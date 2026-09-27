@@ -1,0 +1,571 @@
+{
+  "name": {
+    "bengali": "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
+    "english": "Baniyachong Adarsha High School"
+  },
+  "shortName": "BAHS",
+  "logo": "/images/logo/logo.png",
+  "address": {
+    "bengali": "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়, উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ।",
+    "english": "Baniyachong Adarsha High School, Upazila: Baniyachong, District: Habiganj."
+  },
+  "eiin": "129344",
+  "schoolCode": "1903",
+  "phone": "+8801309-129344",
+  "email": "bahs129344@yahoo.com",
+  "totalArea": "২ একর ৫২ শতক",
+  "established": "২৪শে জানুয়ারী, ১৯৮৫",
+  "establishedYear": 1985,
+  "facebook": "https://www.facebook.com/profile.php?id=100048911620274",
+  "history": {
+    "bengali": "ঐতিহাসিক জনপদ বানিয়াচং—যা সমগ্র এশিয়া তথা বিশ্বের বৃহত্তম গ্রাম হিসেবে সুপরিচিত। হবিগঞ্জ জেলার এই ঐতিহ্যবাহী বানিয়াচং উপজেলা সদরের ১নং উত্তর পূর্ব ইউনিয়নে প্রাকৃতিক মনোরম ও শ্যামলিম পরিবেশে ২ একর ৫২ শতক ভূমির ওপর ১৯৮৫ সালের ২৪শে জানুয়ারী প্রতিষ্ঠিত হয় বানিয়াচং আদর্শ উচ্চ বিদ্যালয় (BAHS)। স্থানীয় শিক্ষানুরাগী ব্যক্তিত্ব, সমাজসেবক ও সর্বস্তরের জনসাধারণের ঐকান্তিক পৃষ্ঠপোষকতায় এই বিদ্যাপীঠ যাত্রা শুরু করে।\n\nপ্রতিষ্ঠালগ্ন থেকেই প্রতিষ্ঠানটি হাওর অববাহিকার শিক্ষার্থীদের মাঝে যুগোপযোগী ও মানসম্মত আধুনিক শিক্ষা বিস্তারে অগ্রণী ভূমিকা পালন করে আসছে। সিলেট শিক্ষা বোর্ডের অধীনে প্রতিষ্ঠানটির শিক্ষার্থীরা প্রতি বছর জেএসসি ও এসএসসি পরীক্ষায় ঈর্ষণীয় সাফল্য অর্জন করছে। আধুনিক কম্পিউটার ল্যাব, সমৃদ্ধ বিজ্ঞানাগার, লাইব্রেরি এবং সুবিশাল খেলার মাঠসহ প্রতিষ্ঠানটি সার্বিক শিক্ষাদানের এক আদর্শ কেন্দ্র। শৃঙ্খলা, নৈতিকতা ও মানবিক মূল্যবোধের সমন্বয়ে ভবিষ্যৎ প্রজন্ম গড়াই এ বিদ্যালয়ের মূল লক্ষ্য।",
+    "english": "Baniyachong is globally renowned as the largest village in Asia. Situated in the 1st North-East Union of Baniyachong Upazila Sadar within Habiganj district, Baniyachong Adarsha High School (BAHS) was established on January 24, 1985, on a scenic 2.52-acre campus. Founded through the generous patronage and dedication of local educationists, community leaders, and patrons, the school began its journey to bring illumination to the broader haor basin.\n\nFrom its very inception, the institution has played a trailblazing role in delivering modern, value-driven education. Operating under the Board of Intermediate and Secondary Education, Sylhet, students consistently demonstrate stellar academic performances in public examinations including JSC and SSC. Equipped with modern multimedia classrooms, science laboratories, a rich library, and a spacious playground, BAHS stands as a beacon of academic discipline, moral character, and human development."
+  },
+  "presidentMessage": {
+    "name": "মোছাঃ সাথী আক্তার",
+    "nameEn": "Mst. Sathi Akther",
+    "designation": "সভাপতি, পরিচালনা পরিষদ",
+    "designationEn": "President, Governing Body",
+    "message": "বিশ্বায়নের এই যুগে তথ্যপ্রযুক্তি ও আধুনিক শিক্ষার সমন্বয়ে আমাদের ভবিষ্যৎ প্রজন্মকে গড়ে তুলতে হবে। বানিয়াচং আদর্শ উচ্চ বিদ্যালয় কেবল পুঁথিগত শিক্ষাই নয়, নৈতিকতা, দেশপ্রেম ও সৃষ্টিশীল নেতৃত্বের শিক্ষায় শিক্ষার্থীদের আলোকিত করছে। পরিচালনা পর্ষদ, সম্মানিত শিক্ষকবৃন্দ ও অভিভাবকমণ্ডলীর যৌথ প্রচেষ্টায় এই বিদ্যালয় সুনাম অক্ষুণ্ণ রেখে উত্তরোত্তর এগিয়ে চলেছে।",
+    "messageEn": "In this modern era of globalization and digital innovation, we must prepare our students with knowledge, moral integrity, and leadership skills. Baniyachong Adarsha High School is steadfast in its mission to deliver holistic education that fosters patriotism, creativity, and ethical excellence. With the collective harmony of our managing committee, faculty, and guardians, we continue our journey towards greater heights.",
+    "photo": "/images/president/president.jpg"
+  },
+  "headmasterMessage": {
+    "name": "পারভীন আক্তার খানম",
+    "nameEn": "Parvin Akter Khanam",
+    "designation": "প্রধান শিক্ষক",
+    "designationEn": "Headmaster",
+    "message": "হবিগঞ্জ জেলার বানিয়াচং উপজেলা সদরের কেন্দ্রস্থলে অবস্থিত বানিয়াচং আদর্শ উচ্চ বিদ্যালয় অত্র অঞ্চলের শিক্ষা বিস্তারে এক অনন্য নাম। ১৯৮৫ সাল থেকে শিক্ষার্থীদের মেধা ও সুপ্ত প্রতিভার বিকাশে আমরা নিরলস কাজ করে যাচ্ছি। আমাদের সুদক্ষ ও নিবেদিতপ্রাণ শিক্ষকবৃন্দের আন্তরিক পাঠদান, সুশৃঙ্খল পাঠ্যক্রম এবং আধুনিক শিক্ষা পদ্ধতির কারণে শিক্ষার্থীরা একাডেমিক ও সহশিক্ষা কার্যক্রমে ধারাবাহিক কৃতিত্ব অর্জন করছে। প্রতিটি শিক্ষার্থীকে সুনাগরিক হিসেবে গড়ে তোলাই আমাদের অঙ্গীকার।",
+    "messageEn": "Situated at the heart of Baniyachong Upazila Sadar in Habiganj, Baniyachong Adarsha High School has been an exemplary center of academic brilliance since 1985. Our devoted faculty members are committed to nurturing the latent talents of every student through rigorous academic standards, modern educational methodologies, and moral guidance. We pledge to groom every learner into an enlightened citizen who contributes positively to the nation.",
+    "photo": "/images/teachers/headmaster.jpg"
+  },
+  "stats": [
+    {
+      "label": "প্রতিষ্ঠাকাল",
+      "labelEn": "Established",
+      "value": "১৯৮৫",
+      "valueEn": "1985",
+      "icon": "calendar"
+    },
+    {
+      "label": "মোট শিক্ষার্থী",
+      "labelEn": "Total Students",
+      "value": "১০০০+",
+      "valueEn": "1000+",
+      "icon": "students"
+    },
+    {
+      "label": "অভিজ্ঞ শিক্ষক",
+      "labelEn": "Faculty Members",
+      "value": "২৫+",
+      "valueEn": "25+",
+      "icon": "teachers"
+    },
+    {
+      "label": "শ্রেণি ও বিভাগ",
+      "labelEn": "Classes & Vocational",
+      "value": "৫টি শ্রেণি + ভোকেশনাল",
+      "valueEn": "5 Classes + Vocational",
+      "icon": "classroom"
+    }
+  ],
+  "classes": [
+    {
+      "num": 6,
+      "nameBn": "৬ষ্ঠ শ্রেণি",
+      "nameEn": "Class 6",
+      "students": "৩০০+",
+      "studentsEn": "300+",
+      "section": "ক, খ",
+      "room": "১০১, ১০২",
+      "classTeacher": "মোঃ রেজাউল করিম",
+      "classTeacherEn": "Md. Rezaul Karim",
+      "teacherPhone": "+8801712-345678",
+      "sections": [
+        {
+          "name": "ক শাখা",
+          "nameEn": "Section A",
+          "classTeacher": "মোঃ রেজাউল করিম",
+          "classTeacherEn": "Md. Rezaul Karim",
+          "teacherPhone": "+8801712-345678",
+          "room": "১০১",
+          "students": "১৫০+",
+          "studentsEn": "150+"
+        },
+        {
+          "name": "খ শাখা",
+          "nameEn": "Section B",
+          "classTeacher": "সানজিদা আক্তার",
+          "classTeacherEn": "Sanjida Akter",
+          "teacherPhone": "+8801723-987654",
+          "room": "১০২",
+          "students": "১৫০+",
+          "studentsEn": "150+"
+        }
+      ],
+      "subjects": [
+        "বাংলা ১ম ও ২য় পত্র",
+        "English 1st & 2nd Paper",
+        "গণিত",
+        "বিজ্ঞান (অনুসন্ধানী ও অনুশীলন)",
+        "ইতিহাস ও সামাজিক বিজ্ঞান",
+        "ডিজিটাল প্রযুক্তি",
+        "স্বাস্থ্য সুরক্ষা",
+        "জীবন ও জীবিকা",
+        "ধর্ম ও নৈতিক শিক্ষা",
+        "শিল্প ও সংস্কৃতি"
+      ],
+      "routine": [
+        {
+          "period": "১ম পিরিয়ড",
+          "time": "১০:০০ - ১০:৪৫",
+          "subject": "বাংলা"
+        },
+        {
+          "period": "২য় পিরিয়ড",
+          "time": "১০:৪৫ - ১১:৩০",
+          "subject": "English"
+        },
+        {
+          "period": "৩য় পিরিয়ড",
+          "time": "১১:৩০ - ১২:১৫",
+          "subject": "গণিত"
+        },
+        {
+          "period": "বিরতি (টিফিন)",
+          "time": "১২:১৫ - ০১:০০",
+          "subject": "নামাজ ও টিফিন"
+        },
+        {
+          "period": "৪র্থ পিরিয়ড",
+          "time": "০১:০০ - ০১:৪৫",
+          "subject": "বিজ্ঞান"
+        },
+        {
+          "period": "৫ম পিরিয়ড",
+          "time": "০১:৪৫ - ০২:৩০",
+          "subject": "ডিজিটাল প্রযুক্তি"
+        },
+        {
+          "period": "৬ষ্ঠ পিরিয়ড",
+          "time": "০২:৩০ - ০৩:১৫",
+          "subject": "সমাজ/ধর্ম"
+        }
+      ],
+      "nctbLink": "https://nctb.gov.bd",
+      "description": "নতুন শিক্ষাক্রমের আলোকে ৬ষ্ঠ শ্রেণির শিক্ষার্থীদের হাতে-কলমে ও বাস্তব অভিজ্ঞতার মাধ্যমে পাঠদান নিশ্চিত করা হয়।"
+    },
+    {
+      "num": 7,
+      "nameBn": "৭ম শ্রেণি",
+      "nameEn": "Class 7",
+      "students": "২৪০+",
+      "studentsEn": "240+",
+      "section": "ক, খ",
+      "room": "১০৩, ১০৪",
+      "classTeacher": "সঞ্জয় কুমার দাস",
+      "classTeacherEn": "Sanjoy Kumar Das",
+      "teacherPhone": "+8801723-456789",
+      "sections": [
+        {
+          "name": "ক শাখা",
+          "nameEn": "Section A",
+          "classTeacher": "সঞ্জয় কুমার দাস",
+          "classTeacherEn": "Sanjoy Kumar Das",
+          "teacherPhone": "+8801723-456789",
+          "room": "১০৩",
+          "students": "১২০+",
+          "studentsEn": "120+"
+        },
+        {
+          "name": "খ শাখা",
+          "nameEn": "Section B",
+          "classTeacher": "ফাহিমা খাতুন",
+          "classTeacherEn": "Fahima Khatun",
+          "teacherPhone": "+8801734-123456",
+          "room": "১০৪",
+          "students": "১২০+",
+          "studentsEn": "120+"
+        }
+      ],
+      "subjects": [
+        "বাংলা",
+        "English",
+        "গণিত",
+        "বিজ্ঞান",
+        "ইতিহাস ও সামাজিক বিজ্ঞান",
+        "ডিজিটাল প্রযুক্তি",
+        "স্বাস্থ্য সুরক্ষা",
+        "জীবন ও জীবিকা",
+        "ধর্ম ও নৈতিক শিক্ষা",
+        "শিল্প ও সংস্কৃতি"
+      ],
+      "routine": [
+        {
+          "period": "১ম পিরিয়ড",
+          "time": "১০:০০ - ১০:৪৫",
+          "subject": "গণিত"
+        },
+        {
+          "period": "২য় পিরিয়ড",
+          "time": "১০:৪৫ - ১১:৩০",
+          "subject": "বাংলা"
+        },
+        {
+          "period": "৩য় পিরিয়ড",
+          "time": "১১:৩০ - ১২:১৫",
+          "subject": "English"
+        },
+        {
+          "period": "বিরতি (টিফিন)",
+          "time": "১২:১৫ - ০১:০০",
+          "subject": "নামাজ ও টিফিন"
+        },
+        {
+          "period": "৪র্থ পিরিয়ড",
+          "time": "০১:০০ - ০১:৪৫",
+          "subject": "বিজ্ঞান"
+        },
+        {
+          "period": "৫ম পিরিয়ড",
+          "time": "০১:৪৫ - ০২:৩০",
+          "subject": "ইতিহাস ও সমাজ"
+        },
+        {
+          "period": "৬ষ্ঠ পিরিয়ড",
+          "time": "০২:৩০ - ০৩:১৫",
+          "subject": "ডিজিটাল প্রযুক্তি"
+        }
+      ],
+      "nctbLink": "https://nctb.gov.bd",
+      "description": "সৃজনশীলতা ও দলগত কাজের মাধ্যমে শিক্ষার্থীদের যৌক্তিক চিন্তা ও বৈজ্ঞানিক দৃষ্টিভঙ্গির বিকাশ ঘটানো হয়।"
+    },
+    {
+      "num": 8,
+      "nameBn": "৮ম শ্রেণি",
+      "nameEn": "Class 8",
+      "students": "২৩০+",
+      "studentsEn": "230+",
+      "section": "ক, খ",
+      "room": "১০৫, ১০৬",
+      "classTeacher": "ফারহানা ইয়াসমিন",
+      "classTeacherEn": "Farhana Yasmin",
+      "teacherPhone": "+8801734-567890",
+      "sections": [
+        {
+          "name": "ক শাখা",
+          "nameEn": "Section A",
+          "classTeacher": "ফারহানা ইয়াসমিন",
+          "classTeacherEn": "Farhana Yasmin",
+          "teacherPhone": "+8801734-567890",
+          "room": "১০৫",
+          "students": "১১৫+",
+          "studentsEn": "115+"
+        },
+        {
+          "name": "খ শাখা",
+          "nameEn": "Section B",
+          "classTeacher": "মোঃ আব্দুল্লাহ আল মামুন",
+          "classTeacherEn": "Md. Abdullah Al Mamun",
+          "teacherPhone": "+8801745-234567",
+          "room": "১০৬",
+          "students": "১১৫+",
+          "studentsEn": "115+"
+        }
+      ],
+      "subjects": [
+        "বাংলা",
+        "English",
+        "গণিত",
+        "বিজ্ঞান",
+        "ইতিহাস ও সামাজিক বিজ্ঞান",
+        "তথ্য ও যোগাযোগ প্রযুক্তি",
+        "ধর্ম ও নৈতিক শিক্ষা",
+        "জীবন ও জীবিকা",
+        "শিল্প ও সংস্কৃতি"
+      ],
+      "routine": [
+        {
+          "period": "১ম পিরিয়ড",
+          "time": "১০:০০ - ১০:৪৫",
+          "subject": "English"
+        },
+        {
+          "period": "২য় পিরিয়ড",
+          "time": "১০:৪৫ - ১১:৩০",
+          "subject": "গণিত"
+        },
+        {
+          "period": "৩য় পিরিয়ড",
+          "time": "১১:৩০ - ১২:১৫",
+          "subject": "বিজ্ঞান"
+        },
+        {
+          "period": "বিরতি (টিফিন)",
+          "time": "১২:১৫ - ০১:০০",
+          "subject": "নামাজ ও টিফিন"
+        },
+        {
+          "period": "৪র্থ পিরিয়ড",
+          "time": "০১:০০ - ০১:৪৫",
+          "subject": "বাংলা"
+        },
+        {
+          "period": "৫ম পিরিয়ড",
+          "time": "০১:৪৫ - ০২:৩০",
+          "subject": "তথ্য প্রযুক্তি"
+        },
+        {
+          "period": "৬ষ্ঠ পিরিয়ড",
+          "time": "০২:৩০ - ০৩:১৫",
+          "subject": "ধর্ম ও নৈতিক শিক্ষা"
+        }
+      ],
+      "nctbLink": "https://nctb.gov.bd",
+      "description": "জেএসসি স্তরীয় জ্ঞান ও মাধ্যমিক শিক্ষার ভিত্তিকে মজবুত করতে বিশেষ কোচিং ও নিবিড় মূল্যায়ন পরিচালনা করা হয়।"
+    },
+    {
+      "num": 9,
+      "nameBn": "৯ম শ্রেণি",
+      "nameEn": "Class 9",
+      "students": "২১০+",
+      "studentsEn": "210+",
+      "section": "বিজ্ঞান, মানবিক",
+      "room": "২০১, ২০২",
+      "classTeacher": "মোঃ কামরুল হাসান",
+      "classTeacherEn": "Md. Kamrul Hasan",
+      "teacherPhone": "+8801745-678901",
+      "sections": [
+        {
+          "name": "বিজ্ঞান বিভাগ",
+          "nameEn": "Science Group",
+          "classTeacher": "মোঃ কামরুল হাসান",
+          "classTeacherEn": "Md. Kamrul Hasan",
+          "teacherPhone": "+8801745-678901",
+          "room": "২০১",
+          "students": "১১০+",
+          "studentsEn": "110+"
+        },
+        {
+          "name": "মানবিক বিভাগ",
+          "nameEn": "Humanities Group",
+          "classTeacher": "সেলিনা আক্তার",
+          "classTeacherEn": "Selina Akter",
+          "teacherPhone": "+8801756-345678",
+          "room": "২০২",
+          "students": "১০০+",
+          "studentsEn": "100+"
+        }
+      ],
+      "subjects": [
+        "বাংলা ১ম ও ২য়",
+        "English 1st & 2nd",
+        "গণিত",
+        "পদার্থবিজ্ঞান / ইতিহাস",
+        "রসায়ন / ভূগোল",
+        "জীববিজ্ঞান / পৌরনীতি",
+        "উচ্চতর গণিত / অর্থনীতি",
+        "আইসিটি",
+        "ধর্ম ও নৈতিক শিক্ষা"
+      ],
+      "routine": [
+        {
+          "period": "১ম পিরিয়ড",
+          "time": "১০:০০ - ১০:৪৫",
+          "subject": "পদার্থ/ইতিহাস"
+        },
+        {
+          "period": "২য় পিরিয়ড",
+          "time": "১০:৪৫ - ১১:৩০",
+          "subject": "রসায়ন/ভূগোল"
+        },
+        {
+          "period": "৩য় পিরিয়ড",
+          "time": "১১:৩০ - ১২:১৫",
+          "subject": "গণিত/উচ্চতর গণিত"
+        },
+        {
+          "period": "বিরতি (টিফিন)",
+          "time": "১২:১৫ - ০১:০০",
+          "subject": "নামাজ ও টিফিন"
+        },
+        {
+          "period": "৪র্থ পিরিয়ড",
+          "time": "০১:০০ - ০১:৪৫",
+          "subject": "English"
+        },
+        {
+          "period": "৫ম পিরিয়ড",
+          "time": "০১:৪৫ - ০২:৩০",
+          "subject": "বাংলা"
+        },
+        {
+          "period": "৬ষ্ঠ পিরিয়ড",
+          "time": "০২:৩০ - ০৩:১৫",
+          "subject": "আইসিটি/বায়োলজি"
+        }
+      ],
+      "nctbLink": "https://nctb.gov.bd",
+      "description": "বিজ্ঞান ও মানবিক বিভাগের শিক্ষার্থীদের ল্যাবভিত্তিক প্র্যাকটিক্যাল ক্লাস এবং ভবিষ্যৎ ক্যারিয়ার ভিত্তিক দিকনির্দেশনা প্রদান করা হয়।"
+    },
+    {
+      "num": 10,
+      "nameBn": "১০ম শ্রেণি",
+      "nameEn": "Class 10",
+      "students": "২০০+",
+      "studentsEn": "200+",
+      "section": "বিজ্ঞান, মানবিক",
+      "room": "২০৩, ২০৪",
+      "classTeacher": "সুকান্ত ভট্টাচার্য্য",
+      "classTeacherEn": "Sukanta Bhattacharya",
+      "teacherPhone": "+8801756-789012",
+      "sections": [
+        {
+          "name": "বিজ্ঞান বিভাগ",
+          "nameEn": "Science Group",
+          "classTeacher": "সুকান্ত ভট্টাচার্য্য",
+          "classTeacherEn": "Sukanta Bhattacharya",
+          "teacherPhone": "+8801756-789012",
+          "room": "২০৩",
+          "students": "১০৫+",
+          "studentsEn": "105+"
+        },
+        {
+          "name": "মানবিক বিভাগ",
+          "nameEn": "Humanities Group",
+          "classTeacher": "মোছাঃ নাজমুন নাহার",
+          "classTeacherEn": "Mst. Nazmun Nahar",
+          "teacherPhone": "+8801767-456789",
+          "room": "২০৪",
+          "students": "৯৫+",
+          "studentsEn": "95+"
+        }
+      ],
+      "subjects": [
+        "বাংলা ১ম ও ২য় পত্র",
+        "English 1st & 2nd",
+        "গণিত",
+        "পদার্থবিজ্ঞান / বাংলাদেশের ইতিহাস",
+        "রসায়ন / ভূগোল ও পরিবেশ",
+        "জীববিজ্ঞান / পৌরনীতি ও নাগরিকতা",
+        "উচ্চতর গণিত / অর্থনীতি",
+        "তথ্য ও যোগাযোগ প্রযুক্তি",
+        "ইসলাম/হিন্দুধর্ম"
+      ],
+      "routine": [
+        {
+          "period": "১ম পিরিয়ড",
+          "time": "১০:০০ - ১০:৪৫",
+          "subject": "এসএসসি বিশেষ ক্লাস (গণিত)"
+        },
+        {
+          "period": "২য় পিরিয়ড",
+          "time": "১০:৪৫ - ১১:৩০",
+          "subject": "বিজ্ঞান/মানবিক মূল বিষয়"
+        },
+        {
+          "period": "৩য় পিরিয়ড",
+          "time": "১১:৩০ - ১২:১৫",
+          "subject": "English (Grammar & Writing)"
+        },
+        {
+          "period": "বিরতি (টিফিন)",
+          "time": "১২:১৫ - ০১:০০",
+          "subject": "নামাজ ও টিফিন"
+        },
+        {
+          "period": "৪র্থ পিরিয়ড",
+          "time": "০১:০০ - ০১:৪৫",
+          "subject": "পদার্থ/রসায়ন/ইতিহাস"
+        },
+        {
+          "period": "৫ম পিরিয়ড",
+          "time": "০১:৪৫ - ০২:৩০",
+          "subject": "মডেল টেস্ট ও অনুশীলন"
+        },
+        {
+          "period": "৬ষ্ঠ পিরিয়ড",
+          "time": "০২:৩০ - ০৩:১৫",
+          "subject": "বিশেষ পরামর্শ ও গাইডেন্স"
+        }
+      ],
+      "nctbLink": "https://nctb.gov.bd",
+      "description": "এসএসসি পরীক্ষার্থীদের শতভাগ পাসের হার ও সর্বোচ্চ সংখ্যক জিপিএ-৫ অর্জনের লক্ষ্যে নিয়মিত মডেল টেস্ট ও প্রশ্ন সমাধান ক্লাস পরিচালিত হয়।"
+    }
+  ],
+  "officialLinks": [
+    {
+      "name": "জাতীয় ওয়েব পোর্টাল",
+      "nameEn": "National Web Portal",
+      "url": "https://bangladesh.gov.bd/"
+    },
+    {
+      "name": "এডুকেশন বোর্ড ফলাফল",
+      "nameEn": "Education Board Results",
+      "url": "http://www.educationboardresults.gov.bd/"
+    },
+    {
+      "name": "মাধ্যমিক ও উচ্চ শিক্ষা বিভাগ",
+      "nameEn": "Secondary & Higher Education (DSHE)",
+      "url": "https://www.dshe.gov.bd/"
+    },
+    {
+      "name": "ব্যানবেইস (BANBEIS)",
+      "nameEn": "BANBEIS Portal",
+      "url": "http://www.banbeis.gov.bd/"
+    },
+    {
+      "name": "শিক্ষক বাতায়ন",
+      "nameEn": "Teachers Portal",
+      "url": "https://www.teachers.gov.bd/"
+    },
+    {
+      "name": "মুক্তপাঠ",
+      "nameEn": "Muktopaath E-Learning",
+      "url": "https://www.muktopaath.gov.bd/"
+    },
+    {
+      "name": "কিশোর বাতায়ন",
+      "nameEn": "Konnect Adolescent Portal",
+      "url": "https://www.kishore.gov.bd/"
+    },
+    {
+      "name": "পাঠ্যবই (NCTB)",
+      "nameEn": "NCTB Textbooks",
+      "url": "https://nctb.gov.bd/"
+    }
+  ],
+  "vocational": {
+    "nameBn": "ভোকেশনাল বিভাগ",
+    "nameEn": "Vocational Department",
+    "description": "কারিগরি ও বৃত্তিমূলক শিক্ষায় দক্ষ মানব সম্পদ তৈরির লক্ষ্যে পরিচালিত ভোকেশনাল বিভাগ।",
+    "descriptionEn": "Vocational department dedicated to producing skilled human resources through technical and vocational education.",
+    "students": "১৫০+",
+    "studentsEn": "150+",
+    "room": "৩০১",
+    "classTeacher": "",
+    "classTeacherEn": "",
+    "teacherPhone": "",
+    "trades": [
+      {
+        "nameBn": "কম্পিউটার অপারেশন ও মেইনটেন্যান্স",
+        "nameEn": "Computer Operation & Maintenance"
+      },
+      {
+        "nameBn": "ইলেকট্রিক্যাল ওয়ার্কস",
+        "nameEn": "Electrical Works"
+      },
+      {
+        "nameBn": "গ্রাফিক্স ডিজাইন",
+        "nameEn": "Graphics Design"
+      }
+    ]
+  },
+  "totalClasses": {
+    "count": 5,
+    "withVocational": true,
+    "totalRooms": 12,
+    "note": "৬ষ্ঠ থেকে ১০ম শ্রেণি (৫টি) + ভোকেশনাল বিভাগ",
+    "noteEn": "Class 6 to 10 (5 classes) + Vocational Department"
+  }
+}

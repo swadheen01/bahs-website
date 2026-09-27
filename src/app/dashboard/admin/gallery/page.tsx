@@ -1,0 +1,231 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { FaImages, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaTimes } from "react-icons/fa";
+import FileUpload from "@/components/admin/FileUpload";
+
+interface GalleryItem {
+  id: number;
+  title: string;
+  image: string;
+  created_at?: string;
+}
+
+const defaultSeedGallery = [
+  { title: "শ্রেণী কক্ষ পরিদর্শনে উপজেলা মাধ্যমিক শিক্ষা অফিসার", image: "/images/hero/slide-1.jpg" },
+  { title: "অভিভাবক প্রতিনিধির সাথে শিক্ষকদের একাংশ", image: "/images/hero/slide-2.jpg" },
+  { title: "বিদ্যালয় প্রাঙ্গণ ও সাংস্কৃতিক কার্যক্রম", image: "/images/hero/slide-3.jpg" },
+];
+
+const emptyForm = { title: "", image: "" };
+
+export default function AdminGalleryPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [photos, setPhotos] = useState<GalleryItem[]>([]);
+  const [fetching, setFetching] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!loading && (!user || user.role !== "admin")) router.replace("/login");
+  }, [user, loading, router]);
+
+  const loadGallery = async () => {
+    setFetching(true);
+    try {
+      const res = await fetch("/api/gallery");
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setPhotos(data);
+      } else {
+        for (const item of defaultSeedGallery) {
+          await fetch("/api/gallery", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item),
+          });
+        }
+        const refreshed = await fetch("/api/gallery");
+        setPhotos(await refreshed.json());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setFetching(false);
+  };
+
+  useEffect(() => {
+    if (user?.role === "admin") loadGallery();
+  }, [user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.image && !editId) {
+      alert("দয়া করে একটি ছবি আপলোড করুন");
+      return;
+    }
+    setSaving(true);
+    if (editId !== null) {
+      await fetch(`/api/gallery/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setEditId(null);
+    } else {
+      await fetch("/api/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    }
+    setForm(emptyForm);
+    setShowForm(false);
+    setSaving(false);
+    await loadGallery();
+  };
+
+  const handleEdit = (p: GalleryItem) => {
+    setForm({ title: p.title, image: p.image });
+    setEditId(p.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("আপনি কি নিশ্চিতভাবে এই ছবিটি মুছে ফেলতে চান?")) return;
+    await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+    await loadGallery();
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditId(null);
+    setForm(emptyForm);
+  };
+
+  if (loading || !user) return null;
+
+  return (
+    <div className="min-h-screen bg-gray-100 font-bengali">
+      <header className="bg-[#051939] text-white px-6 py-4 flex items-center justify-between shadow">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/admin" className="text-gray-300 hover:text-white text-sm flex items-center gap-1">
+            <FaArrowLeft /> ড্যাশবোর্ড
+          </Link>
+          <span className="text-gray-600">|</span>
+          <h1 className="text-lg font-bold flex items-center gap-2">
+            <FaImages className="text-pink-400" /> ফটো গ্যালারি ব্যবস্থাপনা
+          </h1>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-[#051939]">গ্যালারির সকল ছবি ({photos.length}টি)</h2>
+            <p className="text-xs text-gray-500 mt-0.5">এখানে থাকা ছবিগুলো ওয়েবসাইটের &apos;গ্যালারী&apos; পেজে দেখা যাবে।</p>
+          </div>
+          <button
+            onClick={() => { handleCancel(); setShowForm(!showForm); }}
+            className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow"
+          >
+            <FaPlus /> নতুন ছবি পোস্ট করুন
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="bg-white rounded-xl shadow-md p-6 mb-8 border-t-4 border-pink-600">
+            <h3 className="font-bold text-lg text-[#051939] mb-4">
+              {editId ? "ছবির তথ্য আপডেট করুন" : "নতুন ছবি আপলোড করুন"}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">
+                  ছবির শিরোনাম / ক্যাপশন *
+                </label>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  required
+                  placeholder="যেমন: বিজ্ঞান মেলা ২০২৬-এ শিক্ষার্থীদের প্রজেক্ট প্রদর্শনী"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-pink-600"
+                />
+              </div>
+
+              <FileUpload
+                label="গ্যালারির ছবি সিলেক্ট বা আপলোড করুন"
+                value={form.image}
+                onChange={(url) => setForm({ ...form, image: url })}
+                required={!editId}
+                helpText={editId ? "নতুন ছবি আপলোড করলে পুরনো ছবি বদলে যাবে। ছবি না বদলালে খালি রাখুন।" : "মোবাইল বা পিসি থেকে স্কুলের যেকোনো স্মৃতিময় ছবি আপলোড করুন"}
+              />
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={saving || (!form.image && !editId)}
+                  className="bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm disabled:opacity-60 shadow"
+                >
+                  {saving ? "সংরক্ষণ হচ্ছে..." : editId ? "আপডেট করুন" : "ছবি পোস্ট করুন"}
+                </button>
+                <button type="button" onClick={handleCancel} className="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg text-sm flex items-center gap-1.5">
+                  <FaTimes size={12} /> বাতিল
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {fetching ? (
+            <div className="col-span-full text-center py-12 bg-white rounded-xl shadow text-gray-400">লোড হচ্ছে...</div>
+          ) : photos.length === 0 ? (
+            <div className="col-span-full text-center py-12 bg-white rounded-xl shadow text-gray-400">কোনো ছবি নেই।</div>
+          ) : (
+            photos.map((p) => (
+              <div
+                key={p.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition"
+              >
+                <div className="relative aspect-[16/10] w-full bg-gray-100">
+                  <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                </div>
+
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <h4 className="font-bold text-gray-800 text-sm leading-snug line-clamp-2 mb-3">{p.title}</h4>
+
+                  <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-gray-400 font-mono truncate max-w-[100px]">{p.image?.split("/").pop()}</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleEdit(p)}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded transition"
+                        title="এডিট করুন"
+                      >
+                        <FaEdit size={11} /> এডিট
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 font-bold bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded transition"
+                        title="মুছে ফেলুন"
+                      >
+                        <FaTrash size={11} /> ডিলিট
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

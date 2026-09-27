@@ -1,0 +1,176 @@
+@import url('https://fonts.maateen.me/kalpurush/font.css');
+@import "tailwindcss";
+
+:root {
+  --primary: #051939;
+  --accent: #800505;
+  --secondary: #06874A;
+}
+
+/* Kalpurush Font Application */
+.font-bengali {
+  font-family: 'Kalpurush', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif !important;
+}
+
+body {
+  font-family: 'Kalpurush', 'Inter', 'Hind Siliguri', sans-serif;
+  top: 0px !important;
+}
+
+/* Ensure Bengali text uses Kalpurush everywhere */
+p, h1, h2, h3, h4, h5, h6, span, a, button, li, th, td, input, label {
+  font-family: 'Kalpurush', 'Hind Siliguri', 'Inter', sans-serif;
+}
+
+/* Hide Google Translate UI elements completely */
+.goog-te-banner-frame { display: none !important; }
+.VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+#goog-gt-tt { display: none !important; }
+.skiptranslate { display: none !important; }
+.goog-text-highlight { background-color: transparent !important; box-shadow: none !important; border-bottom: none !important; }
+
+/* Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Splash Screen instant hide if already viewed in session */
+html.splash-hidden #bahs-splash-screen {
+  display: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #051939;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #800505;
+}
+
+/* Glossy Glassmorphism Utility Classes */
+.glossy-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glossy-card:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 35px -10px rgba(5, 25, 57, 0.15), 0 0 15px rgba(255, 255, 255, 0.5);
+  transform: translateY(-4px);
+}
+
+.glossy-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Glass shine effect on hover */
+.glossy-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.glossy-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: rotate(25deg) translateY(-100%);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.glossy-shine:hover::after {
+  transform: rotate(25deg) translateY(100%);
+}
+
+/* Tactile Glossy Button Utility */
+.glossy-btn {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px -3px rgba(0, 0, 0, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glossy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.35), inset 0 1px 2px 0 rgba(255, 255, 255, 0.65), 0 0 14px rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.glossy-btn:active {
+  transform: translateY(0);
+}
+
+.glossy-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: rotate(25deg) translateY(-100%);
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.glossy-btn:hover::after {
+  transform: rotate(25deg) translateY(100%);
+}
+

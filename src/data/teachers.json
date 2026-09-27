@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "nameBengali": "পারভীন আক্তার খানম",
+    "nameEnglish": "Parveen Akter Khanam",
+    "designation": "প্রধান শিক্ষক",
+    "designationEn": "Headmaster",
+    "subject": "",
+    "category": "management",
+    "photo": "/images/teachers/headmaster.jpg",
+    "order": 1
+  },
+  {
+    "id": 2,
+    "nameBengali": "শিরিন আক্তার",
+    "nameEnglish": "Shirin Akter",
+    "designation": "সহকারী প্রধান শিক্ষক",
+    "designationEn": "Assistant Headmaster",
+    "subject": "",
+    "category": "management",
+    "photo": "/images/teachers/shirin-akter.jpg",
+    "order": 2
+  },
+  {
+    "id": 3,
+    "nameBengali": "মোহাম্মদ মোফাজ্জল হোসেন",
+    "nameEnglish": "Mohammad Mofazzal Hossain",
+    "designation": "সিনিয়র শিক্ষক",
+    "designationEn": "Senior Teacher",
+    "subject": "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)",
+    "category": "faculty",
+    "photo": "/images/teachers/mofazzal-hossain.jpg",
+    "order": 3
+  },
+  {
+    "id": 4,
+    "nameBengali": "মোঃ নানু মিয়া",
+    "nameEnglish": "Md. Nanu Miah",
+    "designation": "সিনিয়র শিক্ষক",
+    "designationEn": "Senior Teacher",
+    "subject": "ব্যবসায় শিক্ষা (Business Studies)",
+    "category": "faculty",
+    "photo": "/images/teachers/nanu-miah.jpg",
+    "order": 4
+  },
+  {
+    "id": 5,
+    "nameBengali": "দীপক কুমার ঘোষ",
+    "nameEnglish": "Dipak Kumar Ghosh",
+    "designation": "সিনিয়র শিক্ষক",
+    "designationEn": "Senior Teacher",
+    "subject": "হিন্দু ধর্ম (Hindu Religion)",
+    "category": "faculty",
+    "photo": "/images/teachers/dipak-ghosh.jpg",
+    "order": 5
+  },
+  {
+    "id": 6,
+    "nameBengali": "মোহাম্মদ কাজল মিয়া",
+    "nameEnglish": "Mohammad Kajol Miah",
+    "designation": "সিনিয়র শিক্ষক",
+    "designationEn": "Senior Teacher",
+    "subject": "জীব বিজ্ঞান (Biology)",
+    "category": "faculty",
+    "photo": "/images/teachers/kajol-miah.jpg",
+    "order": 6
+  },
+  {
+    "id": 7,
+    "nameBengali": "মোঃ গোলাম রব্বানী",
+    "nameEnglish": "Md. Golam Rabbani",
+    "designation": "সিনিয়র শিক্ষক",
+    "designationEn": "Senior Teacher",
+    "subject": "বাংলা (Bengali)",
+    "category": "faculty",
+    "photo": "/images/teachers/golam-rabbani.jpg",
+    "order": 7
+  }
+]
+

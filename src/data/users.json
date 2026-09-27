@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "name": "Admin",
+    "username": "admin",
+    "passwordHash": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+    "role": "admin",
+    "active": true
+  },
+  {
+    "id": 2,
+    "name": "পারভীন আক্তার খানম",
+    "username": "headmaster",
+    "passwordHash": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+    "role": "teacher",
+    "teacherId": 1,
+    "active": true
+  },
+  {
+    "id": 3,
+    "name": "Student Demo",
+    "username": "student",
+    "passwordHash": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+    "role": "student",
+    "class": "10",
+    "active": true
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "mc-1",
+    "name": "মোছাঃ সাথী আক্তার",
+    "nameEn": "Mst. Sathi  Akther",
+    "designation": "সভাপতি",
+    "designationEn": "President",
+    "category": "সভাপতি",
+    "phone": "+8801711-234567",
+    "photo": "/images/president/president.jpg",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "উপজেলা নির্বাহী অফিসার"
+  },
+  {
+    "id": "mc-2",
+    "name": "পারভীন আক্তার খানম",
+    "nameEn": "Parvin Akter Khanam",
+    "designation": "প্রধান শিক্ষক ও সদস্য সচিব",
+    "designationEn": "Headmaster & Member Secretary",
+    "category": "সদস্য সচিব",
+    "phone": "+8801712-345678",
+    "photo": "/images/teachers/headmaster.jpg",
+    "term": "পদাধিকারবলে",
+    "bio": "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়ের প্রধান শিক্ষক ও পরিচালনা পর্ষদের সদস্য সচিব।"
+  },
+  {
+    "id": "mc-3",
+    "name": "হাজী মোঃ আব্দুল জলিল",
+    "nameEn": "Haji Md. Abdul Jalil",
+    "designation": "প্রতিষ্ঠাতা সদস্য",
+    "designationEn": "Founder Member",
+    "category": "প্রতিষ্ঠাতা সদস্য",
+    "phone": "+8801713-456789",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "আজীবন",
+    "bio": "১৯৮৫ সালে বিদ্যালয় প্রতিষ্ঠাকালীন অন্যতম উদ্যোক্তা ও আজীবন পৃষ্ঠপোষক।"
+  },
+  {
+    "id": "mc-4",
+    "name": "মোঃ রফিকুল ইসলাম",
+    "nameEn": "Md. Rafiqul Islam",
+    "designation": "দাতা সদস্য",
+    "designationEn": "Donor Member",
+    "category": "দাতা সদস্য",
+    "phone": "+8801714-567890",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "বিদ্যালয়ের ভূমি ও উন্নয়ন তহবিলে বিশেষ অবদানকারী বিশিষ্ট দানশীল ব্যক্তিত্ব।"
+  },
+  {
+    "id": "mc-5",
+    "name": "মোঃ ফজলুল করিম",
+    "nameEn": "Md. Fazlul Karim",
+    "designation": "অভিভাবক সদস্য",
+    "designationEn": "Guardian Representative",
+    "category": "অভিভাবক প্রতিনিধি",
+    "phone": "+8801715-678901",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "সাধারণ অভিভাবকদের পক্ষ থেকে নির্বাচিত সদস্য।"
+  },
+  {
+    "id": "mc-6",
+    "name": "মোছাঃ জাহানারা বেগম",
+    "nameEn": "Mst. Jahanara Begum",
+    "designation": "সংরক্ষিত মহিলা অভিভাবক সদস্য",
+    "designationEn": "Female Guardian Representative",
+    "category": "অভিভাবক প্রতিনিধি",
+    "phone": "+8801716-789012",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "অভিভাবকদের মধ্য থেকে নির্বাচিত সংরক্ষিত নারী সদস্য।"
+  },
+  {
+    "id": "mc-7",
+    "name": "মোঃ বশির মিয়া",
+    "nameEn": "Md. Bashir Mia",
+    "designation": "অভিভাবক সদস্য",
+    "designationEn": "Guardian Representative",
+    "category": "অভিভাবক প্রতিনিধি",
+    "phone": "+8801717-890123",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "নির্বাচিত অভিভাবক প্রতিনিধি।"
+  },
+  {
+    "id": "mc-8",
+    "name": "সঞ্জয় কুমার দাস",
+    "nameEn": "Sanjoy Kumar Das",
+    "designation": "শিক্ষক প্রতিনিধি",
+    "designationEn": "Teacher Representative",
+    "category": "শিক্ষক প্রতিনিধি",
+    "phone": "+8801718-901234",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "শিক্ষকমণ্ডলীর পক্ষ থেকে নির্বাচিত শিক্ষক প্রতিনিধি।"
+  },
+  {
+    "id": "mc-9",
+    "name": "সেলিনা আক্তার",
+    "nameEn": "Selina Akter",
+    "designation": "সংরক্ষিত মহিলা শিক্ষক প্রতিনিধি",
+    "designationEn": "Female Teacher Representative",
+    "category": "শিক্ষক প্রতিনিধি",
+    "phone": "+8801719-012345",
+    "photo": "/images/teachers/default_avatar.png",
+    "term": "২০২৪ - ২০২৬",
+    "bio": "সহকারী শিক্ষক ও পরিচালনা পর্ষদের মহিলা শিক্ষক প্রতিনিধি।"
+  }
+]

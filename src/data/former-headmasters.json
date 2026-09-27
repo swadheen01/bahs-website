@@ -1,0 +1,34 @@
+[
+  {
+    "id": "fh-1",
+    "name": "মোঃ মফিজুল ইসলাম",
+    "nameEn": "Md. Mofizul Islam",
+    "tenure": "১৯৮৫ - ১৯৯৫",
+    "photo": "/images/teachers/default_avatar.png",
+    "description": "প্রতিষ্ঠাকালীন প্রধান শিক্ষক হিসেবে বিদ্যালয়ের ভিত্তি স্থাপন ও পাঠদান পরিচালনায় ঐতিহাসিক অবদান রাখেন।"
+  },
+  {
+    "id": "fh-2",
+    "name": "আব্দুল মোতালিব চৌধুরী",
+    "nameEn": "Abdul Motalib Chowdhury",
+    "tenure": "১৯৯৫ - ২০০৮",
+    "photo": "/images/teachers/default_avatar.png",
+    "description": "বিদ্যালয়ের একাডেমিক বিস্তার ও মাধ্যমিক স্তরে প্রথম ব্যাচসমূহের অসাধারণ ফলাফলে অগ্রণী নেতৃত্ব দেন।"
+  },
+  {
+    "id": "fh-3",
+    "name": "মোঃ আতাউর রহমান",
+    "nameEn": "Md. Ataur Rahman",
+    "tenure": "২০০৮ - ২০১৮",
+    "photo": "/images/teachers/default_avatar.png",
+    "description": "আধুনিক বিজ্ঞানাগার ও কম্পিউটার ল্যাব প্রতিষ্ঠা এবং সহশিক্ষা কার্যক্রমে জেলা পর্যায়ে শ্রেষ্ঠত্ব অর্জনে নেতৃত্ব দেন।"
+  },
+  {
+    "id": "fh-4",
+    "name": "পারভীন আক্তার খানম",
+    "nameEn": "Parvin Akter Khanam",
+    "tenure": "২০১৮ - বর্তমান",
+    "photo": "/images/teachers/headmaster.jpg",
+    "description": "বর্তমান প্রধান শিক্ষক হিসেবে ডিজিটাল একাডেমি, উন্নত ফলাফল ও আধুনিক শিক্ষাক্রম বাস্তবায়নে সফল নেতৃত্ব প্রদান করছেন।"
+  }
+]

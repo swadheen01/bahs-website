@@ -1,0 +1,137 @@
+{
+  "academicYear": "2026",
+  "calendarPdfUrl": "/uploads/academic_calendar_2026.pdf",
+  "calendarPdfTitle": "শিক্ষাবর্ষ ২০২৬ শিক্ষাপঞ্জি ও বার্ষিক ছুটির তালিকা (অফিসিয়াল)",
+  "holidays": [
+    {
+      "id": "h-1",
+      "title": "শবে বরাত",
+      "titleEn": "Shab-e-Barat",
+      "startDate": "২০২৬-০২-০৪",
+      "endDate": "২০২৬-০২-০৪",
+      "totalDays": "১ দিন",
+      "type": "সরকারি ছুটি",
+      "description": "পবিত্র শবে বরাত উপলক্ষে বিদ্যালয় বন্ধ থাকবে।"
+    },
+    {
+      "id": "h-2",
+      "title": "শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস",
+      "titleEn": "Shaheed Day & International Mother Language Day",
+      "startDate": "২০২৬-০২-২১",
+      "endDate": "২০২৬-০২-২১",
+      "totalDays": "১ দিন",
+      "type": "জাতীয় দিবস",
+      "description": "সকালে প্রভাতফেরি ও শহীদ মিনারে শ্রদ্ধা নিবেদন।"
+    },
+    {
+      "id": "h-3",
+      "title": "পবিত্র মাহে রমজান ও ঈদুল ফিতর",
+      "titleEn": "Holy Ramadan & Eid-ul-Fitr",
+      "startDate": "২০২৬-০২-১৮",
+      "endDate": "২০২৬-০৩-২৫",
+      "totalDays": "৩৬ দিন",
+      "type": "ধর্মীয় ও দীর্ঘকালীন অবকাশ",
+      "description": "রমজান, শব-ই-কদর ও পবিত্র ঈদুল ফিতর উপলক্ষে দীর্ঘকালীন ছুটি।"
+    },
+    {
+      "id": "h-4",
+      "title": "স্বাধীনতা ও জাতীয় দিবস",
+      "titleEn": "Independence & National Day",
+      "startDate": "২০২৬-০৩-২৬",
+      "endDate": "২০২৬-০৩-২৬",
+      "totalDays": "১ দিন",
+      "type": "জাতীয় দিবস",
+      "description": "কুচকাওয়াজ, জাতীয় পতাকা উত্তোলন ও সাংস্কৃতিক অনুষ্ঠান।"
+    },
+    {
+      "id": "h-5",
+      "title": "বাংলা নববর্ষ (পহেলা বৈশাখ)",
+      "titleEn": "Bengali New Year (Pahela Baishakh)",
+      "startDate": "২০২৬-০৪-১৪",
+      "endDate": "২০২৬-০৪-১৪",
+      "totalDays": "১ দিন",
+      "type": "ঐতিহ্যবাহী ছুটি",
+      "description": "শুভ নববর্ষ উদযাপন ও সাংস্কৃতিক আনন্দানুষ্ঠান।"
+    },
+    {
+      "id": "h-6",
+      "title": "মে দিবস ও বুদ্ধ পূর্ণিমা",
+      "titleEn": "May Day & Buddha Purnima",
+      "startDate": "২০২৬-০৫-০১",
+      "endDate": "২০২৬-০৫-০২",
+      "totalDays": "২ দিন",
+      "type": "সরকারি ছুটি",
+      "description": "আন্তর্জাতিক শ্রমিক সংহতি দিবস ও বৈশাখী পূর্ণিমা।"
+    },
+    {
+      "id": "h-7",
+      "title": "পবিত্র ঈদুল আযহা ও গ্রীষ্মকালীন অবকাশ",
+      "titleEn": "Eid-ul-Azha & Summer Vacation",
+      "startDate": "২০২৬-০৫-২৫",
+      "endDate": "২০২৬-০৬-০৮",
+      "totalDays": "১৫ দিন",
+      "type": "ধর্মীয় ও গ্রীষ্মকালীন অবকাশ",
+      "description": "পবিত্র কোরবানির ঈদ এবং গ্রীষ্মকালীন দীর্ঘ ছুটি।"
+    },
+    {
+      "id": "h-8",
+      "title": "পবিত্র আশুরা",
+      "titleEn": "Holy Ashura",
+      "startDate": "২০২৬-০৬-২৫",
+      "endDate": "২০২৬-০৬-২৫",
+      "totalDays": "১ দিন",
+      "type": "সরকারি ছুটি",
+      "description": "পবিত্র আশুরা পালন।"
+    },
+    {
+      "id": "h-9",
+      "title": "শুভ জন্মাষ্টমী",
+      "titleEn": "Janmashtami",
+      "startDate": "২০২৬-০৮-০৫",
+      "endDate": "২০২৬-০৮-০৫",
+      "totalDays": "১ দিন",
+      "type": "ধর্মীয় ছুটি",
+      "description": "শ্রীশ্রী কৃষ্ণের শুভ জন্মাষ্টমী।"
+    },
+    {
+      "id": "h-10",
+      "title": "পবিত্র ঈদে মিলাদুন্নবী (সা.)",
+      "titleEn": "Eid-e-Miladunnabi (PBUH)",
+      "startDate": "২০২৬-০৮-২৬",
+      "endDate": "২০২৬-০৮-২৬",
+      "totalDays": "১ দিন",
+      "type": "ধর্মীয় ছুটি",
+      "description": "মহানবী হযরত মুহাম্মদ (সা.)-এর পবিত্র বেলাদত ও ওফাত দিবস।"
+    },
+    {
+      "id": "h-11",
+      "title": "শারদীয় দুর্গাপূজা ও বিজয়া দশমী",
+      "titleEn": "Durga Puja & Bijoya Dashami",
+      "startDate": "২০২৬-১০-১৮",
+      "endDate": "২০২৬-১০-২১",
+      "totalDays": "৪ দিন",
+      "type": "ধর্মীয় উৎসব",
+      "description": "হিন্দু ধর্মাবলম্বীদের প্রধান ধর্মীয় উৎসব শারদীয় দুর্গাপূজা।"
+    },
+    {
+      "id": "h-12",
+      "title": "মহান বিজয় দিবস",
+      "titleEn": "Victory Day",
+      "startDate": "২০২৬-১২-১৬",
+      "endDate": "২০২৬-১২-১৬",
+      "totalDays": "১ দিন",
+      "type": "জাতীয় দিবস",
+      "description": "বীর মুক্তিযোদ্ধাদের প্রতি বিনম্র শ্রদ্ধা জ্ঞাপন।"
+    },
+    {
+      "id": "h-13",
+      "title": "যিশু খ্রিস্টের জন্মদিন (বড়দিন) ও শীতকালীন অবকাশ",
+      "titleEn": "Christmas & Winter Vacation",
+      "startDate": "২০২৬-১২-২৫",
+      "endDate": "২০২৬-১২-৩১",
+      "totalDays": "৭ দিন",
+      "type": "শীতকালীন ছুটি",
+      "description": "বড়দিন ও বার্ষিক শীতকালীন অবকাশ উপলক্ষে শিক্ষাপ্রতিষ্ঠান বন্ধ।"
+    }
+  ]
+}
