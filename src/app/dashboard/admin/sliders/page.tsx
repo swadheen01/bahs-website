@@ -32,20 +32,8 @@ export default function AdminSlidersPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
 
-  // Instant render from local cache or pre-bundled sliders
-  const [sliders, setSliders] = useState<Slider[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("bahs_cached_sliders");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {}
-    }
-    return (initialSliders as Slider[]) || [];
-  });
-
+  // Instant render from pre-bundled sliders, verified against server
+  const [sliders, setSliders] = useState<Slider[]>((initialSliders as Slider[]) || []);
   const [fetching, setFetching] = useState<boolean>(!initialSliders || initialSliders.length === 0);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -55,6 +43,11 @@ export default function AdminSlidersPage() {
   const [saveMsg, setSaveMsg] = useState("");
 
   useEffect(() => {
+    // Purge any stale slider cache from localStorage
+    try {
+      localStorage.removeItem("bahs_cached_sliders");
+    } catch (e) {}
+
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
   }, [user, loading, router]);
 
@@ -66,9 +59,6 @@ export default function AdminSlidersPage() {
       if (Array.isArray(data) && data.length > 0) {
         const sorted = [...data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
         setSliders(sorted);
-        try {
-          localStorage.setItem("bahs_cached_sliders", JSON.stringify(sorted));
-        } catch (e) {}
       }
     } catch (e) {
       console.error(e);
@@ -94,9 +84,6 @@ export default function AdminSlidersPage() {
         s.id === editId ? { ...s, title: form.title, image: form.image } : s
       );
       setSliders(updated);
-      try {
-        localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
-      } catch (e) {}
 
       setShowForm(false);
       setEditId(null);
@@ -126,9 +113,6 @@ export default function AdminSlidersPage() {
         if (newSlide && newSlide.id) {
           const updated = [...sliders, newSlide];
           setSliders(updated);
-          try {
-            localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
-          } catch (e) {}
         }
       } catch (err) {
         console.error("New slide error:", err);
@@ -154,9 +138,6 @@ export default function AdminSlidersPage() {
     // Optimistic removal: instantly removes from screen
     const updated = sliders.filter((s) => s.id !== id);
     setSliders(updated);
-    try {
-      localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
-    } catch (e) {}
     setSaveMsg(t("স্লাইডারটি মুছে ফেলা হয়েছে", "Slide deleted successfully"));
     setTimeout(() => setSaveMsg(""), 3000);
 
@@ -185,9 +166,6 @@ export default function AdminSlidersPage() {
     }));
 
     setSliders(reordered);
-    try {
-      localStorage.setItem("bahs_cached_sliders", JSON.stringify(reordered));
-    } catch (e) {}
     setMoving(true);
 
     try {

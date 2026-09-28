@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -49,6 +50,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await writeLocalSliders(local);
   }
 
+  try {
+    revalidatePath("/");
+    revalidatePath("/dashboard/admin/sliders");
+  } catch (e) {}
+
   return NextResponse.json({ success: true });
 }
 
@@ -69,6 +75,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const local = await readLocalSliders();
   const filtered = local.filter((s: any) => String(s.id) !== String(id));
   await writeLocalSliders(filtered);
+
+  try {
+    revalidatePath("/");
+    revalidatePath("/dashboard/admin/sliders");
+  } catch (e) {}
 
   return NextResponse.json({ success: true });
 }

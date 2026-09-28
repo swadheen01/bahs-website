@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -84,6 +85,11 @@ export async function POST(req: Request) {
     local.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
     await writeLocalSliders(local);
 
+    try {
+      revalidatePath("/");
+      revalidatePath("/dashboard/admin/sliders");
+    } catch (e) {}
+
     return NextResponse.json(newSlide);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -132,6 +138,11 @@ export async function PUT(req: Request) {
     } catch (e) {
       console.error("Supabase slider bulk update error:", e);
     }
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/dashboard/admin/sliders");
+    } catch (e) {}
 
     return NextResponse.json({ success: true, sliders: local });
   } catch (err: any) {

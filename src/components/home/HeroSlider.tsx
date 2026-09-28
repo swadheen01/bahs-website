@@ -11,33 +11,27 @@ interface Slider {
   sort_order?: number;
 }
 
-export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slider[]>((initialSlides as Slider[]) || []);
+export default function HeroSlider({ initialSlides: propSlides }: { initialSlides?: Slider[] }) {
+  const [slides, setSlides] = useState<Slider[]>(() => {
+    if (propSlides && propSlides.length > 0) return propSlides;
+    return (initialSlides as Slider[]) || [];
+  });
   const [currentSlide, setCurrentSlide] = useState(0);
   const { language } = useLanguage();
 
   useEffect(() => {
-    // Immediately check if there is fresh cached slider data in localStorage
+    // Clean up any stale localStorage from previous versions
     try {
-      const cached = localStorage.getItem("bahs_cached_sliders");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setSlides(parsed);
-        }
-      }
+      localStorage.removeItem("bahs_cached_sliders");
     } catch (e) {}
 
-    // Fetch latest sliders in background
+    // Fetch latest sliders from server to ensure fresh content
     fetch("/api/sliders")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
           setSlides(sorted);
-          try {
-            localStorage.setItem("bahs_cached_sliders", JSON.stringify(sorted));
-          } catch (e) {}
         }
       })
       .catch((e) => console.error("Slider fetch error:", e));
