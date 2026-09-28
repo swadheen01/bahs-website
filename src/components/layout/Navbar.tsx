@@ -107,22 +107,21 @@ export default function Navbar() {
   return (
     <header className={`w-full z-50 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
       {/* Top Banner (School Logo, Name, Address & 3-Line Menu) */}
-      {/* Top Banner (School Logo, Name, Address & 3-Line Menu) */}
       <div className="bg-[#465b6a] py-3 lg:py-4 border-b border-[#3b4c59] relative">
         <div className="container mx-auto px-4 relative flex items-center justify-center">
-          {/* Center: 100% Perfectly Centered Logo & School Info / Address on all devices */}
+          {/* Logo & School Info: Logo on left in web/PC view, on top in mobile view */}
           <Link
             href="/"
-            className="w-full flex flex-col items-center justify-center text-center px-12 sm:px-14 lg:px-28 group min-w-0"
+            className="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-2.5 md:gap-4.5 group mx-auto min-w-0 px-8 sm:px-12 md:px-0"
           >
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-white rounded-full p-2 shadow-xl shrink-0 border-2 border-white/60 group-hover:scale-105 transition-transform duration-300 mb-1 sm:mb-2">
+            <div className="relative w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-22 lg:h-22 bg-white rounded-full p-2 shadow-xl shrink-0 border-2 border-white/60 group-hover:scale-105 transition-transform duration-300">
               <Image src="/images/logo/logo.png" alt="BAHS Logo" fill className="object-contain p-1" priority />
             </div>
-            <div className="text-white text-center min-w-0">
+            <div className="text-white text-center md:text-left min-w-0">
               <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-tight tracking-wide drop-shadow-md group-hover:text-emerald-300 transition-colors uppercase">
                 {t("বানিয়াচং আদর্শ উচ্চ বিদ্যালয়", "Baniyachong Adarsha High School")}
               </h1>
-              <p className="text-xs sm:text-sm lg:text-[15px] text-gray-100 font-semibold mt-1 flex flex-wrap items-center justify-center gap-x-2.5">
+              <p className="text-xs sm:text-sm lg:text-[15px] text-gray-100 font-semibold mt-1 flex flex-wrap items-center justify-center md:justify-start gap-x-2.5">
                 <span>{t("উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ।", "Upazila: Baniyachong, District: Habiganj.")}</span>
                 <span className="text-emerald-300 hidden sm:inline">•</span>
                 <span className="text-yellow-300 font-bold">{t("স্থাপিত: ১৯৮৫", "Est: 1985")}</span>
