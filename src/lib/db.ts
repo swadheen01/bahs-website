@@ -16,13 +16,24 @@ export interface Notice {
 export const noticesDB = {
   getAll: async (): Promise<Notice[]> => {
     const { data } = await supabase.from('notices').select('*').order('id', { ascending: false });
-    return (data || []).map(n => ({
-      id: n.id, title: n.title, date: n.date, dateISO: n.date_iso, type: n.type, fileUrl: n.file_url, isNew: n.is_new, addedBy: n.added_by
-    }));
+    const internalTypes = new Set(['routine', 'slider', 'gallery', 'staff', 'calendar', 'result', 'committee', 'school_info']);
+    return (data || [])
+      .filter(n => !internalTypes.has(n.type))
+      .map(n => ({
+        id: n.id, title: n.title, date: n.date, dateISO: n.date_iso, type: n.type, fileUrl: n.file_url, isNew: n.is_new, addedBy: n.added_by
+      }));
   },
-  add: async (notice: Omit<Notice, "id">) => {
+  add: async (notice: Omit<Notice, "id"> & { id?: number }) => {
+    const noticeId = notice.id || (Date.now() % 2147483647);
     const { data, error } = await supabase.from('notices').insert({
-      title: notice.title, date: notice.date, date_iso: notice.dateISO, type: notice.type, file_url: notice.fileUrl, is_new: notice.isNew, added_by: notice.addedBy
+      id: noticeId,
+      title: notice.title,
+      date: notice.date,
+      date_iso: notice.dateISO,
+      type: notice.type,
+      file_url: notice.fileUrl,
+      is_new: notice.isNew,
+      added_by: notice.addedBy
     }).select().single();
     if (error) throw error;
     return { ...data, dateISO: data.date_iso, fileUrl: data.file_url, isNew: data.is_new, addedBy: data.added_by };
@@ -148,18 +159,26 @@ async function writeLocalStaff(data: Staff[]) {
 export const staffDB = {
   getAll: async (): Promise<Staff[]> => {
     try {
-      const { data, error } = await supabase.from('staff').select('*').order('sort_order', { ascending: true });
+      const { data, error } = await supabase
+        .from('notices')
+        .select('*')
+        .eq('type', 'staff')
+        .order('id', { ascending: true });
       if (!error && Array.isArray(data) && data.length > 0) {
-        return data.map((s: any) => ({
-          id: s.id,
-          nameBengali: s.name_bengali,
-          nameEnglish: s.name_english || "",
-          designation: s.designation,
-          designationEn: s.designation_en || "",
-          phone: s.phone || "",
-          photo: s.photo || "",
-          order: s.sort_order || 0
-        }));
+        return data.map((s: any) => {
+          let extra: any = {};
+          try { extra = JSON.parse(s.added_by || "{}"); } catch (e) {}
+          return {
+            id: s.id,
+            nameBengali: s.title,
+            nameEnglish: extra.nameEnglish || "",
+            designation: s.date,
+            designationEn: extra.designationEn || "",
+            phone: s.date_iso || "",
+            photo: s.file_url || "",
+            order: typeof extra.order === "number" ? extra.order : 0
+          };
+        }).sort((a, b) => a.order - b.order);
       }
     } catch (e) {}
     const local = await readLocalStaff();
@@ -167,7 +186,7 @@ export const staffDB = {
   },
   add: async (item: Omit<Staff, "id">): Promise<Staff> => {
     const local = await readLocalStaff();
-    const newId = local.length > 0 ? Math.max(...local.map((s: Staff) => s.id)) + 1 : 1;
+    const newId = (Date.now() % 2147483647);
     const newStaff: Staff = {
       id: newId,
       nameBengali: item.nameBengali,
@@ -180,18 +199,20 @@ export const staffDB = {
     };
 
     try {
-      const { data, error } = await supabase.from('staff').insert({
-        name_bengali: item.nameBengali,
-        name_english: item.nameEnglish,
-        designation: item.designation,
-        designation_en: item.designationEn,
-        phone: item.phone,
-        photo: item.photo,
-        sort_order: item.order
-      }).select().single();
-      if (!error && data) {
-        newStaff.id = data.id;
-      }
+      await supabase.from('notices').insert({
+        id: newId,
+        title: item.nameBengali,
+        date: item.designation,
+        date_iso: item.phone || "",
+        file_url: item.photo || "",
+        type: 'staff',
+        added_by: JSON.stringify({
+          nameEnglish: item.nameEnglish,
+          designationEn: item.designationEn,
+          order: newStaff.order
+        }),
+        is_new: false
+      });
     } catch (e) {}
 
     local.push(newStaff);
@@ -201,14 +222,18 @@ export const staffDB = {
   update: async (id: number, data: Partial<Staff>) => {
     try {
       const updateData: any = {};
-      if (data.nameBengali !== undefined) updateData.name_bengali = data.nameBengali;
-      if (data.nameEnglish !== undefined) updateData.name_english = data.nameEnglish;
-      if (data.designation !== undefined) updateData.designation = data.designation;
-      if (data.designationEn !== undefined) updateData.designation_en = data.designationEn;
-      if (data.phone !== undefined) updateData.phone = data.phone;
-      if (data.photo !== undefined) updateData.photo = data.photo;
-      if (data.order !== undefined) updateData.sort_order = data.order;
-      await supabase.from('staff').update(updateData).eq('id', id);
+      if (data.nameBengali !== undefined) updateData.title = data.nameBengali;
+      if (data.designation !== undefined) updateData.date = data.designation;
+      if (data.phone !== undefined) updateData.date_iso = data.phone;
+      if (data.photo !== undefined) updateData.file_url = data.photo;
+      if (data.nameEnglish !== undefined || data.designationEn !== undefined || data.order !== undefined) {
+        updateData.added_by = JSON.stringify({
+          nameEnglish: data.nameEnglish,
+          designationEn: data.designationEn,
+          order: data.order
+        });
+      }
+      await supabase.from('notices').update(updateData).eq('id', id).eq('type', 'staff');
     } catch (e) {}
 
     const local = await readLocalStaff();
@@ -220,7 +245,7 @@ export const staffDB = {
   },
   delete: async (id: number) => {
     try {
-      await supabase.from('staff').delete().eq('id', id);
+      await supabase.from('notices').delete().eq('id', id).eq('type', 'staff');
     } catch (e) {}
     const local = await readLocalStaff();
     const filtered = local.filter((s: Staff) => s.id !== id);
@@ -279,16 +304,47 @@ export interface GalleryPhoto {
 
 export const galleryDB = {
   getAll: async (): Promise<GalleryPhoto[]> => {
-    const { data } = await supabase.from('gallery_photos').select('*').order('id', { ascending: false });
-    return data || [];
+    try {
+      const { data } = await supabase.from('notices').select('*').eq('type', 'gallery').order('id', { ascending: false });
+      if (data && data.length > 0) {
+        return data.map((g: any) => ({
+          id: g.id,
+          src: g.file_url,
+          caption: g.title,
+          category: g.added_by || "campus"
+        }));
+      }
+    } catch (e) {}
+    try {
+      const fs = await import("fs/promises");
+      const p = await import("path");
+      const content = await fs.readFile(p.join(process.cwd(), "src", "data", "gallery.json"), "utf-8");
+      return JSON.parse(content);
+    } catch (e) {
+      return [];
+    }
   },
-  add: async (photo: Omit<GalleryPhoto, "id">) => {
-    const { data, error } = await supabase.from('gallery_photos').insert(photo).select().single();
+  add: async (photo: Omit<GalleryPhoto, "id"> & { id?: number }) => {
+    const photoId = photo.id || (Date.now() % 2147483647);
+    const { data, error } = await supabase.from('notices').insert({
+      id: photoId,
+      title: photo.caption,
+      file_url: photo.src,
+      type: 'gallery',
+      added_by: photo.category || 'campus',
+      date: new Date().toLocaleDateString('bn-BD'),
+      date_iso: new Date().toISOString()
+    }).select().single();
     if (error) throw error;
-    return data;
+    return {
+      id: data.id,
+      src: data.file_url,
+      caption: data.title,
+      category: data.added_by
+    };
   },
   delete: async (id: number) => {
-    await supabase.from('gallery_photos').delete().eq('id', id);
+    await supabase.from('notices').delete().eq('id', id).eq('type', 'gallery');
   },
 };
 

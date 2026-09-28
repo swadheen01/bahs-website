@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
+import { supabase } from "@/lib/supabase";
 
 const holidaysFilePath = path.join(process.cwd(), "src", "data", "holidays.json");
 
@@ -9,17 +10,38 @@ async function getHolidaysData() {
     const data = await readFile(holidaysFilePath, "utf-8");
     return JSON.parse(data);
   } catch (err) {
-    return { academicYear: "2025", holidays: [], calendarPdfUrl: "" };
+    return { academicYear: "2026", holidays: [], calendarPdfUrl: "", calendarPdfTitle: "" };
   }
 }
 
 async function saveHolidaysData(data: any) {
-  await writeFile(holidaysFilePath, JSON.stringify(data, null, 2), "utf-8");
+  try {
+    await writeFile(holidaysFilePath, JSON.stringify(data, null, 2), "utf-8");
+  } catch (e) {
+    // Ignore read-only filesystem on Vercel
+  }
 }
 
 export async function GET() {
   try {
     const data = await getHolidaysData();
+
+    // Check Supabase for calendar PDF
+    try {
+      const { data: calData } = await supabase
+        .from("notices")
+        .select("*")
+        .eq("type", "calendar")
+        .order("id", { ascending: false })
+        .limit(1);
+
+      if (calData && calData.length > 0) {
+        data.calendarPdfUrl = calData[0].file_url || data.calendarPdfUrl;
+        data.calendarPdfTitle = calData[0].title || data.calendarPdfTitle;
+        if (calData[0].date) data.academicYear = calData[0].date;
+      }
+    } catch (e) {}
+
     return NextResponse.json({ success: true, ...data });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -35,6 +57,40 @@ export async function POST(req: Request) {
       if (body.calendarPdfUrl) data.calendarPdfUrl = body.calendarPdfUrl;
       if (body.calendarPdfTitle) data.calendarPdfTitle = body.calendarPdfTitle;
       if (body.academicYear) data.academicYear = body.academicYear;
+
+      // Sync calendar PDF to Supabase notices where type='calendar'
+      try {
+        const { data: existingCal } = await supabase
+          .from("notices")
+          .select("id")
+          .eq("type", "calendar")
+          .limit(1);
+
+        if (existingCal && existingCal.length > 0) {
+          await supabase
+            .from("notices")
+            .update({
+              title: body.calendarPdfTitle || "শিক্ষাবর্ষ ক্যালেন্ডার",
+              file_url: body.calendarPdfUrl,
+              date: body.academicYear || "২০২৬",
+              date_iso: new Date().toISOString(),
+            })
+            .eq("id", existingCal[0].id);
+        } else {
+          await supabase.from("notices").insert({
+            id: Date.now() % 2147483647,
+            title: body.calendarPdfTitle || "শিক্ষাবর্ষ ক্যালেন্ডার",
+            file_url: body.calendarPdfUrl,
+            type: "calendar",
+            date: body.academicYear || "২০২৬",
+            date_iso: new Date().toISOString(),
+            is_new: false,
+          });
+        }
+      } catch (e) {
+        console.error("Supabase calendar sync error:", e);
+      }
+
       await saveHolidaysData(data);
       return NextResponse.json({ success: true, data });
     }

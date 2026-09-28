@@ -13,14 +13,14 @@ export default async function PhotoGalleryPage() {
   let photos = defaultGallery;
 
   try {
-    const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('notices').select('*').eq('type', 'gallery').order('id', { ascending: false });
     if (data && data.length > 0) {
       const dbPhotos = data.map((item: any) => ({
         id: item.id,
-        src: item.image,
+        src: item.file_url,
         caption: item.title,
-        category: "event",
-        date: "২০২৫"
+        category: item.added_by || "event",
+        date: item.date || "২০২৬"
       }));
       photos = [...dbPhotos, ...defaultGallery];
     }

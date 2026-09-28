@@ -1,13 +1,34 @@
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
+import { supabase } from "@/lib/supabase";
 
 const infoPath = path.join(process.cwd(), "src", "data", "school-info.json");
 
 export async function GET() {
   try {
-    const content = await readFile(infoPath, "utf-8");
-    return NextResponse.json(JSON.parse(content));
+    let data: any = {};
+    try {
+      const content = await readFile(infoPath, "utf-8");
+      data = JSON.parse(content);
+    } catch (e) {}
+
+    // Check Supabase for updated school info
+    try {
+      const { data: dbData } = await supabase
+        .from("notices")
+        .select("*")
+        .eq("type", "school_info")
+        .order("id", { ascending: false })
+        .limit(1);
+
+      if (dbData && dbData.length > 0) {
+        const extra = JSON.parse(dbData[0].added_by || "{}");
+        data = { ...data, ...extra };
+      }
+    } catch (e) {}
+
+    return NextResponse.json(data);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -16,8 +37,11 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const content = await readFile(infoPath, "utf-8");
-    const data = JSON.parse(content);
+    let data: any = {};
+    try {
+      const content = await readFile(infoPath, "utf-8");
+      data = JSON.parse(content);
+    } catch (e) {}
 
     // Update stats and classes if provided
     if (body.stats) data.stats = body.stats;
@@ -36,11 +60,45 @@ export async function PUT(req: Request) {
     if (body.vocational) data.vocational = { ...data.vocational, ...body.vocational };
     if (body.totalClasses) data.totalClasses = { ...data.totalClasses, ...body.totalClasses };
 
-    await writeFile(infoPath, JSON.stringify(data, null, 2), "utf-8");
+    // Sync to Supabase notices table where type='school_info'
+    try {
+      const { data: existing } = await supabase
+        .from("notices")
+        .select("id")
+        .eq("type", "school_info")
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        await supabase
+          .from("notices")
+          .update({
+            added_by: JSON.stringify(data),
+            date_iso: new Date().toISOString(),
+          })
+          .eq("id", existing[0].id);
+      } else {
+        await supabase.from("notices").insert({
+          id: Date.now() % 2147483647,
+          title: "School Info & Messages",
+          type: "school_info",
+          date: new Date().toLocaleDateString("bn-BD"),
+          date_iso: new Date().toISOString(),
+          added_by: JSON.stringify(data),
+          is_new: false,
+        });
+      }
+    } catch (e) {
+      console.error("Supabase school-info sync error:", e);
+    }
+
+    try {
+      await writeFile(infoPath, JSON.stringify(data, null, 2), "utf-8");
+    } catch (e) {
+      // Ignore read-only filesystem on Vercel
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

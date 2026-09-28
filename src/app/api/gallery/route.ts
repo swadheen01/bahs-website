@@ -27,23 +27,30 @@ async function writeLocalGallery(data: any[]) {
       src: item.image,
       caption: item.title,
       category: "event",
-      date: item.created_at || "২০২৫",
+      date: item.created_at || "২০২৬",
     }));
     await writeFile(jsonPath, JSON.stringify(formatted, null, 2), "utf-8");
   } catch (e) {
-    console.error("Local gallery write error:", e);
+    // Ignore read-only filesystem on Vercel
   }
 }
 
 export async function GET() {
   try {
     const { data, error } = await supabase
-      .from("gallery")
+      .from("notices")
       .select("*")
-      .order("created_at", { ascending: false });
+      .eq("type", "gallery")
+      .order("id", { ascending: false });
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      return NextResponse.json(data);
+      const items = data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        image: item.file_url,
+        created_at: item.date_iso || item.date || new Date().toISOString(),
+      }));
+      return NextResponse.json(items);
     }
   } catch (e) {}
 
@@ -55,20 +62,29 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const local = await readLocalGallery();
+    const newId = Date.now() % 2147483647;
 
     const newItem = {
-      id: Date.now(),
+      id: newId,
       title: body.title,
       image: body.image,
       created_at: new Date().toISOString(),
     };
 
     try {
-      const { data, error } = await supabase.from("gallery").insert([body]).select();
-      if (!error && data && data.length > 0) {
-        newItem.id = data[0].id;
-      }
-    } catch (e) {}
+      await supabase.from("notices").insert({
+        id: newId,
+        title: body.title,
+        file_url: body.image,
+        type: "gallery",
+        added_by: "campus",
+        date: new Date().toLocaleDateString("bn-BD"),
+        date_iso: newItem.created_at,
+        is_new: false,
+      });
+    } catch (e) {
+      console.error("Supabase gallery insert error:", e);
+    }
 
     local.unshift(newItem);
     await writeLocalGallery(local);

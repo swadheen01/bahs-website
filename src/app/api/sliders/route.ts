@@ -5,7 +5,7 @@ import path from "path";
 
 const jsonPath = path.join(process.cwd(), "src", "data", "sliders.json");
 
-async function readLocalSliders() {
+async function readLocalSliders(): Promise<any[]> {
   try {
     const content = await readFile(jsonPath, "utf-8");
     return JSON.parse(content);
@@ -18,23 +18,29 @@ async function writeLocalSliders(data: any[]) {
   try {
     await writeFile(jsonPath, JSON.stringify(data, null, 2), "utf-8");
   } catch (e) {
-    console.error("Local slider write error:", e);
+    // Ignore read-only filesystem on Vercel
   }
 }
 
 export async function GET() {
   try {
     const { data, error } = await supabase
-      .from("sliders")
+      .from("notices")
       .select("*")
-      .order("sort_order", { ascending: true });
+      .eq("type", "slider")
+      .order("id", { ascending: true });
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      return NextResponse.json(data);
+      const sliders = data.map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        image: s.file_url,
+        sort_order: Number(s.added_by) || 0,
+      }));
+      sliders.sort((a, b) => a.sort_order - b.sort_order);
+      return NextResponse.json(sliders);
     }
-  } catch (e) {
-    // Fall back to local file
-  }
+  } catch (e) {}
 
   const local = await readLocalSliders();
   local.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -45,25 +51,33 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const local = await readLocalSliders();
+    const newId = Date.now() % 2147483647;
+    const sortOrder = body.sort_order !== undefined ? body.sort_order : local.length + 1;
 
     const newSlide = {
-      id: Date.now(),
+      id: newId,
       title: body.title,
       image: body.image,
-      sort_order: body.sort_order || local.length + 1,
+      sort_order: sortOrder,
     };
 
-    // Try saving to Supabase first
+    // Save to Supabase notices table where type='slider'
     try {
-      const { data, error } = await supabase.from("sliders").insert([body]).select();
-      if (!error && data && data.length > 0) {
-        newSlide.id = data[0].id;
-      }
+      await supabase.from("notices").insert({
+        id: newId,
+        title: body.title,
+        file_url: body.image,
+        type: "slider",
+        added_by: String(sortOrder),
+        date: new Date().toLocaleDateString("bn-BD"),
+        date_iso: new Date().toISOString(),
+        is_new: false,
+      });
     } catch (e) {
-      // Ignore Supabase RLS error
+      console.error("Supabase slider insert error:", e);
     }
 
-    // Always persist to local sliders.json
+    // Persist to local sliders.json if filesystem is writable
     local.push(newSlide);
     local.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
     await writeLocalSliders(local);
@@ -101,13 +115,20 @@ export async function PUT(req: Request) {
     local.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
     await writeLocalSliders(local);
 
-    // Also update Supabase in background
+    // Also update Supabase notices table where type='slider'
     try {
       for (const [id, order] of orderMap.entries()) {
-        await supabase.from("sliders").update({ sort_order: order }).eq("id", id);
+        const numId = Number(id);
+        if (!isNaN(numId)) {
+          await supabase
+            .from("notices")
+            .update({ added_by: String(order) })
+            .eq("id", numId)
+            .eq("type", "slider");
+        }
       }
     } catch (e) {
-      // Ignore Supabase errors
+      console.error("Supabase slider bulk update error:", e);
     }
 
     return NextResponse.json({ success: true, sliders: local });

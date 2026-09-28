@@ -31,20 +31,28 @@ async function writeLocalGallery(data: any[]) {
     }));
     await writeFile(jsonPath, JSON.stringify(formatted, null, 2), "utf-8");
   } catch (e) {
-    console.error("Local gallery write error:", e);
+    // Ignore read-only filesystem on Vercel
   }
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
-  const updateData: any = {};
-  if (body.title !== undefined) updateData.caption = body.title;
-  if (body.image !== undefined) updateData.src = body.image;
 
-  try {
-    await supabase.from("gallery_photos").update(updateData).eq("id", id);
-  } catch (e) {}
+  const numId = Number(id);
+  if (!isNaN(numId)) {
+    try {
+      const updateData: any = {};
+      if (body.title !== undefined) updateData.title = body.title;
+      if (body.image !== undefined) updateData.file_url = body.image;
+
+      await supabase
+        .from("notices")
+        .update(updateData)
+        .eq("id", numId)
+        .eq("type", "gallery");
+    } catch (e) {}
+  }
 
   const local = await readLocalGallery();
   const index = local.findIndex((item: any) => String(item.id) === String(id));
@@ -59,9 +67,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  try {
-    await supabase.from("gallery_photos").delete().eq("id", id);
-  } catch (e) {}
+  const numId = Number(id);
+  if (!isNaN(numId)) {
+    try {
+      await supabase
+        .from("notices")
+        .delete()
+        .eq("id", numId)
+        .eq("type", "gallery");
+    } catch (e) {}
+  }
 
   const local = await readLocalGallery();
   const filtered = local.filter((item: any) => String(item.id) !== String(id));

@@ -145,31 +145,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile/Tablet Sub-Bar: Login on Left, Real-Time Clock & Full Date on Right (Language toggle removed) */}
+      {/* Mobile/Tablet Sub-Bar: Real-Time Clock & Date on Left, Login on Right */}
       <div className="lg:hidden bg-[#364652] py-2 px-3 sm:px-4 border-b border-[#2c3e50] flex items-center justify-between gap-2 shadow-inner">
-        {/* Left: Login / Dashboard Button */}
-        <div className="shrink-0">
-          {user ? (
-            <Link
-              href={dashboardHref}
-              className="glossy-btn flex items-center gap-1.5 bg-[#06874A] hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-400/40 shadow-xs"
-            >
-              <FaTachometerAlt size={12} />
-              <span>{t("ড্যাশবোর্ড", "Dashboard")}</span>
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="glossy-btn flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-medium px-3 py-1.5 rounded-xl border border-white/25 shadow-xs"
-            >
-              <FaUser size={11} />
-              <span>{t("লগইন", "Login")}</span>
-            </Link>
-          )}
-        </div>
-
-        {/* Right: Full Real-time Clock & Date with Complete Month Name */}
-        <div className="flex-1 flex items-center justify-end min-w-0">
+        {/* Left: Full Real-time Clock & Date with Complete Month Name */}
+        <div className="flex-1 flex items-center justify-start min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1.5 rounded-xl text-white shadow-inner">
             <FaClock className="text-yellow-300 text-xs shrink-0" />
             <span className="text-yellow-300 font-bold text-xs sm:text-sm font-mono tracking-wider shrink-0">
@@ -197,6 +176,27 @@ export default function Navbar() {
               )}
             </span>
           </div>
+        </div>
+
+        {/* Right: Login / Dashboard Button */}
+        <div className="shrink-0">
+          {user ? (
+            <Link
+              href={dashboardHref}
+              className="glossy-btn flex items-center gap-1.5 bg-[#06874A] hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-400/40 shadow-xs"
+            >
+              <FaTachometerAlt size={12} />
+              <span>{t("ড্যাশবোর্ড", "Dashboard")}</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="glossy-btn flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-medium px-3 py-1.5 rounded-xl border border-white/25 shadow-xs"
+            >
+              <FaUser size={11} />
+              <span>{t("লগইন", "Login")}</span>
+            </Link>
+          )}
         </div>
       </div>
 
