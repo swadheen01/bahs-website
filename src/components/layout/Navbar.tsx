@@ -107,26 +107,22 @@ export default function Navbar() {
   return (
     <header className={`w-full z-50 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
       {/* Top Banner (School Logo, Name, Address & 3-Line Menu) */}
-      <div className="bg-[#465b6a] py-3 lg:py-4 border-b border-[#3b4c59]">
-        <div className="container mx-auto px-4 relative flex items-center justify-between gap-3">
-          {/* Left Spacer for desktop centering balance */}
-          <div className="hidden lg:flex items-center w-28 shrink-0 pointer-events-none opacity-0 select-none">
-            <span>BAHS</span>
-          </div>
-
-          {/* Center: Prominently Centered Logo & School Info / Address */}
+      {/* Top Banner (School Logo, Name, Address & 3-Line Menu) */}
+      <div className="bg-[#465b6a] py-3 lg:py-4 border-b border-[#3b4c59] relative">
+        <div className="container mx-auto px-4 relative flex items-center justify-center">
+          {/* Center: 100% Perfectly Centered Logo & School Info / Address on all devices */}
           <Link
             href="/"
-            className="flex flex-col sm:flex-row items-center justify-center text-center sm:text-left gap-3 sm:gap-4.5 group mx-auto min-w-0"
+            className="w-full flex flex-col items-center justify-center text-center px-12 sm:px-14 lg:px-28 group min-w-0"
           >
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-white rounded-full p-2 shadow-xl shrink-0 border-2 border-white/60 group-hover:scale-105 transition-transform duration-300">
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-white rounded-full p-2 shadow-xl shrink-0 border-2 border-white/60 group-hover:scale-105 transition-transform duration-300 mb-1 sm:mb-2">
               <Image src="/images/logo/logo.png" alt="BAHS Logo" fill className="object-contain p-1" priority />
             </div>
-            <div className="text-white text-center sm:text-left min-w-0">
+            <div className="text-white text-center min-w-0">
               <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-tight tracking-wide drop-shadow-md group-hover:text-emerald-300 transition-colors uppercase">
                 {t("বানিয়াচং আদর্শ উচ্চ বিদ্যালয়", "Baniyachong Adarsha High School")}
               </h1>
-              <p className="text-xs sm:text-sm lg:text-[15px] text-gray-100 font-semibold mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-x-2.5">
+              <p className="text-xs sm:text-sm lg:text-[15px] text-gray-100 font-semibold mt-1 flex flex-wrap items-center justify-center gap-x-2.5">
                 <span>{t("উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ।", "Upazila: Baniyachong, District: Habiganj.")}</span>
                 <span className="text-emerald-300 hidden sm:inline">•</span>
                 <span className="text-yellow-300 font-bold">{t("স্থাপিত: ১৯৮৫", "Est: 1985")}</span>
@@ -136,8 +132,8 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Right: 3-Line Menu Option Button */}
-          <div className="flex items-center justify-end shrink-0 text-white lg:w-28">
+          {/* Right: 3-Line Menu Option Button (Absolute to avoid displacing center content) */}
+          <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex items-center">
             <button
               onClick={() => setSideMenuOpen(true)}
               className="glossy-btn flex items-center justify-center bg-white/15 hover:bg-white/25 text-white w-10 h-10 rounded-xl border border-white/30 shadow-md group cursor-pointer"
@@ -149,58 +145,58 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile/Tablet Sub-Bar: Real-Time Clock, Date, Language & Login (Always Visible on Mobile) */}
+      {/* Mobile/Tablet Sub-Bar: Login on Left, Real-Time Clock & Full Date on Right (Language toggle removed) */}
       <div className="lg:hidden bg-[#364652] py-2 px-3 sm:px-4 border-b border-[#2c3e50] flex items-center justify-between gap-2 shadow-inner">
-        {/* Real-time Clock & Date in Glassy Box */}
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1 rounded-xl text-white shadow-inner">
-          <FaClock className="text-yellow-300 text-xs shrink-0" />
-          <span className="text-yellow-300 font-bold text-xs sm:text-sm font-mono tracking-wider">
-            {currentDateTime ? (
-              currentDateTime.toLocaleTimeString(language === "bn" ? "bn-BD" : "en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-              })
-            ) : (
-              "--:--:--"
-            )}
-          </span>
-          <span className="text-gray-400 text-xs">•</span>
-          <span className="text-gray-200 text-[11px] font-medium truncate max-w-[130px] sm:max-w-none">
-            {currentDateTime ? (
-              currentDateTime.toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })
-            ) : (
-              ""
-            )}
-          </span>
-        </div>
-
-        {/* Quick Actions (Language & Login/Dashboard) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <LanguageToggle size="sm" />
+        {/* Left: Login / Dashboard Button */}
+        <div className="shrink-0">
           {user ? (
             <Link
               href={dashboardHref}
-              className="glossy-btn flex items-center gap-1 bg-[#06874A] hover:bg-green-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-emerald-400/40 shadow-xs"
+              className="glossy-btn flex items-center gap-1.5 bg-[#06874A] hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-400/40 shadow-xs"
             >
-              <FaTachometerAlt size={10} />
+              <FaTachometerAlt size={12} />
               <span>{t("ড্যাশবোর্ড", "Dashboard")}</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="glossy-btn flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white text-[11px] font-medium px-2.5 py-1 rounded-lg border border-white/25 shadow-xs"
+              className="glossy-btn flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-medium px-3 py-1.5 rounded-xl border border-white/25 shadow-xs"
             >
-              <FaUser size={10} />
+              <FaUser size={11} />
               <span>{t("লগইন", "Login")}</span>
             </Link>
           )}
+        </div>
+
+        {/* Right: Full Real-time Clock & Date with Complete Month Name */}
+        <div className="flex-1 flex items-center justify-end min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1.5 rounded-xl text-white shadow-inner">
+            <FaClock className="text-yellow-300 text-xs shrink-0" />
+            <span className="text-yellow-300 font-bold text-xs sm:text-sm font-mono tracking-wider shrink-0">
+              {currentDateTime ? (
+                currentDateTime.toLocaleTimeString(language === "bn" ? "bn-BD" : "en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                })
+              ) : (
+                "--:--:--"
+              )}
+            </span>
+            <span className="text-gray-400 text-xs shrink-0">•</span>
+            <span className="text-gray-200 text-xs font-medium whitespace-nowrap">
+              {currentDateTime ? (
+                currentDateTime.toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              ) : (
+                ""
+              )}
+            </span>
+          </div>
         </div>
       </div>
 
