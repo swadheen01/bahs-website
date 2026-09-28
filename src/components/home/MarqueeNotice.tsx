@@ -1,10 +1,26 @@
 "use client";
-import notices from "@/data/notices.json";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export default function MarqueeNotice() {
   const { t } = useLanguage();
-  const latestNotices = notices.slice(0, 5).map((n) => n.title).join("  ➤  ");
+  const [notices, setNotices] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/notices", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setNotices(data);
+        }
+      })
+      .catch((e) => console.error("Marquee fetch error:", e));
+  }, []);
+
+  const latestNotices =
+    notices.length > 0
+      ? notices.slice(0, 5).map((n) => n.title).join("  ➤  ")
+      : t("বানিয়াচং আদর্শ উচ্চ বিদ্যালয়ের ওয়েবসাইটে আপনাকে স্বাগতম", "Welcome to Baniyachong Adarsha High School Official Website");
 
   return (
     <div className="bg-[#800505] text-white flex items-stretch overflow-hidden">

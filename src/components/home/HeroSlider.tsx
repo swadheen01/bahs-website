@@ -11,27 +11,23 @@ interface Slider {
   sort_order?: number;
 }
 
-const defaultSlides: Slider[] = [
-  { id: 1, title: "শ্রেণী কক্ষ পরিদর্শনে উপজেলা মাধ্যমিক শিক্ষা অফিসার", image: "/images/hero/slide-1.jpg" },
-  { id: 2, title: "বিদ্যালয়ের বার্ষিক ক্রীড়া ও সাংস্কৃতিক প্রতিযোগিতা", image: "/images/hero/slide-2.jpg" },
-  { id: 3, title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় প্রাঙ্গণ", image: "/images/hero/slide-3.jpg" },
-];
-
 export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slider[]>(defaultSlides);
+  const [slides, setSlides] = useState<Slider[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const { language } = useLanguage();
 
   useEffect(() => {
-    fetch('/api/sliders')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
+    fetch("/api/sliders", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
           setSlides(sorted);
         }
       })
-      .catch(() => {});
+      .catch((e) => console.error("Slider fetch error:", e))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -41,6 +37,20 @@ export default function HeroSlider() {
     }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  if (loading) {
+    return (
+      <section className="w-full bg-gradient-to-b from-[#465b6a]/10 via-gray-100 to-gray-50 py-3 sm:py-5 px-3 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <div className="relative p-1.5 sm:p-3 bg-gradient-to-b from-white via-slate-50 to-gray-200 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-300/80">
+            <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-800 animate-pulse flex items-center justify-center">
+              <span className="text-gray-400 text-sm">স্লাইডার লোড হচ্ছে...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (slides.length === 0) return null;
 
@@ -58,21 +68,20 @@ export default function HeroSlider() {
                   index === currentSlide ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
               >
-                <Image
+                <img
                   src={slide.image}
                   alt={slide.title}
-                  fill
-                  className="object-cover object-center"
-                  priority={index === 0}
-                  sizes="(max-width: 768px) 100vw, 1024px"
+                  className="w-full h-full object-cover object-center"
                 />
 
-                {/* Sleek bottom gradient for caption (Matching clean landscape reference) */}
-                <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent pt-8 pb-3 sm:pb-4 px-4 sm:px-6 flex flex-col items-center justify-end text-center pointer-events-none">
-                  <h2 className="text-white text-xs sm:text-base md:text-xl font-bold drop-shadow-md line-clamp-1 max-w-3xl">
-                    {slide.title}
-                  </h2>
-                </div>
+                {/* Sleek bottom gradient for caption */}
+                {slide.title && (
+                  <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent pt-8 pb-3 sm:pb-4 px-4 sm:px-6 flex flex-col items-center justify-end text-center pointer-events-none">
+                    <h2 className="text-white text-xs sm:text-base md:text-xl font-bold drop-shadow-md line-clamp-1 max-w-3xl">
+                      {slide.title}
+                    </h2>
+                  </div>
+                )}
               </div>
             ))}
 

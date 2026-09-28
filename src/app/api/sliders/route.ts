@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 const jsonPath = path.join(process.cwd(), "src", "data", "sliders.json");
 
 async function readLocalSliders(): Promise<any[]> {
@@ -30,10 +32,10 @@ export async function GET() {
       .eq("type", "slider")
       .order("id", { ascending: true });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (!error && Array.isArray(data)) {
       const sliders = data.map((s: any) => ({
         id: s.id,
-        title: s.title,
+        title: s.title || "",
         image: s.file_url,
         sort_order: Number(s.added_by) || 0,
       }));
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
 
     const newSlide = {
       id: newId,
-      title: body.title,
+      title: body.title || "",
       image: body.image,
       sort_order: sortOrder,
     };
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
     try {
       await supabase.from("notices").insert({
         id: newId,
-        title: body.title,
+        title: body.title || "",
         file_url: body.image,
         type: "slider",
         added_by: String(sortOrder),

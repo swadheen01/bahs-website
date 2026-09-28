@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
 import { noticesDB } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 async function getSession() {
   return getIronSession<IronSessionData>(await cookies(), sessionOptions);
 }

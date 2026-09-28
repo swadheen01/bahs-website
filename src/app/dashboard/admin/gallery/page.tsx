@@ -13,12 +13,6 @@ interface GalleryItem {
   created_at?: string;
 }
 
-const defaultSeedGallery = [
-  { title: "শ্রেণী কক্ষ পরিদর্শনে উপজেলা মাধ্যমিক শিক্ষা অফিসার", image: "/images/hero/slide-1.jpg" },
-  { title: "অভিভাবক প্রতিনিধির সাথে শিক্ষকদের একাংশ", image: "/images/hero/slide-2.jpg" },
-  { title: "বিদ্যালয় প্রাঙ্গণ ও সাংস্কৃতিক কার্যক্রম", image: "/images/hero/slide-3.jpg" },
-];
-
 const emptyForm = { title: "", image: "" };
 
 export default function AdminGalleryPage() {
@@ -38,20 +32,10 @@ export default function AdminGalleryPage() {
   const loadGallery = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/gallery");
+      const res = await fetch("/api/gallery", { cache: "no-store" });
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setPhotos(data);
-      } else {
-        for (const item of defaultSeedGallery) {
-          await fetch("/api/gallery", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(item),
-          });
-        }
-        const refreshed = await fetch("/api/gallery");
-        setPhotos(await refreshed.json());
       }
     } catch (e) {
       console.error(e);
@@ -70,24 +54,35 @@ export default function AdminGalleryPage() {
       return;
     }
     setSaving(true);
-    if (editId !== null) {
-      await fetch(`/api/gallery/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      setEditId(null);
-    } else {
-      await fetch("/api/gallery", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+    try {
+      const payload = {
+        ...form,
+        title: form.title?.trim() || "গ্যালারি ছবি",
+      };
+      if (editId !== null) {
+        const res = await fetch(`/api/gallery/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) alert("ছবি আপডেট করা যায়নি");
+        setEditId(null);
+      } else {
+        const res = await fetch("/api/gallery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) alert("ছবি পোস্ট করা যায়নি");
+      }
+      setForm(emptyForm);
+      setShowForm(false);
+      await loadGallery();
+    } catch (err) {
+      alert("সার্ভার এরর! ছবি সংরক্ষণ করা যায়নি।");
+    } finally {
+      setSaving(false);
     }
-    setForm(emptyForm);
-    setShowForm(false);
-    setSaving(false);
-    await loadGallery();
   };
 
   const handleEdit = (p: GalleryItem) => {
@@ -99,8 +94,13 @@ export default function AdminGalleryPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("আপনি কি নিশ্চিতভাবে এই ছবিটি মুছে ফেলতে চান?")) return;
-    await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-    await loadGallery();
+    try {
+      const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+      if (!res.ok) alert("ছবি মুছে ফেলা সম্ভব হয়নি");
+      await loadGallery();
+    } catch (err) {
+      alert("মুছে ফেলার সময় ত্রুটি হয়েছে");
+    }
   };
 
   const handleCancel = () => {

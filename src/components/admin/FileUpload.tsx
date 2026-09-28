@@ -11,6 +11,64 @@ interface FileUploadProps {
   helpText?: string;
 }
 
+async function compressImageIfNeeded(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type.includes("svg") || file.size < 600 * 1024) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = document.createElement("img");
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        const maxDim = 1600;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.82
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function FileUpload({
   label,
   value,
@@ -27,19 +85,20 @@ export default function FileUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError("ফাইল সাইজ ১০ মেগাবাইটের বেশি হতে পারবে না");
+    // Validate size (max 25MB before compression)
+    if (file.size > 25 * 1024 * 1024) {
+      setError("ফাইল সাইজ ২৫ মেগাবাইটের বেশি হতে পারবে না");
       return;
     }
 
     setUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
+      const fileToUpload = await compressImageIfNeeded(file);
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -65,7 +124,7 @@ export default function FileUpload({
     setError(null);
   };
 
-  const isImage = value && (value.match(/\.(jpeg|jpg|gif|png|webp)$/i) || value.startsWith("/uploads/") || value.startsWith("/images/"));
+  const isImage = value && (value.match(/\.(jpeg|jpg|gif|png|webp)$/i) || value.startsWith("/uploads/") || value.startsWith("/images/") || value.startsWith("data:image"));
   const isPdf = value && value.match(/\.(pdf)$/i);
 
   return (
@@ -86,70 +145,81 @@ export default function FileUpload({
       {value ? (
         <div className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-200 rounded-xl">
           {isImage ? (
-            <div className="w-20 h-20 relative rounded-lg overflow-hidden border border-gray-300 bg-white flex-shrink-0">
+            <div className="w-20 h-20 relative rounded-lg overflow-hidden border border-gray-300 bg-white shrink-0">
               <img src={value} alt="Preview" className="w-full h-full object-cover" />
             </div>
           ) : isPdf ? (
-            <div className="w-16 h-16 rounded-lg bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
               <FaFilePdf size={32} />
             </div>
           ) : (
-            <div className="w-16 h-16 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0 font-bold text-xs">
+            <div className="w-16 h-16 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 font-bold text-xs">
               FILE
             </div>
           )}
 
           <div className="flex-1 min-w-0">
             <p className="text-xs text-green-600 font-bold flex items-center gap-1 mb-1">
-              <FaCheckCircle /> ফাইল সফলভাবে আপলোড হয়েছে
+              <FaCheckCircle /> ফাইল আপলোড সম্পন্ন হয়েছে
             </p>
-            <p className="text-xs text-gray-500 font-mono truncate">{value}</p>
+            <p className="text-xs text-gray-500 truncate max-w-[200px] sm:max-w-xs">
+              {value.startsWith("data:") ? "সফলভাবে এনকোড করা ছবি" : value}
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="text-xs bg-white border border-gray-300 hover:bg-gray-100 px-3 py-1.5 rounded-lg font-bold text-gray-700 transition"
+              className="text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
             >
-              পরিবর্তন করুন
+              পরিবর্তন
             </button>
             <button
               type="button"
               onClick={handleRemove}
-              className="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition"
+              className="text-xs bg-red-50 border border-red-200 text-red-600 p-2 rounded-lg hover:bg-red-100 transition"
               title="মুছে ফেলুন"
             >
-              <FaTrash size={14} />
+              <FaTrash size={12} />
             </button>
           </div>
         </div>
       ) : (
-        <div
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${
-            uploading ? "border-green-400 bg-green-50/50" : "border-gray-300 hover:border-[#06874A] hover:bg-gray-50"
-          }`}
-        >
-          {uploading ? (
-            <div className="flex flex-col items-center justify-center py-2 text-[#06874A]">
-              <FaSpinner className="animate-spin mb-2" size={24} />
-              <p className="text-sm font-bold">ফাইল আপলোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-2">
-              <div className="w-10 h-10 rounded-full bg-green-50 text-[#06874A] flex items-center justify-center mb-2">
-                <FaCloudUploadAlt size={22} />
-              </div>
-              <p className="text-sm font-bold text-gray-700">এখানে ক্লিক করে ফাইল সিলেক্ট করুন</p>
-              <p className="text-xs text-gray-400 mt-1">{helpText}</p>
-            </div>
-          )}
+        <div>
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            className={`w-full border-2 border-dashed rounded-xl p-5 text-center transition flex flex-col items-center justify-center gap-2 cursor-pointer ${
+              uploading ? "border-green-400 bg-green-50/50" : "border-gray-300 hover:border-[#06874A] hover:bg-gray-50"
+            }`}
+          >
+            {uploading ? (
+              <>
+                <FaSpinner className="animate-spin text-[#06874A]" size={28} />
+                <span className="text-sm font-bold text-[#06874A]">ফাইল প্রসেসিং ও আপলোড হচ্ছে...</span>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#06874A] flex items-center justify-center">
+                  <FaCloudUploadAlt size={22} />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold text-gray-700">ফাইল নির্বাচন করতে ক্লিক করুন</span>
+                  <p className="text-xs text-gray-500">{helpText}</p>
+                </div>
+              </>
+            )}
+          </button>
         </div>
       )}
 
-      {error && <p className="text-xs text-red-500 font-bold">{error}</p>}
+      {error && (
+        <p className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded-lg border border-red-200">
+          ⚠️ {error}
+        </p>
+      )}
     </div>
   );
 }

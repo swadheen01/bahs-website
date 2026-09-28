@@ -3,15 +3,17 @@ import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 const jsonPath = path.join(process.cwd(), "src", "data", "gallery.json");
 
-async function readLocalGallery() {
+async function readLocalGallery(): Promise<any[]> {
   try {
     const content = await readFile(jsonPath, "utf-8");
     const data = JSON.parse(content);
     return data.map((item: any) => ({
       id: item.id,
-      title: item.caption || item.title,
+      title: item.caption || item.title || "গ্যালারি ছবি",
       image: item.src || item.image,
       created_at: item.date || new Date().toISOString(),
     }));
@@ -43,10 +45,10 @@ export async function GET() {
       .eq("type", "gallery")
       .order("id", { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (!error && Array.isArray(data)) {
       const items = data.map((item: any) => ({
         id: item.id,
-        title: item.title,
+        title: item.title || "গ্যালারি ছবি",
         image: item.file_url,
         created_at: item.date_iso || item.date || new Date().toISOString(),
       }));
@@ -63,10 +65,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const local = await readLocalGallery();
     const newId = Date.now() % 2147483647;
+    const safeTitle = body.title?.trim() || "গ্যালারি ছবি";
 
     const newItem = {
       id: newId,
-      title: body.title,
+      title: safeTitle,
       image: body.image,
       created_at: new Date().toISOString(),
     };
@@ -74,7 +77,7 @@ export async function POST(req: Request) {
     try {
       await supabase.from("notices").insert({
         id: newId,
-        title: body.title,
+        title: safeTitle,
         file_url: body.image,
         type: "gallery",
         added_by: "campus",
