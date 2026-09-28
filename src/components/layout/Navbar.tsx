@@ -6,22 +6,14 @@ import {
   FaBars,
   FaTimes,
   FaChevronDown,
+  FaChevronUp,
   FaUser,
   FaUserPlus,
   FaSignOutAlt,
   FaTachometerAlt,
   FaCode,
-  FaGithub,
-  FaLinkedin,
-  FaFacebook,
-  FaYoutube,
-  FaEnvelope,
-  FaGraduationCap,
-  FaExternalLinkAlt,
-  FaHome,
-  FaBook,
-  FaBell,
-  FaImages,
+  FaClock,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -29,7 +21,6 @@ import { useRouter } from "next/navigation";
 import LanguageToggle from "./LanguageToggle";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpenDropdown, setMobileOpenDropdown] = useState<string | null>(null);
@@ -113,7 +104,7 @@ export default function Navbar() {
 
   return (
     <header className={`w-full z-50 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
-      {/* Top Banner */}
+      {/* Top Banner (School Logo, Name, Address & 3-Line Menu) */}
       <div className="bg-[#465b6a] py-3 lg:py-4 border-b border-[#3b4c59]">
         <div className="container mx-auto px-4 relative flex items-center justify-between gap-3">
           {/* Left Spacer for desktop centering balance */}
@@ -145,7 +136,6 @@ export default function Navbar() {
 
           {/* Right: 3-Line Menu Option Button */}
           <div className="flex items-center justify-end shrink-0 text-white lg:w-28">
-            {/* 3-Line Menu Option with prominent tactile glossy hover effect */}
             <button
               onClick={() => setSideMenuOpen(true)}
               className="glossy-btn flex items-center justify-center bg-white/15 hover:bg-white/25 text-white w-10 h-10 rounded-xl border border-white/30 shadow-md group cursor-pointer"
@@ -157,11 +147,66 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Main Horizontal Navigation Bar */}
-      <nav className={`bg-[#364652] transition-all duration-300 ${scrolled ? "fixed top-0 left-0 w-full shadow-lg z-50" : ""}`}>
+      {/* Mobile/Tablet Sub-Bar: Real-Time Clock, Date, Language & Login (Always Visible on Mobile) */}
+      <div className="lg:hidden bg-[#364652] py-2 px-3 sm:px-4 border-b border-[#2c3e50] flex items-center justify-between gap-2 shadow-inner">
+        {/* Real-time Clock & Date in Glassy Box */}
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1 rounded-xl text-white shadow-inner">
+          <FaClock className="text-yellow-300 text-xs shrink-0" />
+          <span className="text-yellow-300 font-bold text-xs sm:text-sm font-mono tracking-wider">
+            {currentDateTime ? (
+              currentDateTime.toLocaleTimeString(language === "bn" ? "bn-BD" : "en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })
+            ) : (
+              "--:--:--"
+            )}
+          </span>
+          <span className="text-gray-400 text-xs">•</span>
+          <span className="text-gray-200 text-[11px] font-medium truncate max-w-[130px] sm:max-w-none">
+            {currentDateTime ? (
+              currentDateTime.toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            ) : (
+              ""
+            )}
+          </span>
+        </div>
+
+        {/* Quick Actions (Language & Login/Dashboard) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <LanguageToggle size="sm" />
+          {user ? (
+            <Link
+              href={dashboardHref}
+              className="glossy-btn flex items-center gap-1 bg-[#06874A] hover:bg-green-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-emerald-400/40 shadow-xs"
+            >
+              <FaTachometerAlt size={10} />
+              <span>{t("ড্যাশবোর্ড", "Dashboard")}</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="glossy-btn flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white text-[11px] font-medium px-2.5 py-1 rounded-lg border border-white/25 shadow-xs"
+            >
+              <FaUser size={10} />
+              <span>{t("লগইন", "Login")}</span>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Horizontal Navigation Bar */}
+      <nav className={`hidden lg:block bg-[#364652] transition-all duration-300 ${scrolled ? "fixed top-0 left-0 w-full shadow-lg z-50" : ""}`}>
         <div className="container mx-auto px-4 flex items-center justify-between">
-          {/* Nav items — centered in remaining space */}
-          <ul className="hidden lg:flex items-center flex-1 justify-center">
+          {/* Nav items — centered */}
+          <ul className="flex items-center flex-1 justify-center">
             {navItems.map((item) => (
               <li
                 key={item.label}
@@ -193,7 +238,7 @@ export default function Navbar() {
               </li>
             ))}
 
-            {/* Auth Buttons inside Nav with Enhanced Glossy Feel */}
+            {/* Auth Buttons inside Desktop Nav */}
             <li className="ml-6 border-l border-gray-500/50 pl-6 flex items-center gap-3">
               {user ? (
                 <div className="flex items-center gap-2">
@@ -226,8 +271,8 @@ export default function Navbar() {
             </li>
           </ul>
 
-          {/* Live Date & Time — right side of nav bar in glassy box */}
-          <div className="hidden lg:flex items-center justify-end py-1.5 min-w-[185px] select-none shrink-0">
+          {/* Desktop Live Date & Time — right side of nav bar in glassy box */}
+          <div className="flex items-center justify-end py-1.5 min-w-[185px] select-none shrink-0">
             {currentDateTime ? (
               <div className="flex flex-col items-center px-3.5 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm shadow-inner">
                 <span className="text-yellow-300 font-bold text-[15px] font-mono tracking-widest leading-none">
@@ -266,9 +311,9 @@ export default function Navbar() {
           />
 
           {/* Drawer Content */}
-          <div className="relative w-full max-w-sm bg-[#051939] text-white h-full shadow-2xl z-10 flex flex-col justify-between overflow-y-auto border-l border-white/10 p-6 animate-in slide-in-from-right duration-300">
-            {/* Top Row: Title & Close Button */}
+          <div className="relative w-full max-w-sm bg-[#051939] text-white h-full shadow-2xl z-10 flex flex-col justify-between overflow-y-auto border-l border-white/10 p-5 sm:p-6 animate-in slide-in-from-right duration-300">
             <div>
+              {/* Top Row: Title & Close Button */}
               <div className="flex items-center justify-between pb-4 border-b border-white/10 gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-white p-1 shrink-0">
@@ -294,8 +339,36 @@ export default function Navbar() {
                 </div>
               </div>
 
+              {/* Real-time Clock Card inside Drawer */}
+              {currentDateTime && (
+                <div className="mt-4 p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FaClock className="text-yellow-300 text-sm" />
+                    <span className="text-xs font-mono font-bold text-yellow-300">
+                      {currentDateTime.toLocaleTimeString(language === "bn" ? "bn-BD" : "en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-gray-300">
+                    <FaCalendarAlt size={10} className="text-emerald-400" />
+                    <span>
+                      {currentDateTime.toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Profile / Account Card Section */}
-              <div className="my-5 p-4 rounded-2xl bg-white/10 border border-white/15">
+              <div className="my-4 p-4 rounded-2xl bg-white/10 border border-white/15">
                 {user ? (
                   <div>
                     <div className="flex items-center gap-3 mb-3">
@@ -353,29 +426,64 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Main Quick Navigation Links */}
+              {/* Navigation Links with Expandable Submenus for Mobile */}
               <div className="space-y-1 mb-6">
                 <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-2 mb-2">
-                  {t("ন্যাভিগেশন", "Navigation")}
+                  {t("ন্যাভিগেশন মেনু", "Navigation Menu")}
                 </p>
                 {navItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setSideMenuOpen(false)}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-gray-200 hover:bg-white/10 hover:text-white transition"
-                  >
-                    <span>{item.label}</span>
-                    <span className="text-xs text-gray-500">›</span>
-                  </Link>
+                  <div key={item.label} className="border-b border-white/5 last:border-0">
+                    {item.children ? (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setMobileOpenDropdown(
+                              mobileOpenDropdown === item.label ? null : item.label
+                            )
+                          }
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-gray-200 hover:bg-white/10 hover:text-white transition"
+                        >
+                          <span className="font-medium">{item.label}</span>
+                          {mobileOpenDropdown === item.label ? (
+                            <FaChevronUp size={11} className="text-yellow-300" />
+                          ) : (
+                            <FaChevronDown size={11} className="text-gray-400" />
+                          )}
+                        </button>
+                        {mobileOpenDropdown === item.label && (
+                          <div className="pl-4 pr-2 py-1 space-y-1 bg-white/5 rounded-xl my-1 border-l-2 border-[#06874A]">
+                            {item.children.map((child) => (
+                              <Link
+                                key={child.label}
+                                href={child.href}
+                                onClick={() => setSideMenuOpen(false)}
+                                className="block px-3 py-2 rounded-lg text-xs text-gray-300 hover:text-white hover:bg-white/10 transition"
+                              >
+                                • {child.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        onClick={() => setSideMenuOpen(false)}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-gray-200 hover:bg-white/10 hover:text-white transition"
+                      >
+                        <span className="font-medium">{item.label}</span>
+                        <span className="text-xs text-gray-500">›</span>
+                      </Link>
+                    )}
+                  </div>
                 ))}
-              </div>
 
-                {/* Developer Option (Simple clean item just like other options) */}
+                {/* Developer Option */}
                 <Link
                   href="/developer"
                   onClick={() => setSideMenuOpen(false)}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-gray-200 hover:bg-white/10 hover:text-white transition group border border-emerald-500/20 bg-emerald-950/20 mt-2"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-gray-200 hover:bg-white/10 hover:text-white transition group border border-emerald-500/20 bg-emerald-950/20 mt-3"
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
@@ -393,6 +501,7 @@ export default function Navbar() {
                   <span className="text-xs text-emerald-400 group-hover:translate-x-1 transition-transform">›</span>
                 </Link>
               </div>
+            </div>
 
             {/* Bottom: Portal info */}
             <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-400">
