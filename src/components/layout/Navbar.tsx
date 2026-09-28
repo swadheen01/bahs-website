@@ -41,6 +41,8 @@ export default function Navbar() {
     nameBn: "স্বাধীন ইসলাম রবি",
     institution: "Leading University (CSE), Sylhet",
     institutionBn: "লিডিং ইউনিভার্সিটি (সিএসই), সিলেট",
+    school: "Baniyachong Adarsha High School (SSC-2018)",
+    schoolBn: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় (এসএসসি-২০১৮)",
     github: "https://github.com/swadheen01",
     linkedin: "https://linkedin.com/in/swadheen01",
     facebook: "https://facebook.com/sherlock.sir1",
@@ -493,8 +495,11 @@ export default function Navbar() {
                       <span className="font-bold text-white group-hover:text-emerald-300 transition-colors">
                         {t("ডেভেলপার", "Developer")}
                       </span>
-                      <span className="text-[11px] text-gray-400 block font-normal">
+                      <span className="text-[11px] text-gray-300 block font-normal">
                         {language === "en" ? dev.name : dev.nameBn}
+                      </span>
+                      <span className="text-[10px] text-yellow-300/90 block font-medium">
+                        {language === "en" ? dev.school : dev.schoolBn}
                       </span>
                     </div>
                   </div>

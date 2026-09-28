@@ -44,6 +44,8 @@ export default function Footer() {
     nameBn: "স্বাধীন ইসলাম রবি",
     institution: "Leading University (CSE), Sylhet",
     institutionBn: "লিডিং ইউনিভার্সিটি (সিএসই), সিলেট",
+    school: "Baniyachong Adarsha High School (SSC-2018)",
+    schoolBn: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় (এসএসসি-২০১৮)",
     github: "https://github.com/swadheen01",
     linkedin: "https://linkedin.com/in/swadheen01",
     facebook: "https://facebook.com/sherlock.sir1",
@@ -163,6 +165,13 @@ export default function Footer() {
               <p className="text-[11px] text-gray-300 flex items-start gap-1.5 px-0.5 leading-relaxed">
                 <FaGraduationCap className="text-emerald-400 shrink-0 mt-0.5" />
                 <span>{language === "en" ? dev.institution : dev.institutionBn}</span>
+              </p>
+
+              <p className="text-[11px] text-gray-300 flex items-start gap-1.5 px-0.5 leading-relaxed">
+                <FaGraduationCap className="text-amber-400 shrink-0 mt-0.5" />
+                <span className="text-yellow-200/90 font-medium">
+                  {language === "en" ? dev.school : dev.schoolBn}
+                </span>
               </p>
 
               {/* Social Icons / Emojis */}

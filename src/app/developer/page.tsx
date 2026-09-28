@@ -27,6 +27,8 @@ export default function DeveloperPage() {
     institutionBn: "লিডিং ইউনিভার্সিটি, সিলেট",
     department: "Department of Computer Science & Engineering (CSE)",
     departmentBn: "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE) বিভাগ",
+    school: "Baniyachong Adarsha High School (SSC-2018)",
+    schoolBn: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় (এসএসসি-২০১৮)",
     email: "contactwith.swadheen@gmail.com",
     github: "https://github.com/swadheen01",
     linkedin: "https://linkedin.com/in/swadheen01",
@@ -134,6 +136,12 @@ export default function DeveloperPage() {
                   <FaMapMarkerAlt className="text-[#800505] shrink-0" size={16} />
                   <span>
                     {language === "en" ? dev.department : dev.departmentBn}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center md:justify-start gap-2 pt-0.5">
+                  <FaGraduationCap className="text-amber-500 shrink-0" size={16} />
+                  <span className="font-bold text-[#051939] bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 rounded-lg text-xs sm:text-sm">
+                    {language === "en" ? dev.school : dev.schoolBn}
                   </span>
                 </div>
               </div>
