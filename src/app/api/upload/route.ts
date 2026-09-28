@@ -12,13 +12,28 @@ export async function POST(req: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let buffer = Buffer.from(bytes);
+    let mimeType = file.type || "application/octet-stream";
+
+    // Compress images with sharp to keep payload tiny (<150KB) and load lightning fast
+    if (mimeType.startsWith("image/") && !mimeType.includes("svg")) {
+      try {
+        const sharpModule = await import("sharp");
+        const sharp = sharpModule.default;
+        buffer = await sharp(buffer)
+          .resize({ width: 1400, withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toBuffer();
+        mimeType = "image/jpeg";
+      } catch (sharpErr) {
+        // Fallback to original buffer
+      }
+    }
 
     // Sanitize and create unique file name
     const timestamp = Date.now();
     const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const fileName = `${timestamp}_${cleanName}`;
-    const mimeType = file.type || "application/octet-stream";
 
     let publicUrl = "";
 

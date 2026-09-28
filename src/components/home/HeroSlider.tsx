@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import initialSlides from "@/data/sliders.json";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -12,22 +12,35 @@ interface Slider {
 }
 
 export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slider[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [slides, setSlides] = useState<Slider[]>((initialSlides as Slider[]) || []);
   const [currentSlide, setCurrentSlide] = useState(0);
   const { language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/sliders", { cache: "no-store" })
+    // Immediately check if there is fresh cached slider data in localStorage
+    try {
+      const cached = localStorage.getItem("bahs_cached_sliders");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSlides(parsed);
+        }
+      }
+    } catch (e) {}
+
+    // Fetch latest sliders in background
+    fetch("/api/sliders")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
           setSlides(sorted);
+          try {
+            localStorage.setItem("bahs_cached_sliders", JSON.stringify(sorted));
+          } catch (e) {}
         }
       })
-      .catch((e) => console.error("Slider fetch error:", e))
-      .finally(() => setLoading(false));
+      .catch((e) => console.error("Slider fetch error:", e));
   }, []);
 
   useEffect(() => {
@@ -37,20 +50,6 @@ export default function HeroSlider() {
     }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
-
-  if (loading) {
-    return (
-      <section className="w-full bg-gradient-to-b from-[#465b6a]/10 via-gray-100 to-gray-50 py-3 sm:py-5 px-3 sm:px-6">
-        <div className="container mx-auto max-w-5xl">
-          <div className="relative p-1.5 sm:p-3 bg-gradient-to-b from-white via-slate-50 to-gray-200 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-300/80">
-            <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-800 animate-pulse flex items-center justify-center">
-              <span className="text-gray-400 text-sm">স্লাইডার লোড হচ্ছে...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   if (slides.length === 0) return null;
 
