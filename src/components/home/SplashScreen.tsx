@@ -23,7 +23,7 @@ export default function SplashScreen() {
       try {
         document.documentElement.classList.add("splash-hidden");
       } catch (e) {}
-    }, 600);
+    }, 450);
   };
 
   useEffect(() => {
@@ -38,9 +38,9 @@ export default function SplashScreen() {
       // Ignore storage errors
     }
 
-    // Smooth line fill-up loading (3 seconds total for comfortable reading of the welcome message)
-    const duration = 3000;
-    const intervalTime = 30;
+    // Fast and smooth line fill-up loading (~1.6 seconds)
+    const duration = 1600;
+    const intervalTime = 18;
     const totalSteps = duration / intervalTime;
     let step = 0;
 
@@ -57,7 +57,7 @@ export default function SplashScreen() {
         // Small pause at 100% completion so user perceives finish
         setTimeout(() => {
           handleDismiss();
-        }, 220);
+        }, 120);
       }
     }, intervalTime);
 
@@ -74,7 +74,7 @@ export default function SplashScreen() {
     <div
       id="bahs-splash-screen"
       onClick={handleDismiss}
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none cursor-pointer transition-all duration-700 ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none cursor-pointer transition-all duration-450 ${
         fadeOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
@@ -87,14 +87,14 @@ export default function SplashScreen() {
         <div className="relative mb-6">
           {/* Subtle Outer Glow Rings */}
           <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-yellow-400 opacity-40 blur-xl animate-spin-slow" />
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32 bg-white rounded-full p-3 shadow-2xl border-4 border-white/80 flex items-center justify-center transform transition-transform hover:scale-105">
+          <div className="relative w-36 h-36 sm:w-44 sm:h-44 bg-white rounded-full p-1 sm:p-1.5 shadow-2xl border-4 border-white/90 flex items-center justify-center transform transition-transform hover:scale-105">
             <div className="relative w-full h-full">
               <Image
                 src="/images/logo/logo.png"
                 alt="BAHS Logo"
                 fill
                 priority
-                className="object-contain p-1"
+                className="object-contain"
               />
             </div>
           </div>
