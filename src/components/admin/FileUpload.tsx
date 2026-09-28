@@ -24,7 +24,7 @@ async function compressImageIfNeeded(file: File): Promise<File> {
       img.onload = () => {
         const canvas = document.createElement("canvas");
         let { width, height } = img;
-        const maxDim = 1600;
+        const maxDim = 2400;
 
         if (width > maxDim || height > maxDim) {
           if (width > height) {
@@ -58,7 +58,7 @@ async function compressImageIfNeeded(file: File): Promise<File> {
             }
           },
           "image/jpeg",
-          0.82
+          0.92
         );
       };
       img.onerror = () => resolve(file);
