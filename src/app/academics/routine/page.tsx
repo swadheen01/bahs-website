@@ -13,6 +13,7 @@ import {
   FaChalkboardTeacher,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import { safeDownloadFile } from "@/lib/downloadFile";
 
 export default function ClassRoutinePage() {
   const { t, language } = useLanguage();
@@ -95,15 +96,14 @@ export default function ClassRoutinePage() {
                     </h3>
                   </div>
 
-                  <a
-                    href={file.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => safeDownloadFile(file.fileUrl, `${file.title}_Routine`)}
                     className="inline-flex items-center justify-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl text-xs shadow transition cursor-pointer"
                   >
                     <FaDownload size={12} />
                     <span>{t("রুটিন ডাউনলোড করুন", "Download Routine")}</span>
-                  </a>
+                  </button>
                 </div>
               ))}
             </div>

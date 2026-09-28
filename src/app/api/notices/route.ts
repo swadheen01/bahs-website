@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
@@ -35,6 +36,11 @@ export async function POST(req: NextRequest) {
     isNew: true,
     addedBy: session.user.name,
   });
+
+  try {
+    revalidatePath("/notices");
+    revalidatePath("/");
+  } catch (e) {}
 
   return NextResponse.json(newNotice, { status: 201 });
 }

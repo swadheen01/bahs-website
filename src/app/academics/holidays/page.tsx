@@ -14,6 +14,7 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import { safeDownloadFile } from "@/lib/downloadFile";
 
 export default function HolidaysPage() {
   const { t, language } = useLanguage();
@@ -124,15 +125,14 @@ export default function HolidaysPage() {
               </div>
             </div>
 
-            <a
-              href={data.calendarPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => safeDownloadFile(data.calendarPdfUrl, data.calendarPdfTitle || "Academic_Calendar")}
               className="inline-flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs shadow-md transition cursor-pointer shrink-0"
             >
               <FaDownload />
               <span>{t("ক্যালেন্ডার PDF ডাউনলোড করুন", "Download PDF Calendar")}</span>
-            </a>
+            </button>
           </div>
         )}
 

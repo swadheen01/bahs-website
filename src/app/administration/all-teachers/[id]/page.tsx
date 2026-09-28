@@ -7,7 +7,7 @@ import {
   FaGraduationCap, FaHeart, FaUserFriends, FaClock,
 } from "react-icons/fa";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 interface InfoRowProps {
   icon: React.ReactNode;

@@ -15,13 +15,35 @@ export interface Notice {
 
 export const noticesDB = {
   getAll: async (): Promise<Notice[]> => {
-    const { data } = await supabase.from('notices').select('*').order('id', { ascending: false });
-    const internalTypes = new Set(['routine', 'slider', 'gallery', 'staff', 'calendar', 'result', 'committee', 'school_info']);
-    return (data || [])
-      .filter(n => !internalTypes.has(n.type))
-      .map(n => ({
-        id: n.id, title: n.title, date: n.date, dateISO: n.date_iso, type: n.type, fileUrl: n.file_url, isNew: n.is_new, addedBy: n.added_by
+    try {
+      const { data, error } = await supabase
+        .from('notices')
+        .select('id, title, date, date_iso, type, file_url, is_new, added_by')
+        .not('type', 'in', '("routine","slider","gallery","staff","calendar","result","committee","school_info")')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+      return (data || []).map(n => ({
+        id: n.id,
+        title: n.title,
+        date: n.date,
+        dateISO: n.date_iso,
+        type: n.type,
+        fileUrl: n.file_url,
+        isNew: n.is_new,
+        addedBy: n.added_by
       }));
+    } catch (e) {
+      console.error("Error fetching notices:", e);
+      try {
+        const fs = await import("fs/promises");
+        const filePath = path.join(process.cwd(), "src", "data", "notices.json");
+        const fileData = await fs.readFile(filePath, "utf-8");
+        return JSON.parse(fileData);
+      } catch (err) {
+        return [];
+      }
+    }
   },
   add: async (notice: Omit<Notice, "id"> & { id?: number }) => {
     const noticeId = notice.id || (Date.now() % 2147483647);

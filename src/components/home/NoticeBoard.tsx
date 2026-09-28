@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaFilePdf, FaBell, FaArrowRight } from "react-icons/fa";
+import { FaFilePdf, FaBell, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import { safeDownloadFile } from "@/lib/downloadFile";
 
 export default function NoticeBoard() {
   const { t } = useLanguage();
@@ -10,16 +11,38 @@ export default function NoticeBoard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/notices", { cache: "no-store" })
+    // Quick cache check to avoid layout shift
+    try {
+      const cached = localStorage.getItem("bahs_cached_notices");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setNoticeList(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (e) {}
+
+    fetch("/api/notices")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setNoticeList(data);
+          try {
+            localStorage.setItem("bahs_cached_notices", JSON.stringify(data));
+          } catch (e) {}
         }
       })
       .catch((e) => console.error("NoticeBoard fetch error:", e))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDownload = (e: React.MouseEvent, notice: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!notice.fileUrl) return;
+    safeDownloadFile(notice.fileUrl, notice.title);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden glossy-shine transition-all duration-300 hover:shadow-xl">
@@ -40,7 +63,7 @@ export default function NoticeBoard() {
 
       {/* Notice List */}
       <div className="divide-y divide-gray-100">
-        {loading ? (
+        {loading && noticeList.length === 0 ? (
           <div className="p-6 text-center text-xs text-gray-400">নোটিশ লোড হচ্ছে...</div>
         ) : noticeList.length === 0 ? (
           <div className="p-6 text-center text-xs text-gray-400">বর্তমানে কোনো নোটিশ নেই।</div>
@@ -57,26 +80,33 @@ export default function NoticeBoard() {
                   <div className="text-[10px] mt-0.5 text-gray-200">{monthYear}</div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm text-gray-800 leading-snug flex items-start gap-1.5">
-                    {notice.isNew && (
-                      <span className="inline-block bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0 mt-0.5">
-                        {t("নতুন", "New")}
-                      </span>
-                    )}
-                    {notice.fileUrl ? (
-                      <a
-                        href={notice.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#051939] group-hover:text-[#06874A] hover:underline flex items-center gap-1 font-medium transition-colors"
+                  <div className="text-xs md:text-sm text-gray-800 leading-snug flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                      {notice.isNew && (
+                        <span className="inline-block bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0 mt-0.5">
+                          {t("নতুন", "New")}
+                        </span>
+                      )}
+                      <Link
+                        href="/notices"
+                        className="font-medium group-hover:text-[#06874A] transition-colors hover:underline"
                       >
-                        <span>{notice.title}</span>
-                        <FaFilePdf className="text-red-500 shrink-0 text-sm" />
-                      </a>
-                    ) : (
-                      <span className="font-medium group-hover:text-[#06874A] transition-colors">{notice.title}</span>
+                        {notice.title}
+                      </Link>
+                    </div>
+
+                    {notice.fileUrl && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleDownload(e, notice)}
+                        className="text-red-500 hover:text-emerald-700 bg-red-50 hover:bg-emerald-50 p-1.5 rounded-md shrink-0 transition flex items-center gap-1 text-xs cursor-pointer"
+                        title="ফাইল ডাউনলোড করুন"
+                      >
+                        <FaDownload size={11} />
+                        <span className="hidden sm:inline text-[10px] font-bold">ফাইল</span>
+                      </button>
                     )}
-                  </p>
+                  </div>
                 </div>
               </div>
             );

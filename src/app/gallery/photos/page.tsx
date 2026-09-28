@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import defaultGallery from "@/data/gallery.json";
 import { supabase } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "ফটোগ্যালারী | বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",

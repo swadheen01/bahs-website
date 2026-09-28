@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
@@ -18,6 +19,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
   await noticesDB.update(parseInt(id), body);
+  try {
+    revalidatePath("/notices");
+    revalidatePath("/");
+  } catch (e) {}
   return NextResponse.json({ success: true });
 }
 
@@ -28,5 +33,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
   const { id } = await params;
   await noticesDB.delete(parseInt(id));
+  try {
+    revalidatePath("/notices");
+    revalidatePath("/");
+  } catch (e) {}
   return NextResponse.json({ success: true });
 }
