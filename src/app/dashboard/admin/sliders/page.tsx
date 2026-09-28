@@ -16,6 +16,7 @@ import {
   FaArrowDown,
 } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
+import initialSliders from "@/data/sliders.json";
 
 interface Slider {
   id: number;
@@ -30,8 +31,22 @@ export default function AdminSlidersPage() {
   const { user, loading } = useAuth();
   const { t, language } = useLanguage();
   const router = useRouter();
-  const [sliders, setSliders] = useState<Slider[]>([]);
-  const [fetching, setFetching] = useState(true);
+
+  // Instant render from local cache or pre-bundled sliders
+  const [sliders, setSliders] = useState<Slider[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("bahs_cached_sliders");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return (initialSliders as Slider[]) || [];
+  });
+
+  const [fetching, setFetching] = useState<boolean>(!initialSliders || initialSliders.length === 0);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -44,13 +59,16 @@ export default function AdminSlidersPage() {
   }, [user, loading, router]);
 
   const loadSliders = async () => {
-    setFetching(true);
+    if (sliders.length === 0) setFetching(true);
     try {
       const res = await fetch("/api/sliders");
       const data = await res.json();
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         const sorted = [...data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
         setSliders(sorted);
+        try {
+          localStorage.setItem("bahs_cached_sliders", JSON.stringify(sorted));
+        } catch (e) {}
       }
     } catch (e) {
       console.error(e);
@@ -69,24 +87,58 @@ export default function AdminSlidersPage() {
       return;
     }
     setSaving(true);
+
     if (editId !== null) {
-      await fetch(`/api/sliders/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      // Optimistic update: instantly reflect changes on screen
+      const updated = sliders.map((s) =>
+        s.id === editId ? { ...s, title: form.title, image: form.image } : s
+      );
+      setSliders(updated);
+      try {
+        localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
+      } catch (e) {}
+
+      setShowForm(false);
       setEditId(null);
+      setForm(emptyForm);
+      setSaveMsg(t("স্লাইডার সফলভাবে আপডেট হয়েছে", "Slide updated successfully"));
+      setTimeout(() => setSaveMsg(""), 3000);
+
+      // Save to server in background
+      try {
+        await fetch(`/api/sliders/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+      } catch (err) {
+        console.error("Save slide error:", err);
+      }
     } else {
-      await fetch("/api/sliders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, sort_order: sliders.length + 1 }),
-      });
+      // New slide: create on server then add
+      try {
+        const res = await fetch("/api/sliders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, sort_order: sliders.length + 1 }),
+        });
+        const newSlide = await res.json();
+        if (newSlide && newSlide.id) {
+          const updated = [...sliders, newSlide];
+          setSliders(updated);
+          try {
+            localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.error("New slide error:", err);
+      }
+      setShowForm(false);
+      setForm(emptyForm);
+      setSaveMsg(t("নতুন স্লাইডার যুক্ত হয়েছে", "New slide added successfully"));
+      setTimeout(() => setSaveMsg(""), 3000);
     }
-    setForm(emptyForm);
-    setShowForm(false);
     setSaving(false);
-    await loadSliders();
   };
 
   const handleEdit = (s: Slider) => {
@@ -98,8 +150,22 @@ export default function AdminSlidersPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm(t("আপনি কি নিশ্চিতভাবে এই স্লাইডারটি মুছে ফেলতে চান?", "Are you sure you want to delete this slide?"))) return;
-    await fetch(`/api/sliders/${id}`, { method: "DELETE" });
-    await loadSliders();
+
+    // Optimistic removal: instantly removes from screen
+    const updated = sliders.filter((s) => s.id !== id);
+    setSliders(updated);
+    try {
+      localStorage.setItem("bahs_cached_sliders", JSON.stringify(updated));
+    } catch (e) {}
+    setSaveMsg(t("স্লাইডারটি মুছে ফেলা হয়েছে", "Slide deleted successfully"));
+    setTimeout(() => setSaveMsg(""), 3000);
+
+    try {
+      await fetch(`/api/sliders/${id}`, { method: "DELETE" });
+    } catch (err) {
+      console.error("Delete slide error:", err);
+      await loadSliders();
+    }
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
@@ -119,6 +185,9 @@ export default function AdminSlidersPage() {
     }));
 
     setSliders(reordered);
+    try {
+      localStorage.setItem("bahs_cached_sliders", JSON.stringify(reordered));
+    } catch (e) {}
     setMoving(true);
 
     try {
@@ -297,7 +366,9 @@ export default function AdminSlidersPage() {
                     <FaCheck /> {t("লাইভ স্লাইড", "Live Slide")}
                   </span>
                   <h4 className="text-base font-bold text-gray-800 leading-snug">{s.title}</h4>
-                  <p className="text-xs text-gray-400 font-mono mt-1 truncate max-w-sm">{s.image}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {s.image?.startsWith("data:") ? t("ছবি সংযুক্ত রয়েছে", "Image attached") : s.image}
+                  </p>
                 </div>
 
                 {/* Edit / Delete Actions */}
