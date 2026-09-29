@@ -83,9 +83,11 @@ export default function ResultsPage() {
     }
   };
 
-  const fetchBoardCaptcha = async () => {
+  const fetchBoardCaptcha = async (keepError = false) => {
     setLoadingCaptcha(true);
-    setBoardError(null);
+    if (!keepError) {
+      setBoardError(null);
+    }
     try {
       const res = await fetch("/api/board-results");
       const data = await res.json();
@@ -104,7 +106,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     if (activeTab === "board" && !boardCaptchaImg && !boardSearching) {
-      fetchBoardCaptcha();
+      fetchBoardCaptcha(false);
     }
   }, [activeTab]);
 
@@ -141,14 +143,15 @@ export default function ResultsPage() {
       const data = await res.json();
       if (data.success && data.result) {
         setBoardResultData(data.result);
+        setBoardError(null);
       } else {
         setBoardError(data.message || "ফলাফল পাওয়া যায়নি");
-        fetchBoardCaptcha();
+        fetchBoardCaptcha(true);
         setBoardCaptchaInput("");
       }
     } catch {
       setBoardError("বোর্ড ফলাফল অনুসন্ধান করতে সমস্যা হয়েছে। অনুগ্রহ করে সরাসরি সরকারি পোর্টালে চেষ্টা করুন।");
-      fetchBoardCaptcha();
+      fetchBoardCaptcha(true);
     } finally {
       setBoardSearching(false);
     }
@@ -160,7 +163,7 @@ export default function ResultsPage() {
     setBoardRoll("");
     setBoardReg("");
     setBoardCaptchaInput("");
-    fetchBoardCaptcha();
+    fetchBoardCaptcha(false);
   };
 
   // Search state
@@ -628,7 +631,7 @@ export default function ResultsPage() {
 
                             <button
                               type="button"
-                              onClick={fetchBoardCaptcha}
+                              onClick={() => fetchBoardCaptcha(false)}
                               disabled={loadingCaptcha}
                               className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
                               title="নতুন ক্যাপচা কোড লোড করুন"

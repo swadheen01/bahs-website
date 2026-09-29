@@ -1,6 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+function mergeCookies(existing: string, newSetCookies: string[]): string {
+  const map = new Map<string, string>();
+  if (existing) {
+    existing.split(";").forEach((part) => {
+      const trimmed = part.trim();
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const key = trimmed.substring(0, eqIdx).trim();
+        const val = trimmed.substring(eqIdx + 1).trim();
+        if (!["path", "expires", "max-age", "samesite", "domain"].includes(key.toLowerCase())) {
+          map.set(key, val);
+        }
+      }
+    });
+  }
+  newSetCookies.forEach((header) => {
+    if (!header) return;
+    const firstPart = header.split(";")[0]?.trim();
+    if (firstPart) {
+      const eqIdx = firstPart.indexOf("=");
+      if (eqIdx > 0) {
+        const key = firstPart.substring(0, eqIdx).trim();
+        const val = firstPart.substring(eqIdx + 1).trim();
+        map.set(key, val);
+      }
+    }
+  });
+  return Array.from(map.entries())
+    .map(([k, v]) => `${k}=${v}`)
+    .join("; ");
+}
+
 // Solve bpanel challenge to establish a verified session with eboardresults
 async function createVerifiedSession(): Promise<string> {
   const userAgent =
@@ -38,7 +70,7 @@ async function createVerifiedSession(): Promise<string> {
   });
 
   const verifyCookies = res2.headers.getSetCookie ? res2.headers.getSetCookie() : [res2.headers.get("set-cookie") || ""];
-  const sessionCookie = verifyCookies.filter(Boolean).join("; ");
+  const sessionCookie = mergeCookies("", verifyCookies);
   if (!sessionCookie) {
     throw new Error("Failed to receive verified session");
   }
@@ -49,14 +81,28 @@ async function createVerifiedSession(): Promise<string> {
 // GET: Generate session and fetch authentic captcha image
 export async function GET(req: NextRequest) {
   try {
-    const sessionCookie = await createVerifiedSession();
+    const userAgent =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    // Fetch captcha image with verified session
+    let sessionCookie = await createVerifiedSession();
+
+    // Visit home page to establish base PHP session
+    const homeRes = await fetch("https://eboardresults.com/v2/home", {
+      headers: {
+        Cookie: sessionCookie,
+        "User-Agent": userAgent,
+      },
+      cache: "no-store",
+    });
+    const homeCookies = homeRes.headers.getSetCookie ? homeRes.headers.getSetCookie() : [homeRes.headers.get("set-cookie") || ""];
+    sessionCookie = mergeCookies(sessionCookie, homeCookies);
+
+    // Fetch captcha image with verified session and save EBRSESSID2
     const captchaRes = await fetch("https://eboardresults.com/v2/captcha?t=" + Date.now(), {
       headers: {
         Cookie: sessionCookie,
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "User-Agent": userAgent,
+        Referer: "https://eboardresults.com/v2/home",
       },
       cache: "no-store",
     });
@@ -67,6 +113,11 @@ export async function GET(req: NextRequest) {
         { status: 502 }
       );
     }
+
+    const captchaCookies = captchaRes.headers.getSetCookie
+      ? captchaRes.headers.getSetCookie()
+      : [captchaRes.headers.get("set-cookie") || ""];
+    sessionCookie = mergeCookies(sessionCookie, captchaCookies);
 
     const buf = await captchaRes.arrayBuffer();
     const base64Image = `data:image/jpeg;base64,${Buffer.from(buf).toString("base64")}`;
@@ -130,6 +181,8 @@ export async function POST(req: NextRequest) {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "X-Requested-With": "XMLHttpRequest",
+        Origin: "https://eboardresults.com",
+        Referer: "https://eboardresults.com/v2/home",
       },
       body: formParams.toString(),
       cache: "no-store",
