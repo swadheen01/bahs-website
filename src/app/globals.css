@@ -174,3 +174,143 @@ html.splash-hidden #bahs-splash-screen {
   transform: rotate(25deg) translateY(100%);
 }
 
+/* ==========================================================================
+   OFFICIAL MARKSHEET & TRANSCRIPT PRINT STYLES
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 6mm 8mm 6mm 8mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Completely eliminate website layout elements during print */
+  header,
+  footer,
+  nav,
+  aside,
+  #bahs-splash-screen,
+  #google_translate_element,
+  .no-print,
+  button,
+  .goog-te-banner-frame,
+  .skiptranslate {
+    display: none !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  .results-page-wrapper,
+  .results-page-wrapper .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* When printing board result: hide everything else and pin the transcript */
+  body.printing-board-result * {
+    visibility: hidden;
+  }
+  body.printing-board-result #printable-board-marksheet,
+  body.printing-board-result #printable-board-marksheet * {
+    visibility: visible;
+  }
+  body.printing-board-result #printable-board-marksheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    display: block !important;
+  }
+
+  /* Browser native Ctrl+P auto-detect when #printable-board-marksheet is present */
+  body:has(#printable-board-marksheet) * {
+    visibility: hidden;
+  }
+  body:has(#printable-board-marksheet) #printable-board-marksheet,
+  body:has(#printable-board-marksheet) #printable-board-marksheet * {
+    visibility: visible;
+  }
+  body:has(#printable-board-marksheet) #printable-board-marksheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    display: block !important;
+  }
+
+  /* Same for internal marksheet */
+  body.printing-internal-result * {
+    visibility: hidden;
+  }
+  body.printing-internal-result .printable-marksheet,
+  body.printing-internal-result .printable-marksheet * {
+    visibility: visible;
+  }
+  body.printing-internal-result .printable-marksheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    display: block !important;
+  }
+
+  body:has(.printable-marksheet) * {
+    visibility: hidden;
+  }
+  body:has(.printable-marksheet) .printable-marksheet,
+  body:has(.printable-marksheet) .printable-marksheet * {
+    visibility: visible;
+  }
+  body:has(.printable-marksheet) .printable-marksheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    display: block !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+
