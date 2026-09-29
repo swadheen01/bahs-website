@@ -41,7 +41,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
     if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 3000);
     return () => clearInterval(timer);
   }, [slides.length]);
 
@@ -57,7 +57,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             {slides.map((slide, index) => (
               <div
                 key={`${slide.id}-${index}`}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
+                className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
                   index === currentSlide ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
               >
