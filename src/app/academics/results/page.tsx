@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,13 +15,153 @@ import {
   FaIdCard,
   FaFileAlt,
   FaArrowRight,
+  FaRedo,
+  FaCopy,
+  FaCheck,
+  FaUndo,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+
+const SUBJECT_MAP: Record<string, string> = {
+  "101": "বাংলা (Bangla)",
+  "102": "বাংলা ২য় পত্র (Bangla II)",
+  "107": "ইংরেজি (English)",
+  "108": "ইংরেজি ২য় পত্র (English II)",
+  "109": "গণিত (Mathematics)",
+  "111": "ইসলাম ও নৈতিক শিক্ষা (Islam & Moral Edu)",
+  "112": "হিন্দুধর্ম ও নৈতিক শিক্ষা (Hindu Religion)",
+  "114": "বৌদ্ধধর্ম (Buddhist Religion)",
+  "115": "খ্রিষ্টধর্ম (Christian Religion)",
+  "127": "বিজ্ঞান (General Science)",
+  "136": "পদার্থবিজ্ঞান (Physics)",
+  "137": "রসায়ন (Chemistry)",
+  "138": "জীববিজ্ঞান (Biology)",
+  "145": "উচ্চতর গণিত (Higher Mathematics)",
+  "154": "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)",
+  "150": "বাংলাদেশ ও বিশ্বপরিচয় (BGS)",
+  "147": "শারীরিক শিক্ষা ও স্বাস্থ্য (Physical Edu)",
+  "156": "কর্ম ও জীবনমুখী শিক্ষা (Career Edu)",
+  "134": "কৃষি শিক্ষা (Agriculture Studies)",
+  "135": "গার্হস্থ্য বিজ্ঞান (Home Science)",
+  "141": "হিসাববিজ্ঞান (Accounting)",
+  "143": "ব্যবসায় উদ্যোগ (Business Ent.)",
+  "140": "ফিন্যান্স ও ব্যাংকিং (Finance & Banking)",
+  "126": "ভূগোল ও পরিবেশ (Geography)",
+  "153": "পৌরনীতি ও নাগরিকতা (Civics)",
+  "152": "ইতিহাস (History)",
+  "129": "চারু ও কারুকলা (Arts & Crafts)",
+};
 
 export default function ResultsPage() {
   const { t, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<"internal" | "board">("board");
+
+  // Board result search state (Native direct integration without iframe)
+  const [boardExam, setBoardExam] = useState<string>("ssc");
+  const [boardYear, setBoardYear] = useState<string>("2024");
+  const [boardName, setBoardName] = useState<string>("sylhet");
+  const [boardRoll, setBoardRoll] = useState<string>("");
+  const [boardReg, setBoardReg] = useState<string>("");
+  const [boardCaptchaInput, setBoardCaptchaInput] = useState<string>("");
+
+  const [boardCaptchaImg, setBoardCaptchaImg] = useState<string>("");
+  const [boardSessionToken, setBoardSessionToken] = useState<string>("");
+  const [loadingCaptcha, setLoadingCaptcha] = useState<boolean>(false);
+  const [boardSearching, setBoardSearching] = useState<boolean>(false);
+  const [boardError, setBoardError] = useState<string | null>(null);
+  const [boardResultData, setBoardResultData] = useState<any | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const handleCopy = (text: string, key: string) => {
+    try {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } catch (e) {
+      // Ignore
+    }
+  };
+
+  const fetchBoardCaptcha = async () => {
+    setLoadingCaptcha(true);
+    setBoardError(null);
+    try {
+      const res = await fetch("/api/board-results");
+      const data = await res.json();
+      if (data.success && data.captcha) {
+        setBoardCaptchaImg(data.captcha);
+        setBoardSessionToken(data.sessionToken);
+      } else {
+        setBoardError(data.message || "ক্যাপচা লোড করা যায়নি, আবার চেষ্টা করুন");
+      }
+    } catch {
+      setBoardError("বোর্ড সার্ভারের সাথে সংযোগে ত্রুটি হয়েছে");
+    } finally {
+      setLoadingCaptcha(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "board" && !boardCaptchaImg && !boardSearching) {
+      fetchBoardCaptcha();
+    }
+  }, [activeTab]);
+
+  const handleBoardSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!boardRoll.trim()) {
+      alert("অনুগ্রহ করে রোল নম্বর প্রদান করুন");
+      return;
+    }
+    if (!boardCaptchaInput.trim()) {
+      alert("অনুগ্রহ করে ৪-সংখ্যার সিকিউরিটি ক্যাপচা কোডটি পূরণ করুন");
+      return;
+    }
+
+    setBoardSearching(true);
+    setBoardError(null);
+    setBoardResultData(null);
+
+    try {
+      const res = await fetch("/api/board-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionToken: boardSessionToken,
+          exam: boardExam,
+          year: boardYear,
+          board: boardName,
+          roll: boardRoll.trim(),
+          reg: boardReg.trim(),
+          captcha: boardCaptchaInput.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.result) {
+        setBoardResultData(data.result);
+      } else {
+        setBoardError(data.message || "ফলাফল পাওয়া যায়নি");
+        fetchBoardCaptcha();
+        setBoardCaptchaInput("");
+      }
+    } catch {
+      setBoardError("বোর্ড ফলাফল অনুসন্ধান করতে সমস্যা হয়েছে। অনুগ্রহ করে সরাসরি সরকারি পোর্টালে চেষ্টা করুন।");
+      fetchBoardCaptcha();
+    } finally {
+      setBoardSearching(false);
+    }
+  };
+
+  const handleResetBoard = () => {
+    setBoardResultData(null);
+    setBoardError(null);
+    setBoardRoll("");
+    setBoardReg("");
+    setBoardCaptchaInput("");
+    fetchBoardCaptcha();
+  };
 
   // Search state
   const [selectedClass, setSelectedClass] = useState("6");
@@ -142,24 +282,53 @@ export default function ResultsPage() {
                 </span>
               </div>
 
-              {/* School Verification Credentials Box */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-8">
-                <h3 className="font-bold text-sm text-[#051939] mb-3 flex items-center gap-2">
-                  <FaInfoCircle className="text-blue-600" />
-                  {t("শিক্ষা বোর্ড সার্ভারে অনুসন্ধানের জন্য প্রয়োজনীয় তথ্য", "Information Required for Board Search")}
-                </h3>
+              {/* School Verification Credentials Box with Quick Copy */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <h3 className="font-bold text-sm text-[#051939] flex items-center gap-2">
+                    <FaInfoCircle className="text-blue-600" />
+                    {t("শিক্ষা বোর্ড সার্ভারে অনুসন্ধানের জন্য প্রয়োজনীয় তথ্য", "Information Required for Board Search")}
+                  </h3>
+                  <span className="text-[11px] text-gray-500 font-medium">
+                    {t("ক্লিক করে তথ্য কপি করে নিচের ফর্মে পেস্ট করুন", "Click copy button to paste into the form below")}
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
-                    <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Education Board")}</span>
-                    <strong className="text-[#051939] text-sm">Sylhet (সিলেট)</strong>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
+                    <div>
+                      <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Education Board")}</span>
+                      <strong className="text-[#051939] text-sm">Sylhet (সিলেট)</strong>
+                    </div>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
-                    <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় EIIN", "School EIIN")}</span>
-                    <strong className="text-[#06874A] text-sm font-mono">129344</strong>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
+                    <div>
+                      <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় EIIN", "School EIIN")}</span>
+                      <strong className="text-[#06874A] text-sm font-mono">129344</strong>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy("129344", "eiin")}
+                      className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                      title="EIIN কপি করুন"
+                    >
+                      {copiedKey === "eiin" ? <FaCheck size={10} className="text-emerald-600" /> : <FaCopy size={10} />}
+                      <span>{copiedKey === "eiin" ? t("কপি হয়েছে!", "Copied!") : t("কপি", "Copy")}</span>
+                    </button>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
-                    <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় / সেন্টার কোড", "School Code")}</span>
-                    <strong className="text-purple-700 text-sm font-mono">1903</strong>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
+                    <div>
+                      <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় / সেন্টার কোড", "School Code")}</span>
+                      <strong className="text-purple-700 text-sm font-mono">1903</strong>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy("1903", "center")}
+                      className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                      title="সেন্টার কোড কপি করুন"
+                    >
+                      {copiedKey === "center" ? <FaCheck size={10} className="text-purple-600" /> : <FaCopy size={10} />}
+                      <span>{copiedKey === "center" ? t("কপি হয়েছে!", "Copied!") : t("কপি", "Copy")}</span>
+                    </button>
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
                     <span className="text-gray-500 block mb-0.5">{t("উপজেলা", "Upazila")}</span>
@@ -168,67 +337,385 @@ export default function ResultsPage() {
                 </div>
               </div>
 
-              {/* Direct Official Portals Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Portal 1: eBoardResults */}
-                <div className="rounded-2xl border border-gray-200 p-6 bg-gradient-to-b from-white to-gray-50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                        {t("দ্রুততম ও বিস্তারিত মার্কশিট", "Detailed Marksheet & Grade")}
-                      </span>
-                      <FaExternalLinkAlt className="text-gray-400 text-xs" />
-                    </div>
-                    <h3 className="font-extrabold text-lg text-[#051939]">
-                      eBoard Results Portal (Web Based)
+              {/* NATIVE BOARD RESULTS SEARCH BOX & RESULT DISPLAY */}
+              {boardResultData ? (
+                /* OFFICIAL MARKSHEET DISPLAY CARD */
+                <div className="bg-white rounded-3xl border-2 border-emerald-500 shadow-2xl p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+                  {/* Marksheet Top Header */}
+                  <div className="text-center border-b border-gray-200 pb-5">
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">
+                      {boardResultData.board_name || "SYLHET"} EDUCATION BOARD
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#051939] mt-2">
+                      {boardExam.toUpperCase()} Examination - {boardYear}
                     </h3>
-                    <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                      {t(
-                        "বোর্ড পরীক্ষার বিষয়ভিত্তিক পূর্ণাঙ্গ নম্বর ও গ্রেডশিট পেতে এই পোর্টালটি ব্যবহার করুন। এখানে ইন্ডিভিজুয়াল ও ইনস্টিটিউশন রেজাল্ট সহজে দেখা যায়।",
-                        "Use this modern portal to view subject-wise full marksheet with grade points. Supports individual & institution results."
-                      )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t("অফিসিয়াল বোর্ড রেজাল্ট ও বিষয়ভিত্তিক গ্রেডশিট", "Official Board Result & Subject-wise Marksheet")}
                     </p>
                   </div>
 
+                  {/* Student Information Summary Grid */}
+                  <div className="bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-2xl border border-gray-200 p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200/80 pb-4 mb-4">
+                      <div>
+                        <span className="text-xs text-gray-500 block mb-0.5">{t("শিক্ষার্থীর নাম", "Student Name")}</span>
+                        <h4 className="text-lg sm:text-xl font-bold text-[#051939]">
+                          {boardResultData.name || "N/A"}
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white px-4 py-2 rounded-xl border border-emerald-300 shadow-sm text-center">
+                          <span className="text-[11px] text-gray-500 block">{t("ফলাফল (GPA)", "Result")}</span>
+                          <span className="text-base sm:text-lg font-black text-emerald-700">
+                            {boardResultData.gpa ? `GPA: ${boardResultData.gpa}` : boardResultData.res_detail || "PASSED"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("রোল নম্বর", "Roll No")}</span>
+                        <strong className="text-gray-900 font-mono text-sm">{boardResultData.roll_no || boardRoll}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("রেজিস্ট্রেশন নম্বর", "Registration No")}</span>
+                        <strong className="text-gray-900 font-mono text-sm">{boardResultData.regno || boardReg || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("পিতা", "Father's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.fname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("মাতা", "Mother's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.mname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Board")}</span>
+                        <strong className="text-gray-900">{boardResultData.board_name || "Sylhet"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("বিভাগ / গ্রুপ", "Group")}</span>
+                        <strong className="text-gray-900">{boardResultData.stud_group || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("ধরন ও লিঙ্গ", "Type & Gender")}</span>
+                        <strong className="text-gray-900">
+                          {boardResultData.stud_type || "Regular"} • {boardResultData.stud_sex || "N/A"}
+                        </strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("প্রতিষ্ঠান", "Institute")}</span>
+                        <strong className="text-[#051939] truncate block" title={boardResultData.inst_name}>
+                          {boardResultData.inst_name || "Baniyachong Adarsha High School"}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subject-Wise Grade Table */}
+                  {boardResultData.display_details && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-[#051939] flex items-center gap-2">
+                        <FaFileAlt className="text-emerald-600" />
+                        <span>{t("বিষয়ভিত্তিক গ্রেড ও ফলাফল", "Subject-wise Grades & Marks")}</span>
+                      </h4>
+                      <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+                        <table className="w-full text-left text-xs sm:text-sm">
+                          <thead className="bg-[#051939] text-white uppercase text-[11px] font-bold">
+                            <tr>
+                              <th className="py-3 px-4">{t("বিষয় কোড", "Subject Code")}</th>
+                              <th className="py-3 px-4">{t("বিষয়ের নাম", "Subject Name")}</th>
+                              <th className="py-3 px-4 text-center">{t("প্রাপ্ত গ্রেড / নম্বর", "Grade / Marks")}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 bg-white">
+                            {boardResultData.display_details
+                              .split(",")
+                              .map((item: string, idx: number) => {
+                                const parts = item.split(":");
+                                const code = parts[0]?.trim() || "";
+                                const gradeStr = parts[1]?.trim() || "";
+                                const subParts = gradeStr.split("=");
+                                const grade = subParts[subParts.length - 1] || "";
+                                const marks = subParts.length > 1 ? subParts[0] : "";
+                                const subName = SUBJECT_MAP[code] || `Subject (${code})`;
+
+                                return (
+                                  <tr key={idx} className="hover:bg-emerald-50/40 transition">
+                                    <td className="py-2.5 px-4 font-mono font-bold text-gray-700">{code}</td>
+                                    <td className="py-2.5 px-4 font-medium text-gray-900">{subName}</td>
+                                    <td className="py-2.5 px-4 text-center">
+                                      <span
+                                        className={`inline-block px-3 py-1 rounded-full font-bold text-xs ${
+                                          grade === "A+"
+                                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                            : grade === "F"
+                                            ? "bg-red-100 text-red-800 border border-red-300"
+                                            : "bg-blue-100 text-blue-800 border border-blue-300"
+                                        }`}
+                                      >
+                                        {marks ? `${marks} (${grade})` : grade}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Marksheet Actions */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={handleResetBoard}
+                      className="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer"
+                    >
+                      <FaUndo size={12} />
+                      <span>{t("আরেকটি ফলাফল দেখুন", "Search Another Result")}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                    >
+                      <FaPrint size={14} />
+                      <span>{t("মার্কশিট প্রিন্ট / সেভ করুন", "Print / Save Marksheet")}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* OFFICIAL BOARD SEARCH FORM BOXES */
+                <div className="bg-white rounded-3xl border-2 border-emerald-500/40 shadow-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white p-4 sm:p-5 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <FaAward className="text-yellow-400" size={18} />
+                      <h3 className="font-bold text-base sm:text-lg">
+                        {t("বোর্ড ফলাফল অনুসন্ধান ফর্ম", "Board Result Search Form")}
+                      </h3>
+                    </div>
+                    <span className="text-xs font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-500/40 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-inner">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>লাইভ সার্ভার কানেক্টেড</span>
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleBoardSearch} className="p-6 sm:p-8 space-y-6">
+                    {boardError && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
+                        <FaTimesCircle className="shrink-0 text-red-500" size={16} />
+                        <span>{boardError}</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {/* Examination Box */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                          {t("পরীক্ষার নাম (Examination)", "Examination")} <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={boardExam}
+                          onChange={(e) => setBoardExam(e.target.value)}
+                          className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white font-medium"
+                        >
+                          <option value="ssc">SSC / Dakhil / Equivalent (এসএসসি / দাখিল)</option>
+                          <option value="jsc">JSC / JDC (জেএসসি / জেডিসি)</option>
+                        </select>
+                      </div>
+
+                      {/* Year Box */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                          {t("পাসের সন (Passing Year)", "Passing Year")} <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={boardYear}
+                          onChange={(e) => setBoardYear(e.target.value)}
+                          className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white font-medium"
+                        >
+                          {["2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"].map((yr) => (
+                            <option key={yr} value={yr}>
+                              {yr}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Board Box */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                          {t("শিক্ষা বোর্ড (Board)", "Board")} <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={boardName}
+                          onChange={(e) => setBoardName(e.target.value)}
+                          className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white font-medium"
+                        >
+                          <option value="sylhet">Sylhet (সিলেট - অত্র বিদ্যালয়)</option>
+                          <option value="dhaka">Dhaka (ঢাকা)</option>
+                          <option value="comilla">Comilla (কুমিল্লা)</option>
+                          <option value="chittagong">Chittagong (চট্টগ্রাম)</option>
+                          <option value="rajshahi">Rajshahi (রাজশাহী)</option>
+                          <option value="barisal">Barisal (বরিশাল)</option>
+                          <option value="jessore">Jessore (যশোর)</option>
+                          <option value="dinajpur">Dinajpur (দিনাজপুর)</option>
+                          <option value="mymensingh">Mymensingh (ময়মনসিংহ)</option>
+                          <option value="madrasah">Madrasah (মাদ্রাসা)</option>
+                          <option value="tec">Technical (কারিগরি)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Roll Number Box */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                          {t("রোল নম্বর (Roll No)", "Roll Number")} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={boardRoll}
+                          onChange={(e) => setBoardRoll(e.target.value)}
+                          placeholder="যেমন: 123456"
+                          className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono"
+                        />
+                      </div>
+
+                      {/* Registration Number Box */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                          {t("রেজিস্ট্রেশন নম্বর (Reg No)", "Registration Number")} <span className="text-gray-400 font-normal">({t("ঐচ্ছিক / বিস্তারিত মার্কশিটের জন্য", "Optional")})</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={boardReg}
+                          onChange={(e) => setBoardReg(e.target.value)}
+                          placeholder="যেমন: 1234567890"
+                          className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Security Captcha Box */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                            {t("সিকিউরিটি কোড (Security Captcha)", "Security Code (Captcha)")} <span className="text-red-500">*</span>
+                          </label>
+                          <div className="flex items-center gap-3">
+                            {loadingCaptcha ? (
+                              <div className="h-11 w-36 bg-gray-200 animate-pulse rounded-xl flex items-center justify-center text-xs text-gray-500">
+                                ক্যাপচা লোড হচ্ছে...
+                              </div>
+                            ) : boardCaptchaImg ? (
+                              <img
+                                src={boardCaptchaImg}
+                                alt="Board Security Captcha"
+                                className="h-11 w-36 object-contain rounded-xl border border-gray-300 shadow-sm bg-white"
+                              />
+                            ) : (
+                              <div className="h-11 w-36 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-xs border border-red-200 font-medium">
+                                লোড ব্যর্থ
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={fetchBoardCaptcha}
+                              disabled={loadingCaptcha}
+                              className="px-3 py-2 bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
+                              title="নতুন ক্যাপচা কোড লোড করুন"
+                            >
+                              <FaRedo className={loadingCaptcha ? "animate-spin" : ""} size={12} />
+                              <span>{t("রিফ্রেশ", "Refresh")}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="sm:w-64">
+                          <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                            {t("ছবির কোডটি লিখুন", "Type the Code Above")} <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            maxLength={6}
+                            value={boardCaptchaInput}
+                            onChange={(e) => setBoardCaptchaInput(e.target.value)}
+                            placeholder="৪-ডিজিটের কোড"
+                            className="w-full border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono text-center tracking-widest font-bold"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Submit Buttons */}
+                    <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleResetBoard}
+                        className="w-full sm:w-auto px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold text-sm transition cursor-pointer text-center"
+                      >
+                        {t("রিসেট করুন", "Reset")}
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={boardSearching || loadingCaptcha}
+                        className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                      >
+                        {boardSearching ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>{t("ফলাফল অনুসন্ধান হচ্ছে...", "Searching Board Results...")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaSearch size={14} />
+                            <span>{t("ফলাফল দেখুন (Get Result)", "Get Board Result")}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Direct Official Server Backup Links */}
+              <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-xs font-bold text-[#051939]">
+                    {t("জরুরি প্রয়োজনে সরাসরি সরকারি মূল সার্ভারে ফলাফল দেখতে:", "Direct Official Board Portals:")}
+                  </h4>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    {t("ফলাফল প্রকাশের দিনে বোর্ড সার্ভারে অতিরিক্ত চাপের ক্ষেত্রে সরাসরি লিংক ব্যবহার করা যাবে।", "Use official links during heavy peak traffic hours.")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
                   <a
                     href="https://eboardresults.com/v2/home"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#06874A] hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl text-center text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="px-3.5 py-2 bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
                   >
-                    <span>{t("eBoard Results এ ফলাফল দেখুন", "Open eBoard Results Portal")}</span>
-                    <FaArrowRight size={12} />
+                    <span>eBoard Results</span>
+                    <FaExternalLinkAlt size={10} />
                   </a>
-                </div>
-
-                {/* Portal 2: Education Board Results GOV */}
-                <div className="rounded-2xl border border-gray-200 p-6 bg-gradient-to-b from-white to-gray-50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
-                        {t("সরকারি মূল সার্ভার", "Official Govt Portal")}
-                      </span>
-                      <FaExternalLinkAlt className="text-gray-400 text-xs" />
-                    </div>
-                    <h3 className="font-extrabold text-lg text-[#051939]">
-                      Education Board Results (Govt Server)
-                    </h3>
-                    <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                      {t(
-                        "শিক্ষা মন্ত্রণালয় পরিচালিত সরকারি মূল পোর্টাল। এসএসসি (SSC) ও জেএসসি (JSC) পরীক্ষার রোল ও রেজিস্ট্রেশন নম্বর প্রদান করে সরাসরি ফলাফল সংগ্রহ করুন।",
-                        "The official central server operated by the Ministry of Education. Input your SSC or JSC Roll & Registration number."
-                      )}
-                    </p>
-                  </div>
-
                   <a
                     href="http://www.educationboardresults.gov.bd/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#051939] hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-xl text-center text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="px-3.5 py-2 bg-white hover:bg-blue-50 border border-blue-300 text-blue-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
                   >
-                    <span>{t("EducationBoardResults.gov.bd পোর্টাল", "Open Official Board Server")}</span>
-                    <FaArrowRight size={12} />
+                    <span>EducationBoardResults.gov.bd</span>
+                    <FaExternalLinkAlt size={10} />
                   </a>
                 </div>
               </div>
