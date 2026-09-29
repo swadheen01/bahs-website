@@ -205,98 +205,78 @@ export default function ResultsPage() {
     setSearching(false);
   };
 
-  const [currentDateStr, setCurrentDateStr] = useState<string>("");
-  useEffect(() => {
-    try {
-      const d = new Date();
-      setCurrentDateStr(
-        d.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      );
-    } catch {
-      setCurrentDateStr("30-Sep-2026");
-    }
-  }, []);
+  const printElement = (elementId: string, docTitle: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
 
-  const getBoardFullName = (bName?: string) => {
-    const code = (bName || boardName || "sylhet").toLowerCase();
-    const map: Record<string, string> = {
-      sylhet: "SYLHET",
-      dhaka: "DHAKA",
-      comilla: "COMILLA",
-      chittagong: "CHITTAGONG",
-      rajshahi: "RAJSHAHI",
-      barisal: "BARISAL",
-      jessore: "JESSORE",
-      dinajpur: "DINAJPUR",
-      mymensingh: "MYMENSINGH",
-      madrasah: "MADRASAH",
-      tec: "TECHNICAL",
-    };
-    return map[code] || (bName ? bName.toUpperCase() : "SYLHET");
-  };
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "none";
+    document.body.appendChild(iframe);
 
-  const getGradePoint = (grade: string): string => {
-    const g = grade.trim().toUpperCase();
-    if (g === "A+") return "5.0";
-    if (g === "A") return "4.0";
-    if (g === "A-") return "3.5";
-    if (g === "B") return "3.0";
-    if (g === "C") return "2.0";
-    if (g === "D") return "1.0";
-    if (g === "F") return "0.0";
-    return "-";
-  };
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
 
-  const parseSubjectDetails = (detailsStr: string) => {
-    if (!detailsStr) return [];
-    return detailsStr.split(",").map((item, idx) => {
-      const parts = item.split(":");
-      const code = parts[0]?.trim() || "";
-      const right = parts[1]?.trim() || "";
-      let marks = "";
-      let grade = right;
-      if (right.includes("=")) {
-        const eqParts = right.split("=");
-        marks = eqParts[0]?.trim() || "";
-        grade = eqParts[1]?.trim() || "";
-      }
-      const name = SUBJECT_MAP[code] || `Subject (${code})`;
-      const point = getGradePoint(grade);
-      return {
-        sl: String(idx + 1).padStart(2, "0"),
-        code,
-        name,
-        marks,
-        grade,
-        point,
-      };
-    });
-  };
+    const styles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
+      .map((s) => s.outerHTML)
+      .join("\n");
 
-  const handlePrintBoard = () => {
-    document.body.classList.add("printing-board-result");
-    window.print();
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll(".no-print").forEach((el) => el.remove());
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html lang="bn">
+        <head>
+          <meta charset="utf-8" />
+          <title>${docTitle}</title>
+          ${styles}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 15mm 12mm;
+            }
+            body {
+              background: #ffffff !important;
+              margin: 0 !important;
+              padding: 20px !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .no-print {
+              display: none !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div>
+            ${clone.outerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
     setTimeout(() => {
-      document.body.classList.remove("printing-board-result");
-    }, 1000);
-  };
-
-  const handlePrintInternal = () => {
-    document.body.classList.add("printing-internal-result");
-    window.print();
-    setTimeout(() => {
-      document.body.classList.remove("printing-internal-result");
-    }, 1000);
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        try {
+          document.body.removeChild(iframe);
+        } catch (e) {}
+      }, 2000);
+    }, 400);
   };
 
   return (
-    <div className={`results-page-wrapper min-h-screen bg-gray-50 pb-20 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
+    <div className={`min-h-screen bg-gray-50 pb-20 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
       {/* Header Banner */}
-      <div className="no-print bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-12 shadow-md">
+      <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-12 shadow-md">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
             <FaGraduationCap size={16} />
@@ -317,7 +297,7 @@ export default function ResultsPage() {
 
       <div className="container mx-auto px-4 -mt-6 max-w-6xl space-y-8 relative z-10">
         {/* Navigation Tabs */}
-        <div className="no-print bg-white rounded-2xl p-2 shadow-lg border border-gray-100 flex flex-col sm:flex-row gap-2">
+        <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100 flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => setActiveTab("board")}
             className={`flex-1 py-3 px-5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
@@ -347,7 +327,7 @@ export default function ResultsPage() {
         {activeTab === "board" && (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Info Notice Card */}
-            <div className="no-print bg-white rounded-3xl p-6 sm:p-8 shadow-md border-t-4 border-[#051939]">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border-t-4 border-[#051939]">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-5 mb-6">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-[#051939] flex items-center gap-2">
@@ -426,392 +406,152 @@ export default function ResultsPage() {
 
               {/* NATIVE BOARD RESULTS SEARCH BOX & RESULT DISPLAY */}
               {boardResultData ? (
-                /* OFFICIAL MARKSHEET DISPLAY CARD & ACTION CONTROLS */
-                <div className="space-y-4 animate-in fade-in duration-300">
-                  {/* Top Screen Action Notification & Print Bar (Hidden in Print) */}
-                  <div className="no-print bg-gradient-to-r from-emerald-900 via-[#051939] to-emerald-950 text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-400 shrink-0">
-                        <FaCheckCircle size={20} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                          <h4 className="font-extrabold text-sm sm:text-base text-emerald-300">
-                            {t("অফিসিয়াল বোর্ড রেজাল্ট সফলভাবে যাচাইকৃত", "Official Board Result Verified")}
-                          </h4>
-                        </div>
-                        <p className="text-xs text-gray-300 mt-0.5">
-                          {t(
-                            "নিচের অফিসিয়াল অ্যাকাডেমিক ট্রান্সক্রিপ্টটি সরকারি ফরম্যাটে প্রস্তুত। আপনি এটি সরাসরি প্রিন্ট বা পিডিএফ হিসেবে সংরক্ষণ করতে পারবেন।",
-                            "Official Academic Transcript ready in authentic government board format."
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 w-full md:w-auto">
-                      <button
-                        type="button"
-                        onClick={handleResetBoard}
-                        className="flex-1 md:flex-none px-4 py-2.5 rounded-xl border border-gray-400/40 hover:bg-white/10 text-gray-200 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <FaUndo size={12} />
-                        <span>{t("আরেকটি ফলাফল", "Search Again")}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handlePrintBoard}
-                        className="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-[#06874A] hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <FaPrint size={14} />
-                        <span>{t("প্রিন্ট / সেভ করুন (PDF)", "Print / Save PDF")}</span>
-                      </button>
-                    </div>
+                /* OFFICIAL MARKSHEET DISPLAY CARD */
+                <div id="printable-board-card" className="bg-white rounded-3xl border-2 border-emerald-500 shadow-2xl p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+                  {/* Marksheet Top Header */}
+                  <div className="text-center border-b border-gray-200 pb-5">
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">
+                      {boardResultData.board_name || "SYLHET"} EDUCATION BOARD
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#051939] mt-2">
+                      {boardExam.toUpperCase()} Examination - {boardYear}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t("অফিসিয়াল বোর্ড রেজাল্ট ও বিষয়ভিত্তিক গ্রেডশিট", "Official Board Result & Subject-wise Marksheet")}
+                    </p>
                   </div>
 
-                  {/* THE PRINTABLE OFFICIAL BOARD ACADEMIC TRANSCRIPT */}
-                  <div
-                    id="printable-board-marksheet"
-                    className="bg-white rounded-2xl md:rounded-3xl border-2 border-[#051939] shadow-2xl p-5 sm:p-8 md:p-9 relative overflow-hidden font-sans text-gray-900"
-                  >
-                    {/* Subtle Official Watermark Background */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
-                      <svg className="w-[420px] h-[420px]" viewBox="0 0 100 100" fill="currentColor">
-                        <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="2" fill="none" />
-                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" fill="none" />
-                        <path d="M50 26 C47 34 40 44 40 54 C40 60 44 64 50 64 C56 64 60 60 60 54 C60 44 53 34 50 26 Z" />
-                        <path d="M40 54 C34 44 26 42 24 48 C22 54 28 62 38 64 Z" />
-                        <path d="M60 54 C66 44 74 42 76 48 C78 54 72 62 62 64 Z" />
-                      </svg>
-                    </div>
-
-                    <div className="relative z-10 space-y-4">
-                      {/* OFFICIAL BANGLADESH BOARD HEADER */}
-                      <div className="text-center border-b-2 border-[#051939] pb-3">
-                        {/* Bangladesh Government / Board Emblem SVG */}
-                        <div className="flex justify-center mb-1">
-                          <svg className="w-13 h-13 text-[#06874A]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="50" cy="50" r="46" stroke="#051939" strokeWidth="2.5" fill="#fefefe" />
-                            <circle cx="50" cy="50" r="41" stroke="#06874A" strokeWidth="1" strokeDasharray="2 2" fill="none" />
-                            <circle cx="50" cy="50" r="23" fill="#06874A" fillOpacity="0.08" />
-                            <path d="M50 26 C47 34 40 44 40 54 C40 60 44 64 50 64 C56 64 60 60 60 54 C60 44 53 34 50 26 Z" fill="#06874A" />
-                            <path d="M40 54 C34 44 26 42 24 48 C22 54 28 62 38 64 Z" fill="#800505" />
-                            <path d="M60 54 C66 44 74 42 76 48 C78 54 72 62 62 64 Z" fill="#800505" />
-                            <path d="M30 68 Q50 64 70 68 Q50 72 30 68 Z" fill="#051939" />
-                            <path d="M34 72 Q50 69 66 72 Q50 75 34 72 Z" fill="#051939" />
-                            <circle cx="34" cy="32" r="2.2" fill="#d97706" />
-                            <circle cx="42" cy="27" r="2.2" fill="#d97706" />
-                            <circle cx="58" cy="27" r="2.2" fill="#d97706" />
-                            <circle cx="66" cy="32" r="2.2" fill="#d97706" />
-                          </svg>
-                        </div>
-
-                        <h2 className="text-base sm:text-xl md:text-2xl font-black text-[#051939] tracking-wider uppercase">
-                          BOARD OF INTERMEDIATE AND SECONDARY EDUCATION, {getBoardFullName(boardResultData.board_name)}
-                        </h2>
-                        <h3 className="text-xs sm:text-sm font-bold text-gray-700 tracking-widest uppercase mt-0.5">
-                          BANGLADESH
-                        </h3>
-                        <p className="text-xs sm:text-sm font-extrabold text-[#06874A] uppercase mt-0.5">
-                          {boardExam.toUpperCase() === "SSC" ? "Secondary School Certificate" : "Junior School Certificate"} Examination - {boardYear}
-                        </p>
-                        <div className="inline-block mt-1.5 border-y-2 border-[#051939] py-0.5 px-6">
-                          <span className="text-xs sm:text-sm font-black text-[#051939] tracking-widest uppercase">
-                            ACADEMIC TRANSCRIPT
+                  {/* Student Information Summary Grid */}
+                  <div className="bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-2xl border border-gray-200 p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200/80 pb-4 mb-4">
+                      <div>
+                        <span className="text-xs text-gray-500 block mb-0.5">{t("শিক্ষার্থীর নাম", "Student Name")}</span>
+                        <h4 className="text-lg sm:text-xl font-bold text-[#051939]">
+                          {boardResultData.name || "N/A"}
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white px-4 py-2 rounded-xl border border-emerald-300 shadow-sm text-center">
+                          <span className="text-[11px] text-gray-500 block">{t("ফলাফল (GPA)", "Result")}</span>
+                          <span className="text-base sm:text-lg font-black text-emerald-700">
+                            {boardResultData.gpa ? `GPA: ${boardResultData.gpa}` : boardResultData.res_detail || "PASSED"}
                           </span>
                         </div>
                       </div>
+                    </div>
 
-                      {/* TOP SECTION: STUDENT DETAILS & OFFICIAL GRADING SCALE */}
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-                        {/* Left: Student Information Table (col-span-8) */}
-                        <div className="lg:col-span-8 border border-gray-400 text-xs rounded-sm overflow-hidden">
-                          <div className="bg-[#051939] text-white px-3 py-1 font-bold uppercase tracking-wider text-[11px]">
-                            Student Details (শিক্ষার্থীর বিবরণ)
-                          </div>
-                          <table className="w-full text-left border-collapse">
-                            <tbody className="divide-y divide-gray-300">
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 w-36 border-r border-gray-300">
-                                  Name of Student
-                                </td>
-                                <td className="py-1 px-3 font-bold text-gray-950 uppercase" colSpan={3}>
-                                  {boardResultData.name || "N/A"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Father's Name
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-900 uppercase" colSpan={3}>
-                                  {boardResultData.fname || "N/A"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Mother's Name
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-900 uppercase" colSpan={3}>
-                                  {boardResultData.mname || "N/A"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Name of Institution
-                                </td>
-                                <td className="py-1 px-3 font-bold text-[#051939] uppercase" colSpan={3}>
-                                  {boardResultData.inst_name || "BANIYACHONG ADARSHA HIGH SCHOOL"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Name of Centre
-                                </td>
-                                <td className="py-1 px-3 font-medium text-gray-800 uppercase" colSpan={3}>
-                                  {boardResultData.centre_name || "BANIYACHONG - 1903"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Roll No.
-                                </td>
-                                <td className="py-1 px-3 font-mono font-bold text-gray-900 text-sm">
-                                  {boardResultData.roll_no || boardRoll}
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-x border-gray-300 w-32">
-                                  Registration No.
-                                </td>
-                                <td className="py-1 px-3 font-mono font-bold text-gray-900">
-                                  {boardResultData.regno || boardReg || "N/A"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Group
-                                </td>
-                                <td className="py-1 px-3 font-bold text-gray-900 uppercase">
-                                  {boardResultData.stud_group || "N/A"}
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-x border-gray-300">
-                                  Type
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-800 uppercase">
-                                  {boardResultData.stud_type || "REGULAR"}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-r border-gray-300">
-                                  Gender / Sex
-                                </td>
-                                <td className="py-1 px-3 font-medium text-gray-800 uppercase">
-                                  {boardResultData.stud_sex || "N/A"}
-                                </td>
-                                <td className="py-1 px-3 font-semibold text-gray-700 bg-gray-50 border-x border-gray-300">
-                                  Date of Birth
-                                </td>
-                                <td className="py-1 px-3 font-medium text-gray-800">
-                                  {boardResultData.dob || "N/A"}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Right: Official Grading System Reference Table (col-span-4) */}
-                        <div className="lg:col-span-4 border border-gray-400 text-[11px] rounded-sm overflow-hidden">
-                          <div className="bg-[#051939] text-white px-2 py-1 font-bold uppercase tracking-wider text-center text-[10px]">
-                            Grading System (গ্রেডিং পদ্ধতি)
-                          </div>
-                          <table className="w-full text-center border-collapse">
-                            <thead>
-                              <tr className="bg-gray-100 border-b border-gray-300 font-bold text-gray-800">
-                                <th className="py-0.5 px-1.5 border-r border-gray-300">Range</th>
-                                <th className="py-0.5 px-1.5 border-r border-gray-300">Grade</th>
-                                <th className="py-0.5 px-1.5">Point</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">80 - 100</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-emerald-700">A+</td>
-                                <td className="py-0.5 px-1.5 font-bold">5.0</td>
-                              </tr>
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">70 - 79</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-blue-700">A</td>
-                                <td className="py-0.5 px-1.5 font-bold">4.0</td>
-                              </tr>
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">60 - 69</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-teal-700">A-</td>
-                                <td className="py-0.5 px-1.5 font-bold">3.5</td>
-                              </tr>
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">50 - 59</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-indigo-700">B</td>
-                                <td className="py-0.5 px-1.5 font-bold">3.0</td>
-                              </tr>
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">40 - 49</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-yellow-700">C</td>
-                                <td className="py-0.5 px-1.5 font-bold">2.0</td>
-                              </tr>
-                              <tr>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">33 - 39</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-orange-700">D</td>
-                                <td className="py-0.5 px-1.5 font-bold">1.0</td>
-                              </tr>
-                              <tr className="bg-red-50/50">
-                                <td className="py-0.5 px-1.5 border-r border-gray-200">00 - 32</td>
-                                <td className="py-0.5 px-1.5 border-r border-gray-200 font-bold text-red-600">F</td>
-                                <td className="py-0.5 px-1.5 font-bold text-red-600">0.0</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("রোল নম্বর", "Roll No")}</span>
+                        <strong className="text-gray-900 font-mono text-sm">{boardResultData.roll_no || boardRoll}</strong>
                       </div>
-
-                      {/* RESULT & GPA OFFICIAL VERDICT HIGHLIGHT */}
-                      <div className="border-2 border-[#06874A] bg-emerald-50/50 rounded-lg p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#06874A] text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            ✓
-                          </div>
-                          <div>
-                            <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-widest block">
-                              Result Status (ফলাফলের অবস্থা)
-                            </span>
-                            <span className="text-base sm:text-lg font-black text-emerald-900">
-                              {boardResultData.res_detail || "PASSED (উত্তীর্ণ)"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 border-t sm:border-t-0 sm:border-l border-emerald-300 pt-2 sm:pt-0 sm:pl-6 text-center sm:text-right">
-                          <div>
-                            <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block">
-                              Grade Point Average (GPA)
-                            </span>
-                            <span className="text-2xl sm:text-3xl font-black text-[#051939] font-mono tracking-tight">
-                              {boardResultData.gpa ? boardResultData.gpa : "5.00"}
-                            </span>
-                            <span className="text-[10px] text-gray-500 block font-medium">on a scale of 5.00</span>
-                          </div>
-                        </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("রেজিস্ট্রেশন নম্বর", "Registration No")}</span>
+                        <strong className="text-gray-900 font-mono text-sm">{boardResultData.regno || boardReg || "N/A"}</strong>
                       </div>
-
-                      {/* SUBJECT-WISE ACADEMIC GRADE SHEET TABLE */}
-                      {boardResultData.display_details && (
-                        <div className="border border-gray-400 rounded-sm overflow-hidden text-xs">
-                          <div className="bg-[#051939] text-white px-3 py-1 font-bold uppercase tracking-wider text-[11px] flex justify-between items-center">
-                            <span>Subject-Wise Grade Sheet (বিষয়ভিত্তিক প্রাপ্ত গ্রেড ও ফলাফল)</span>
-                            <span className="text-[10px] text-gray-300">Official BISE Records</span>
-                          </div>
-                          <table className="w-full text-left border-collapse">
-                            <thead>
-                              <tr className="bg-gray-100 border-b border-gray-400 text-gray-900 text-[11px] uppercase font-bold">
-                                <th className="py-1.5 px-3 border-r border-gray-300 text-center w-14">SI No.</th>
-                                <th className="py-1.5 px-3 border-r border-gray-300 text-center w-20">Code</th>
-                                <th className="py-1.5 px-3 border-r border-gray-300">Name of Subject</th>
-                                <th className="py-1.5 px-3 border-r border-gray-300 text-center w-28">Letter Grade</th>
-                                <th className="py-1.5 px-3 text-center w-24">Grade Point</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-300 bg-white">
-                              {parseSubjectDetails(boardResultData.display_details).map((sub) => (
-                                <tr key={sub.code} className="hover:bg-gray-50 transition print-avoid-break">
-                                  <td className="py-1 px-3 border-r border-gray-300 text-center font-mono text-gray-500">
-                                    {sub.sl}
-                                  </td>
-                                  <td className="py-1 px-3 border-r border-gray-300 text-center font-mono font-bold text-gray-700">
-                                    {sub.code}
-                                  </td>
-                                  <td className="py-1 px-3 border-r border-gray-300 font-semibold text-gray-900">
-                                    {sub.name}
-                                  </td>
-                                  <td className="py-1 px-3 border-r border-gray-300 text-center">
-                                    <span
-                                      className={`inline-block font-black px-2 py-0.5 rounded text-xs ${
-                                        sub.grade === "A+"
-                                          ? "bg-emerald-100 text-emerald-900 font-bold"
-                                          : sub.grade === "F"
-                                          ? "bg-red-100 text-red-900 font-bold"
-                                          : "bg-blue-50 text-blue-900 font-bold"
-                                      }`}
-                                    >
-                                      {sub.marks ? `${sub.marks} (${sub.grade})` : sub.grade}
-                                    </span>
-                                  </td>
-                                  <td className="py-1 px-3 text-center font-mono font-bold text-gray-900">
-                                    {sub.point}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-
-                      {/* OFFICIAL VERIFICATION & SIGNATURE FOOTER */}
-                      <div className="pt-5 border-t-2 border-[#051939] grid grid-cols-1 sm:grid-cols-3 gap-5 items-end text-xs print-avoid-break">
-                        <div>
-                          <p className="font-semibold text-gray-700">
-                            <strong>Date of Publication:</strong> Official Schedule
-                          </p>
-                          <p className="font-semibold text-gray-700 mt-0.5">
-                            <strong>Printed Date:</strong> {currentDateStr || "Official Web Copy"}
-                          </p>
-                          <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed italic">
-                            * Note: This Academic Transcript is an electronically generated official document from Education Board Bangladesh database.
-                          </p>
-                        </div>
-
-                        {/* Security Verification Barcode Box */}
-                        <div className="text-center border border-dashed border-gray-400 p-2 rounded bg-gray-50/80">
-                          <div className="font-mono text-[10px] tracking-widest text-gray-600 font-bold uppercase">
-                            DOCUMENT VERIFICATION
-                          </div>
-                          <div className="my-0.5 font-mono text-xs font-black tracking-widest text-[#051939]">
-                            ||| | |||| | |||||| || | ||| ||||
-                          </div>
-                          <div className="text-[10px] text-emerald-800 font-bold font-mono">
-                            EIIN: 129344 | CENTRE: 1903
-                          </div>
-                          <div className="text-[9px] text-gray-500 uppercase">Baniyachong Adarsha High School</div>
-                        </div>
-
-                        {/* Signature Line */}
-                        <div className="text-center sm:text-right">
-                          <div className="w-44 border-b border-gray-600 mx-auto sm:ml-auto sm:mr-0 mb-1" />
-                          <p className="font-bold text-[#051939] text-xs">Controller of Examinations</p>
-                          <p className="text-[11px] text-gray-600">
-                            Board of Intermediate & Secondary Education, {getBoardFullName(boardResultData.board_name)}
-                          </p>
-                        </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("পিতা", "Father's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.fname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("মাতা", "Mother's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.mname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Board")}</span>
+                        <strong className="text-gray-900">{boardResultData.board_name || "Sylhet"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("বিভাগ / গ্রুপ", "Group")}</span>
+                        <strong className="text-gray-900">{boardResultData.stud_group || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("ধরন ও লিঙ্গ", "Type & Gender")}</span>
+                        <strong className="text-gray-900">
+                          {boardResultData.stud_type || "Regular"} • {boardResultData.stud_sex || "N/A"}
+                        </strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("প্রতিষ্ঠান", "Institute")}</span>
+                        <strong className="text-[#051939] truncate block" title={boardResultData.inst_name}>
+                          {boardResultData.inst_name || "Baniyachong Adarsha High School"}
+                        </strong>
                       </div>
                     </div>
                   </div>
 
-                  {/* Bottom Action Bar (Hidden in Print) */}
-                  <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-3">
+                  {/* Subject-Wise Grade Table */}
+                  {boardResultData.display_details && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-[#051939] flex items-center gap-2">
+                        <FaFileAlt className="text-emerald-600" />
+                        <span>{t("বিষয়ভিত্তিক গ্রেড ও ফলাফল", "Subject-wise Grades & Marks")}</span>
+                      </h4>
+                      <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
+                        <table className="w-full text-left text-xs sm:text-sm">
+                          <thead className="bg-[#051939] text-white uppercase text-[11px] font-bold">
+                            <tr>
+                              <th className="py-3 px-4">{t("বিষয় কোড", "Subject Code")}</th>
+                              <th className="py-3 px-4">{t("বিষয়ের নাম", "Subject Name")}</th>
+                              <th className="py-3 px-4 text-center">{t("প্রাপ্ত গ্রেড / নম্বর", "Grade / Marks")}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 bg-white">
+                            {boardResultData.display_details
+                              .split(",")
+                              .map((item: string, idx: number) => {
+                                const parts = item.split(":");
+                                const code = parts[0]?.trim() || "";
+                                const gradeStr = parts[1]?.trim() || "";
+                                const subParts = gradeStr.split("=");
+                                const grade = subParts[subParts.length - 1] || "";
+                                const marks = subParts.length > 1 ? subParts[0] : "";
+                                const subName = SUBJECT_MAP[code] || `Subject (${code})`;
+
+                                return (
+                                  <tr key={idx} className="hover:bg-emerald-50/40 transition">
+                                    <td className="py-2.5 px-4 font-mono font-bold text-gray-700">{code}</td>
+                                    <td className="py-2.5 px-4 font-medium text-gray-900">{subName}</td>
+                                    <td className="py-2.5 px-4 text-center">
+                                      <span
+                                        className={`inline-block px-3 py-1 rounded-full font-bold text-xs ${
+                                          grade === "A+"
+                                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                            : grade === "F"
+                                            ? "bg-red-100 text-red-800 border border-red-300"
+                                            : "bg-blue-100 text-blue-800 border border-blue-300"
+                                        }`}
+                                      >
+                                        {marks ? `${marks} (${grade})` : grade}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Marksheet Actions */}
+                  <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={handleResetBoard}
-                      className="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shadow-sm"
+                      className="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer"
                     >
                       <FaUndo size={12} />
-                      <span>{t("আরেকটি ফলাফল অনুসন্ধান করুন", "Search Another Result")}</span>
+                      <span>{t("আরেকটি ফলাফল দেখুন", "Search Another Result")}</span>
                     </button>
 
                     <button
                       type="button"
-                      onClick={handlePrintBoard}
-                      className="px-6 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer"
+                      onClick={() => printElement("printable-board-card", `Board_Result_${boardRoll || "Marksheet"}`)}
+                      className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
                     >
                       <FaPrint size={14} />
-                      <span>{t("মার্কশিট প্রিন্ট / সেভ করুন (PDF)", "Print / Save Marksheet (PDF)")}</span>
+                      <span>{t("মার্কশিট প্রিন্ট / সেভ করুন", "Print / Save Marksheet")}</span>
                     </button>
                   </div>
                 </div>
@@ -1016,7 +756,7 @@ export default function ResultsPage() {
               )}
 
               {/* Direct Official Server Backup Links */}
-              <div className="no-print rounded-2xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h4 className="text-xs font-bold text-[#051939]">
                     {t("জরুরি প্রয়োজনে সরাসরি সরকারি মূল সার্ভারে ফলাফল দেখতে:", "Direct Official Board Portals:")}
@@ -1048,7 +788,7 @@ export default function ResultsPage() {
               </div>
 
               {/* Sylhet Board Extra Link */}
-              <div className="no-print mt-6 p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <div className="mt-6 p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <span className="text-xs text-gray-600 font-medium">
                   {t(
                     "সিলেট শিক্ষা বোর্ডের বিজ্ঞপ্তি ও বিশেষ নির্দেশনাবলীর জন্য সিলেট শিক্ষা বোর্ড ওয়েবসাইটে ভিজিট করুন:",
@@ -1073,7 +813,7 @@ export default function ResultsPage() {
         {activeTab === "internal" && (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Search Filter Form */}
-            <div className="no-print bg-white rounded-3xl p-6 sm:p-8 shadow-md border-t-4 border-[#06874A]">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border-t-4 border-[#06874A]">
               <div className="border-b border-gray-100 pb-4 mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-[#051939] flex items-center gap-2">
                   <FaSchool className="text-[#06874A]" />
@@ -1190,7 +930,7 @@ export default function ResultsPage() {
             )}
 
             {!searching && resultData && (
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden printable-marksheet">
+              <div id="printable-internal-card" className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden printable-marksheet">
                 {/* School Header on Marksheet */}
                 <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white p-6 sm:p-8 text-center relative">
                   <div className="flex justify-center mb-3">
@@ -1213,7 +953,7 @@ export default function ResultsPage() {
 
                   {/* Print Button (Hidden during print) */}
                   <button
-                    onClick={handlePrintInternal}
+                    onClick={() => printElement("printable-internal-card", `Result_${resultData.roll || "Marksheet"}`)}
                     className="no-print absolute top-6 right-6 bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border border-white/30"
                   >
                     <FaPrint />
