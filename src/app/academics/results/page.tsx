@@ -239,7 +239,7 @@ export default function ResultsPage() {
           <style>
             @page {
               size: A4 portrait;
-              margin: 8mm 10mm;
+              margin: 10mm 12mm;
             }
             *, *::before, *::after {
               box-sizing: border-box;
@@ -248,49 +248,55 @@ export default function ResultsPage() {
               background: #ffffff !important;
               margin: 0 !important;
               padding: 0 !important;
+              font-size: 13px !important;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
             .no-print {
               display: none !important;
             }
-            /* Guarantee single A4 page fit */
+            /* Generous, clean single A4 page fit */
             #printable-board-card, #printable-internal-card {
-              padding: 16px 20px !important;
+              padding: 24px 28px !important;
               margin: 0 auto !important;
-              border-width: 1.5px !important;
+              border: 2px solid #06874A !important;
               box-shadow: none !important;
-              border-radius: 16px !important;
+              border-radius: 20px !important;
               page-break-inside: avoid !important;
               break-inside: avoid !important;
             }
             .space-y-6 > * + * {
-              margin-top: 10px !important;
+              margin-top: 14px !important;
             }
             .space-y-3 > * + * {
-              margin-top: 6px !important;
+              margin-top: 10px !important;
             }
             table th, table td {
-              padding-top: 4px !important;
-              padding-bottom: 4px !important;
-              padding-left: 10px !important;
-              padding-right: 10px !important;
-              font-size: 11px !important;
+              padding-top: 6px !important;
+              padding-bottom: 6px !important;
+              padding-left: 14px !important;
+              padding-right: 14px !important;
+              font-size: 12.5px !important;
             }
             .grid {
-              gap: 8px !important;
+              gap: 10px !important;
             }
             .p-5 {
-              padding: 12px !important;
+              padding: 16px !important;
             }
             .pb-5 {
-              padding-bottom: 8px !important;
+              padding-bottom: 12px !important;
             }
             .mb-4 {
-              margin-bottom: 8px !important;
+              margin-bottom: 12px !important;
             }
             .pb-4 {
-              padding-bottom: 8px !important;
+              padding-bottom: 12px !important;
+            }
+            .truncate {
+              overflow: visible !important;
+              text-overflow: unset !important;
+              white-space: normal !important;
             }
             tr, .grid, .rounded-2xl {
               page-break-inside: avoid !important;
@@ -495,14 +501,6 @@ export default function ResultsPage() {
                         <strong className="text-gray-900 font-mono text-sm">{boardResultData.regno || boardReg || "N/A"}</strong>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-gray-200/80">
-                        <span className="text-gray-500 block mb-0.5">{t("পিতা", "Father's Name")}</span>
-                        <strong className="text-gray-900">{boardResultData.fname || "N/A"}</strong>
-                      </div>
-                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
-                        <span className="text-gray-500 block mb-0.5">{t("মাতা", "Mother's Name")}</span>
-                        <strong className="text-gray-900">{boardResultData.mname || "N/A"}</strong>
-                      </div>
-                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
                         <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Board")}</span>
                         <strong className="text-gray-900">{boardResultData.board_name || "Sylhet"}</strong>
                       </div>
@@ -511,14 +509,28 @@ export default function ResultsPage() {
                         <strong className="text-gray-900">{boardResultData.stud_group || "N/A"}</strong>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("পিতা", "Father's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.fname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
+                        <span className="text-gray-500 block mb-0.5">{t("মাতা", "Mother's Name")}</span>
+                        <strong className="text-gray-900">{boardResultData.mname || "N/A"}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-gray-200/80">
                         <span className="text-gray-500 block mb-0.5">{t("ধরন ও লিঙ্গ", "Type & Gender")}</span>
                         <strong className="text-gray-900">
                           {boardResultData.stud_type || "Regular"} • {boardResultData.stud_sex || "N/A"}
                         </strong>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-gray-200/80">
-                        <span className="text-gray-500 block mb-0.5">{t("প্রতিষ্ঠান", "Institute")}</span>
-                        <strong className="text-[#051939] truncate block" title={boardResultData.inst_name}>
+                        <span className="text-gray-500 block mb-0.5">{t("সেন্টার কোড", "Center / Code")}</span>
+                        <strong className="text-gray-900">
+                          {boardResultData.centre_name || "Habiganj (1903)"}
+                        </strong>
+                      </div>
+                      <div className="bg-white p-3.5 rounded-xl border border-gray-200/80 col-span-2 sm:col-span-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                        <span className="text-gray-500 block shrink-0 font-medium">{t("শিক্ষা প্রতিষ্ঠান (Institute)", "Institute")}</span>
+                        <strong className="text-[#051939] text-xs sm:text-sm font-bold break-words text-left sm:text-right">
                           {boardResultData.inst_name || "Baniyachong Adarsha High School"}
                         </strong>
                       </div>
