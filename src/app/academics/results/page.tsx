@@ -528,9 +528,9 @@ export default function ResultsPage() {
                           {boardResultData.centre_name || "Habiganj (1903)"}
                         </strong>
                       </div>
-                      <div className="bg-white p-3.5 rounded-xl border border-gray-200/80 col-span-2 sm:col-span-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
-                        <span className="text-gray-500 block shrink-0 font-medium">{t("শিক্ষা প্রতিষ্ঠান (Institute)", "Institute")}</span>
-                        <strong className="text-[#051939] text-xs sm:text-sm font-bold break-words text-left sm:text-right">
+                      <div className="bg-white p-3.5 rounded-xl border border-gray-200/80 col-span-2 sm:col-span-4 flex flex-col items-center justify-center text-center">
+                        <span className="text-gray-500 block text-xs mb-1 font-medium">{t("শিক্ষা প্রতিষ্ঠান (Institute)", "Institute")}</span>
+                        <strong className="text-[#051939] text-sm sm:text-base font-bold break-words">
                           {boardResultData.inst_name || "Baniyachong Adarsha High School"}
                         </strong>
                       </div>
