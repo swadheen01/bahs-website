@@ -239,17 +239,62 @@ export default function ResultsPage() {
           <style>
             @page {
               size: A4 portrait;
-              margin: 15mm 12mm;
+              margin: 8mm 10mm;
             }
-            body {
+            *, *::before, *::after {
+              box-sizing: border-box;
+            }
+            html, body {
               background: #ffffff !important;
               margin: 0 !important;
-              padding: 20px !important;
+              padding: 0 !important;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
             .no-print {
               display: none !important;
+            }
+            /* Guarantee single A4 page fit */
+            #printable-board-card, #printable-internal-card {
+              padding: 16px 20px !important;
+              margin: 0 auto !important;
+              border-width: 1.5px !important;
+              box-shadow: none !important;
+              border-radius: 16px !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            .space-y-6 > * + * {
+              margin-top: 10px !important;
+            }
+            .space-y-3 > * + * {
+              margin-top: 6px !important;
+            }
+            table th, table td {
+              padding-top: 4px !important;
+              padding-bottom: 4px !important;
+              padding-left: 10px !important;
+              padding-right: 10px !important;
+              font-size: 11px !important;
+            }
+            .grid {
+              gap: 8px !important;
+            }
+            .p-5 {
+              padding: 12px !important;
+            }
+            .pb-5 {
+              padding-bottom: 8px !important;
+            }
+            .mb-4 {
+              margin-bottom: 8px !important;
+            }
+            .pb-4 {
+              padding-bottom: 8px !important;
+            }
+            tr, .grid, .rounded-2xl {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
             }
           </style>
         </head>
