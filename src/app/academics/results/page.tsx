@@ -15,13 +15,6 @@ import {
   FaIdCard,
   FaFileAlt,
   FaArrowRight,
-  FaRedo,
-  FaExpand,
-  FaCompress,
-  FaCopy,
-  FaCheck,
-  FaServer,
-  FaBolt,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -29,28 +22,6 @@ export default function ResultsPage() {
   const { t, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<"internal" | "board">("board");
-
-  // Board result portal state
-  const [boardServer, setBoardServer] = useState<"eboard" | "gov">("eboard");
-  const [iframeKey, setIframeKey] = useState<number>(0);
-  const [isIframeLoading, setIsIframeLoading] = useState<boolean>(true);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [isPortalExpanded, setIsPortalExpanded] = useState<boolean>(false);
-
-  const handleCopy = (text: string, key: string) => {
-    try {
-      navigator.clipboard.writeText(text);
-      setCopiedKey(key);
-      setTimeout(() => setCopiedKey(null), 2000);
-    } catch (e) {
-      // Ignore
-    }
-  };
-
-  const handleReloadPortal = () => {
-    setIsIframeLoading(true);
-    setIframeKey((prev) => prev + 1);
-  };
 
   // Search state
   const [selectedClass, setSelectedClass] = useState("6");
@@ -171,53 +142,24 @@ export default function ResultsPage() {
                 </span>
               </div>
 
-              {/* School Verification Credentials Box with Quick Copy */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <h3 className="font-bold text-sm text-[#051939] flex items-center gap-2">
-                    <FaInfoCircle className="text-blue-600" />
-                    {t("শিক্ষা বোর্ড সার্ভারে অনুসন্ধানের জন্য প্রয়োজনীয় তথ্য", "Information Required for Board Search")}
-                  </h3>
-                  <span className="text-[11px] text-gray-500 font-medium">
-                    {t("ক্লিক করে তথ্য কপি করে নিচের ফর্মে পেস্ট করুন", "Click copy button to paste into the form below")}
-                  </span>
-                </div>
+              {/* School Verification Credentials Box */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-8">
+                <h3 className="font-bold text-sm text-[#051939] mb-3 flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-600" />
+                  {t("শিক্ষা বোর্ড সার্ভারে অনুসন্ধানের জন্য প্রয়োজনীয় তথ্য", "Information Required for Board Search")}
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
-                    <div>
-                      <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Education Board")}</span>
-                      <strong className="text-[#051939] text-sm">Sylhet (সিলেট)</strong>
-                    </div>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                    <span className="text-gray-500 block mb-0.5">{t("শিক্ষা বোর্ড", "Education Board")}</span>
+                    <strong className="text-[#051939] text-sm">Sylhet (সিলেট)</strong>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
-                    <div>
-                      <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় EIIN", "School EIIN")}</span>
-                      <strong className="text-[#06874A] text-sm font-mono">129344</strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy("129344", "eiin")}
-                      className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
-                      title="EIIN কপি করুন"
-                    >
-                      {copiedKey === "eiin" ? <FaCheck size={10} className="text-emerald-600" /> : <FaCopy size={10} />}
-                      <span>{copiedKey === "eiin" ? t("কপি হয়েছে!", "Copied!") : t("কপি", "Copy")}</span>
-                    </button>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                    <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় EIIN", "School EIIN")}</span>
+                    <strong className="text-[#06874A] text-sm font-mono">129344</strong>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
-                    <div>
-                      <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় / সেন্টার কোড", "School Code")}</span>
-                      <strong className="text-purple-700 text-sm font-mono">1903</strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy("1903", "center")}
-                      className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
-                      title="সেন্টার কোড কপি করুন"
-                    >
-                      {copiedKey === "center" ? <FaCheck size={10} className="text-purple-600" /> : <FaCopy size={10} />}
-                      <span>{copiedKey === "center" ? t("কপি হয়েছে!", "Copied!") : t("কপি", "Copy")}</span>
-                    </button>
+                  <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                    <span className="text-gray-500 block mb-0.5">{t("বিদ্যালয় / সেন্টার কোড", "School Code")}</span>
+                    <strong className="text-purple-700 text-sm font-mono">1903</strong>
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
                     <span className="text-gray-500 block mb-0.5">{t("উপজেলা", "Upazila")}</span>
@@ -226,158 +168,68 @@ export default function ResultsPage() {
                 </div>
               </div>
 
-              {/* LIVE BOARD RESULTS PORTAL (EMBEDDED LIVE MIRROR) */}
-              <div
-                className={`transition-all duration-300 ${
-                  isPortalExpanded
-                    ? "fixed inset-0 z-[100] bg-[#051939]/90 backdrop-blur-md p-2 sm:p-5 flex flex-col"
-                    : "rounded-2xl border-2 border-emerald-500/30 bg-white shadow-xl overflow-hidden"
-                }`}
-              >
-                {/* Control Toolbar */}
-                <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/10">
-                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 px-3 py-1 rounded-full shadow-inner">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                      <span>{t("লাইভ ফলাফল পোর্টাল", "Live Result Portal")}</span>
-                    </span>
-
-                    {/* Server Switcher */}
-                    <div className="bg-white/10 p-1 rounded-xl flex items-center gap-1 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (boardServer !== "eboard") {
-                            setBoardServer("eboard");
-                            setIsIframeLoading(true);
-                            setIframeKey((k) => k + 1);
-                          }
-                        }}
-                        className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                          boardServer === "eboard"
-                            ? "bg-emerald-600 text-white shadow-sm"
-                            : "text-gray-300 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <FaBolt className={boardServer === "eboard" ? "text-yellow-300" : "text-gray-400"} size={11} />
-                        <span>eBoard Results (মার্কশিট সহ)</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (boardServer !== "gov") {
-                            setBoardServer("gov");
-                            setIsIframeLoading(true);
-                            setIframeKey((k) => k + 1);
-                          }
-                        }}
-                        className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                          boardServer === "gov"
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "text-gray-300 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <FaServer className={boardServer === "gov" ? "text-yellow-300" : "text-gray-400"} size={11} />
-                        <span>Education Board Server</span>
-                      </button>
+              {/* Direct Official Portals Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Portal 1: eBoardResults */}
+                <div className="rounded-2xl border border-gray-200 p-6 bg-gradient-to-b from-white to-gray-50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                        {t("দ্রুততম ও বিস্তারিত মার্কশিট", "Detailed Marksheet & Grade")}
+                      </span>
+                      <FaExternalLinkAlt className="text-gray-400 text-xs" />
                     </div>
-                  </div>
-
-                  {/* Actions (Reload, Expand/Contract, Fallback Open) */}
-                  <div className="flex items-center gap-2 text-xs">
-                    <button
-                      type="button"
-                      onClick={handleReloadPortal}
-                      title="পোর্টাল পুনরায় লোড করুন"
-                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition cursor-pointer flex items-center gap-1.5 text-gray-200 hover:text-white"
-                    >
-                      <FaRedo size={11} className={isIframeLoading ? "animate-spin" : ""} />
-                      <span className="hidden sm:inline">{t("রিলোড", "Reload")}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsPortalExpanded(!isPortalExpanded)}
-                      title={isPortalExpanded ? "স্বাভাবিক আকার করুন" : "বড় স্ক্রিনে দেখুন"}
-                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition cursor-pointer flex items-center gap-1.5 text-gray-200 hover:text-white"
-                    >
-                      {isPortalExpanded ? (
-                        <>
-                          <FaCompress size={12} />
-                          <span className="hidden sm:inline">{t("ছোট করুন", "Exit Fullscreen")}</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaExpand size={12} />
-                          <span className="hidden sm:inline">{t("বড় করুন", "Expand")}</span>
-                        </>
-                      )}
-                    </button>
-
-                    <a
-                      href={
-                        boardServer === "eboard"
-                          ? "https://eboardresults.com/v2/home"
-                          : "https://www.educationboardresults.gov.bd/v2/home"
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="আলাদা উইন্ডোতে ওপেন করুন"
-                      className="px-2.5 py-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition"
-                    >
-                      <FaExternalLinkAlt size={12} />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Helpful Instruction Tip Bar */}
-                <div className="bg-amber-50 border-b border-amber-200/60 px-4 py-2 text-xs text-amber-900 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-bold text-amber-800">💡 {t("নির্দেশনা:", "Guide:")}</span>
-                    <span>
+                    <h3 className="font-extrabold text-lg text-[#051939]">
+                      eBoard Results Portal (Web Based)
+                    </h3>
+                    <p className="text-xs text-gray-600 mt-2 leading-relaxed">
                       {t(
-                        "নিচের বক্সে Examination (SSC/JSC) ও Year নির্বাচন করুন, Board হিসেবে 'Sylhet' দিন, এরপর Roll, Reg নং এবং সিকিউরিটি কোড লিখে Get Result চাপুন।",
-                        "Select Examination (SSC/JSC), Year, set Board as 'Sylhet', then enter Roll, Reg and Captcha security key."
+                        "বোর্ড পরীক্ষার বিষয়ভিত্তিক পূর্ণাঙ্গ নম্বর ও গ্রেডশিট পেতে এই পোর্টালটি ব্যবহার করুন। এখানে ইন্ডিভিজুয়াল ও ইনস্টিটিউশন রেজাল্ট সহজে দেখা যায়।",
+                        "Use this modern portal to view subject-wise full marksheet with grade points. Supports individual & institution results."
                       )}
-                    </span>
+                    </p>
                   </div>
-                  <div className="hidden md:flex items-center gap-2 text-[11px] font-semibold text-gray-600 shrink-0">
-                    <span>EIIN: 129344</span>
-                    <span>•</span>
-                    <span>Centre: 1903</span>
-                  </div>
+
+                  <a
+                    href="https://eboardresults.com/v2/home"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#06874A] hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl text-center text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>{t("eBoard Results এ ফলাফল দেখুন", "Open eBoard Results Portal")}</span>
+                    <FaArrowRight size={12} />
+                  </a>
                 </div>
 
-                {/* The Embedded Frame Container */}
-                <div className={`relative bg-gray-100 ${isPortalExpanded ? "flex-1 w-full" : "w-full h-[760px] sm:h-[840px]"}`}>
-                  {isIframeLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50/95 backdrop-blur-sm gap-3">
-                      <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                      <div className="text-sm font-bold text-[#051939]">
-                        {t("বোর্ড ফলাফল সার্ভারের সাথে সংযুক্ত হচ্ছে...", "Connecting to Board Result Server...")}
-                      </div>
-                      <p className="text-xs text-gray-500 max-w-sm text-center">
-                        {t(
-                          "অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন। সার্ভার রেসপন্স করলে নিচে সরাসরি ফর্মটি প্রদর্শিত হবে।",
-                          "Please wait a few seconds while the official result portal loads."
-                        )}
-                      </p>
+                {/* Portal 2: Education Board Results GOV */}
+                <div className="rounded-2xl border border-gray-200 p-6 bg-gradient-to-b from-white to-gray-50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
+                        {t("সরকারি মূল সার্ভার", "Official Govt Portal")}
+                      </span>
+                      <FaExternalLinkAlt className="text-gray-400 text-xs" />
                     </div>
-                  )}
+                    <h3 className="font-extrabold text-lg text-[#051939]">
+                      Education Board Results (Govt Server)
+                    </h3>
+                    <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+                      {t(
+                        "শিক্ষা মন্ত্রণালয় পরিচালিত সরকারি মূল পোর্টাল। এসএসসি (SSC) ও জেএসসি (JSC) পরীক্ষার রোল ও রেজিস্ট্রেশন নম্বর প্রদান করে সরাসরি ফলাফল সংগ্রহ করুন।",
+                        "The official central server operated by the Ministry of Education. Input your SSC or JSC Roll & Registration number."
+                      )}
+                    </p>
+                  </div>
 
-                  <iframe
-                    key={`${boardServer}-${iframeKey}`}
-                    src={
-                      boardServer === "eboard"
-                        ? "https://eboardresults.com/v2/home"
-                        : "https://www.educationboardresults.gov.bd/v2/home"
-                    }
-                    onLoad={() => setIsIframeLoading(false)}
-                    className="w-full h-full border-0 bg-white"
-                    title="Bangladesh Education Board Official Results Mirror"
-                    allow="clipboard-write; fullscreen"
-                  />
+                  <a
+                    href="http://www.educationboardresults.gov.bd/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#051939] hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-xl text-center text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>{t("EducationBoardResults.gov.bd পোর্টাল", "Open Official Board Server")}</span>
+                    <FaArrowRight size={12} />
+                  </a>
                 </div>
               </div>
 
