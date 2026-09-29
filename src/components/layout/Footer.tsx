@@ -231,7 +231,7 @@ export default function Footer() {
             <div className="rounded-xl overflow-hidden border border-gray-700 aspect-[4/3] bg-gray-800 shadow">
               <iframe
                 title="Baniyachong Adarsha High School Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14545.972304910356!2d91.35081!3d24.51865!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37512803c7349141%3A0x6b24cb4d2716d123!2sBaniyachong%2C%20Habiganj!5e0!3m2!1sen!2sbd!4v1700000000000"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3637.288!2d91.357114!3d24.531553!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsDMxJzUzLjYiTiA5McKwMjEnMzMuNSJF!5e0!3m2!1sen!2sbd!4v1710000000000"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -240,9 +240,19 @@ export default function Footer() {
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
-            <p className="text-[11px] text-gray-400 mt-2">
-              {t("বানিয়াচং, হবিগঞ্জ, সিলেট বিভাগ", "Baniyachong, Habiganj, Sylhet Division")}
-            </p>
+            <div className="flex items-center justify-between text-[11px] text-gray-400 mt-2">
+              <span>{t("বানিয়াচং (G9J5+JJ4)", "Baniachong (G9J5+JJ4)")}</span>
+              <a
+                href="https://maps.google.com/?q=24.5315531,91.3593032"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 transition-colors"
+                title="Open in Google Maps"
+              >
+                <span>{t("গুগল ম্যাপে দেখুন", "View Map")}</span>
+                <FaExternalLinkAlt className="text-[9px]" />
+              </a>
+            </div>
           </div>
         </div>
 
