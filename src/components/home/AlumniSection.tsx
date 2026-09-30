@@ -19,7 +19,7 @@ export default function AlumniSection() {
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/school-info")
+    fetch("/api/school-info?t=" + Date.now(), { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (data && typeof data.showAlumniSection !== "undefined") {
@@ -28,7 +28,7 @@ export default function AlumniSection() {
       })
       .catch(() => {});
 
-    fetch("/api/alumni")
+    fetch("/api/alumni?t=" + Date.now(), { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {

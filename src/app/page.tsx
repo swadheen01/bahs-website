@@ -208,6 +208,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Teachers Section */}
+      <TeachersSection />
+
       {/* Colorful, Dedicated Students' Corner Section (Moved cleanly down with distinct vibrant glass styling!) */}
       <section className="py-16 bg-gradient-to-r from-[#051939] via-[#09224d] to-[#051939] text-white relative overflow-hidden">
         {/* Background decorative glass orbs */}
@@ -272,9 +275,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Teachers Section */}
-      <TeachersSection />
 
       {/* Alumni Section */}
       <AlumniSection />

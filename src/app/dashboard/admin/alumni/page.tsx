@@ -42,7 +42,7 @@ export default function AdminAlumniPage() {
 
   const loadSectionSettings = async () => {
     try {
-      const res = await fetch("/api/school-info");
+      const res = await fetch("/api/school-info?t=" + Date.now(), { cache: "no-store" });
       const data = await res.json();
       if (typeof data.showAlumniSection !== "undefined") {
         setShowSection(data.showAlumniSection);
