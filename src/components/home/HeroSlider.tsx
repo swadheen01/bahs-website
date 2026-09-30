@@ -14,6 +14,15 @@ interface Slider {
 export default function HeroSlider({ initialSlides: propSlides }: { initialSlides?: Slider[] }) {
   const [slides, setSlides] = useState<Slider[]>(() => {
     if (propSlides && propSlides.length > 0) return propSlides;
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("bahs_hero_sliders");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
     return (initialSlides as Slider[]) || [];
   });
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -26,13 +35,26 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
       localStorage.removeItem("bahs_cached_sliders");
     } catch (e) {}
 
-    // Fetch latest sliders from server to ensure fresh content
-    fetch("/api/sliders")
+    // Fetch latest sliders from server to ensure fresh content with cache buster
+    fetch("/api/sliders?t=" + new Date().getTime())
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-          setSlides(sorted);
+          
+          try {
+            sessionStorage.setItem("bahs_hero_sliders", JSON.stringify(sorted));
+          } catch (e) {}
+
+          setSlides((prev) => {
+            // If the order or items changed, reset current slide to 0 to show the correct first slide instantly
+            const prevIds = prev.map(s => s.id).join(',');
+            const newIds = sorted.map(s => s.id).join(',');
+            if (prevIds !== newIds) {
+              setCurrentSlide(0);
+            }
+            return sorted;
+          });
         }
       })
       .catch((e) => console.error("Slider fetch error:", e));
@@ -43,7 +65,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
     if (slides.length <= 1 || lightboxIndex !== null) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 3000);
+    }, 4000); // slightly increased to 4s to give more time to read, was 3s
     return () => clearInterval(timer);
   }, [slides.length, lightboxIndex]);
 
