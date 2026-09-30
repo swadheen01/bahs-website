@@ -48,3 +48,4 @@ export async function POST(req: NextRequest) {
   const { passwordHash: _, ...safeUser } = newUser;
   return NextResponse.json(safeUser, { status: 201 });
 }
+

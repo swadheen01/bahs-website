@@ -45,3 +45,4 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   await usersDB.delete(parseInt(id));
   return NextResponse.json({ success: true });
 }
+
