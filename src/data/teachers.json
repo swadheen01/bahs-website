@@ -18,7 +18,7 @@
     "designationEn": "Assistant Headmaster",
     "subject": "",
     "category": "management",
-    "photo": "/images/teachers/shirin-akter.jpg",
+    "photo": "/images/teachers/Shirin.jpg",
     "order": 2
   },
   {
@@ -29,7 +29,7 @@
     "designationEn": "Senior Teacher",
     "subject": "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)",
     "category": "faculty",
-    "photo": "/images/teachers/mofazzal-hossain.jpg",
+    "photo": "/images/teachers/DIPOK.jpg",
     "order": 3
   },
   {
@@ -40,7 +40,7 @@
     "designationEn": "Senior Teacher",
     "subject": "ব্যবসায় শিক্ষা (Business Studies)",
     "category": "faculty",
-    "photo": "/images/teachers/nanu-miah.jpg",
+    "photo": "/images/teachers/NANU.jpg",
     "order": 4
   },
   {
@@ -51,7 +51,7 @@
     "designationEn": "Senior Teacher",
     "subject": "হিন্দু ধর্ম (Hindu Religion)",
     "category": "faculty",
-    "photo": "/images/teachers/dipak-ghosh.jpg",
+    "photo": "/images/teachers/RABBANI.jpg",
     "order": 5
   },
   {
@@ -73,8 +73,7 @@
     "designationEn": "Senior Teacher",
     "subject": "বাংলা (Bengali)",
     "category": "faculty",
-    "photo": "/images/teachers/golam-rabbani.jpg",
+    "photo": "/images/teachers/jahidul.jpg",
     "order": 7
   }
 ]
-
