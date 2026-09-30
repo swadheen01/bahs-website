@@ -44,6 +44,15 @@ export default function AlumniSection() {
               "Those who have carried forward the legacy of our institution through notable achievements across diverse fields."
             )}
           </p>
+          <div className="mt-3">
+            <p className="text-gray-500 text-[11px] md:text-xs max-w-2xl mx-auto italic bg-gray-50 py-1.5 px-3 rounded-lg border border-gray-100 inline-block">
+              <span className="font-semibold text-emerald-700">{t("বি.দ্র: ", "Note: ")}</span>
+              {t(
+                "সকল কৃতি শিক্ষার্থীর নাম একসাথে সংযুক্ত করা সম্ভব হয়নি, তবে তাঁদের সকলের সফলতায় আমরা গর্বিত। এই তালিকাটি পর্যায়ক্রমে আপডেট হতে থাকবে।",
+                "It's not possible to list all our outstanding alumni, but we are proud of everyone's success. This list will be updated periodically."
+              )}
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">

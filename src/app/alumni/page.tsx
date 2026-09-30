@@ -19,6 +19,12 @@ export default async function AlumniPage() {
           <p className="text-gray-200 font-bengali text-sm md:text-base max-w-2xl mx-auto">
             যাঁরা নিজেদের মেধা ও যোগ্যতায় বিভিন্ন ক্ষেত্রে সাফল্যের স্বাক্ষর রেখে চলেছেন, তাঁরা আমাদের গর্ব।
           </p>
+          <div className="mt-4">
+            <p className="inline-block bg-black/20 text-gray-200 text-xs md:text-sm px-4 py-2 rounded-lg border border-white/10 font-bengali italic">
+              <span className="font-bold text-emerald-400">বি.দ্র: </span>
+              সকল কৃতি শিক্ষার্থীর নাম একসাথে সংযুক্ত করা সম্ভব হয়নি, তবে তাঁদের সকলের সফলতায় আমরা গর্বিত। এই তালিকাটি পর্যায়ক্রমে আপডেট হতে থাকবে।
+            </p>
+          </div>
         </div>
       </div>
 
