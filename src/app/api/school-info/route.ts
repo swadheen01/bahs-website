@@ -3,6 +3,8 @@ import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 const infoPath = path.join(process.cwd(), "src", "data", "school-info.json");
 
 export async function GET() {
@@ -23,7 +25,8 @@ export async function GET() {
         .limit(1);
 
       if (dbData && dbData.length > 0) {
-        const extra = JSON.parse(dbData[0].added_by || "{}");
+        const payload = dbData[0].file_url || dbData[0].added_by || "{}";
+        const extra = JSON.parse(payload);
         data = { ...data, ...extra };
       }
     } catch (e) {}
@@ -41,6 +44,22 @@ export async function PUT(req: Request) {
     try {
       const content = await readFile(infoPath, "utf-8");
       data = JSON.parse(content);
+    } catch (e) {}
+
+    // First load whatever was already saved in Supabase
+    try {
+      const { data: dbData } = await supabase
+        .from("notices")
+        .select("*")
+        .eq("type", "school_info")
+        .order("id", { ascending: false })
+        .limit(1);
+
+      if (dbData && dbData.length > 0) {
+        const payload = dbData[0].file_url || dbData[0].added_by || "{}";
+        const extra = JSON.parse(payload);
+        data = { ...data, ...extra };
+      }
     } catch (e) {}
 
     // Update stats and classes if provided
@@ -69,11 +88,13 @@ export async function PUT(req: Request) {
         .eq("type", "school_info")
         .limit(1);
 
+      const jsonString = JSON.stringify(data);
+
       if (existing && existing.length > 0) {
         await supabase
           .from("notices")
           .update({
-            added_by: JSON.stringify(data),
+            file_url: jsonString,
             date_iso: new Date().toISOString(),
           })
           .eq("id", existing[0].id);
@@ -84,7 +105,7 @@ export async function PUT(req: Request) {
           type: "school_info",
           date: new Date().toLocaleDateString("bn-BD"),
           date_iso: new Date().toISOString(),
-          added_by: JSON.stringify(data),
+          file_url: jsonString,
           is_new: false,
         });
       }

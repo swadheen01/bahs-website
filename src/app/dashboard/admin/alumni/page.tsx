@@ -28,6 +28,7 @@ export default function AdminAlumniPage() {
 
   const [showSection, setShowSection] = useState<boolean>(true);
   const [savingSection, setSavingSection] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
@@ -47,30 +48,39 @@ export default function AdminAlumniPage() {
       if (typeof data.showAlumniSection !== "undefined") {
         setShowSection(data.showAlumniSection);
       }
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+      setInitialLoaded(true);
+    }
   };
 
   useEffect(() => { 
-    if (user?.role === "admin") {
+    if (user?.role === "admin" && !initialLoaded) {
       loadAlumni(); 
       loadSectionSettings();
     }
-  }, [user]);
+  }, [user, initialLoaded]);
 
   const toggleSection = async () => {
-    setSavingSection(true);
+    if (savingSection) return;
     const newValue = !showSection;
+    setShowSection(newValue);
+    setSavingSection(true);
     try {
-      await fetch("/api/school-info", {
+      const res = await fetch("/api/school-info", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ showAlumniSection: newValue })
       });
-      setShowSection(newValue);
+      if (!res.ok) {
+        throw new Error("Failed to save");
+      }
     } catch (e) {
-      alert("Failed to update setting");
+      alert("Failed to update setting. Please try again.");
+      setShowSection(!newValue); // Revert back
+    } finally {
+      setSavingSection(false);
     }
-    setSavingSection(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
