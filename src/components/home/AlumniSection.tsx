@@ -73,6 +73,19 @@ export default function AlumniSection() {
             </div>
           ))}
         </div>
+
+        {/* See More Button */}
+        {alumni.length > 0 && (
+          <div className="mt-10 text-center">
+            <a
+              href="/alumni"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 hover:text-[#06874A] hover:border-[#06874A] hover:bg-emerald-50 rounded-full font-medium text-sm transition-all duration-300 shadow-sm hover:shadow"
+            >
+              {language === "en" ? "See more" : "আরও দেখুন"}
+              <span className="text-lg leading-none">&rarr;</span>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );
