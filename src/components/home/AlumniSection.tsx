@@ -15,9 +15,19 @@ interface Alumni {
 
 export default function AlumniSection() {
   const [alumni, setAlumni] = useState<Alumni[]>([]);
+  const [showSection, setShowSection] = useState<boolean>(true);
   const { t, language } = useLanguage();
 
   useEffect(() => {
+    fetch("/api/school-info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.showAlumniSection !== "undefined") {
+          setShowSection(data.showAlumniSection);
+        }
+      })
+      .catch(() => {});
+
     fetch("/api/alumni")
       .then((res) => res.json())
       .then((data) => {
@@ -28,7 +38,7 @@ export default function AlumniSection() {
       .catch(() => {});
   }, []);
 
-  if (!alumni || alumni.length === 0) return null;
+  if (!showSection || !alumni || alumni.length === 0) return null;
 
   return (
     <section className="py-12 bg-white border-t border-gray-100">

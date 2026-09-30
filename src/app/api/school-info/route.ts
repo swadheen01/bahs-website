@@ -59,6 +59,7 @@ export async function PUT(req: Request) {
     if (body.established) data.established = body.established;
     if (body.vocational) data.vocational = { ...data.vocational, ...body.vocational };
     if (body.totalClasses) data.totalClasses = { ...data.totalClasses, ...body.totalClasses };
+    if (typeof body.showAlumniSection !== "undefined") data.showAlumniSection = body.showAlumniSection;
 
     // Sync to Supabase notices table where type='school_info'
     try {

@@ -26,6 +26,9 @@ export default function AdminAlumniPage() {
   const [form, setForm] = useState({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" });
   const [saving, setSaving] = useState(false);
 
+  const [showSection, setShowSection] = useState<boolean>(true);
+  const [savingSection, setSavingSection] = useState(false);
+
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
   }, [user, loading, router]);
@@ -37,7 +40,38 @@ export default function AdminAlumniPage() {
     setFetching(false);
   };
 
-  useEffect(() => { if (user?.role === "admin") loadAlumni(); }, [user]);
+  const loadSectionSettings = async () => {
+    try {
+      const res = await fetch("/api/school-info");
+      const data = await res.json();
+      if (typeof data.showAlumniSection !== "undefined") {
+        setShowSection(data.showAlumniSection);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => { 
+    if (user?.role === "admin") {
+      loadAlumni(); 
+      loadSectionSettings();
+    }
+  }, [user]);
+
+  const toggleSection = async () => {
+    setSavingSection(true);
+    const newValue = !showSection;
+    try {
+      await fetch("/api/school-info", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ showAlumniSection: newValue })
+      });
+      setShowSection(newValue);
+    } catch (e) {
+      alert("Failed to update setting");
+    }
+    setSavingSection(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +116,21 @@ export default function AdminAlumniPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6">
+        {/* Settings Bar */}
+        <div className="bg-white rounded-xl shadow p-4 mb-6 flex justify-between items-center border-l-4 border-emerald-600">
+          <div>
+            <h3 className="font-bold text-[#051939] font-bengali text-base">হোমপেজে কৃতি শিক্ষার্থী সেকশন</h3>
+            <p className="text-xs text-gray-500 font-bengali mt-0.5">হোমপেজে এই সেকশনটি দেখানো বা লুকানোর জন্য নিচের সুইচটি ব্যবহার করুন। ডেটা মুছে যাবে না।</p>
+          </div>
+          <button 
+            onClick={toggleSection} 
+            disabled={savingSection}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${showSection ? 'bg-emerald-500' : 'bg-gray-300'} ${savingSection ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${showSection ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-[#051939] font-bengali">কৃতি শিক্ষার্থী তালিকা ({alumni.length}জন)</h2>
           <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" }); }}
