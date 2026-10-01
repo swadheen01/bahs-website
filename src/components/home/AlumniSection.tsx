@@ -21,8 +21,8 @@ export default function AlumniSection() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/school-info?t=" + Date.now(), { cache: "no-store" }).then((res) => res.json()),
-      fetch("/api/alumni?t=" + Date.now(), { cache: "no-store" }).then((res) => res.json())
+      fetch("/api/school-info", { next: { revalidate: 30 } }).then((res) => res.json()),
+      fetch("/api/alumni", { next: { revalidate: 30 } }).then((res) => res.json())
     ])
     .then(([infoData, alumniData]) => {
       if (infoData && typeof infoData.showAlumniSection !== "undefined") {
