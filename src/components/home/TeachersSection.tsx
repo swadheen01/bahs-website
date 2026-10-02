@@ -11,6 +11,7 @@ interface Teacher {
   nameBengali: string;
   nameEnglish?: string;
   designation: string;
+  designationEn?: string;
   subject?: string;
   category: string;
   photo?: string;
@@ -54,19 +55,19 @@ export default function TeachersSection() {
           </p>
         </div>
 
-        {/* Teachers Grid with Premium Frames */}
+        {/* Teachers Grid with Premium Navy Frames */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
           {teachers.map((teacher) => (
             <Link
               key={teacher.id}
               href={`/administration/all-teachers/${teacher.id}`}
-              className="group relative bg-white rounded-2xl p-2.5 sm:p-3 border-2 border-slate-200/90 hover:border-emerald-500 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
+              className="group relative bg-white rounded-2xl p-2.5 sm:p-3 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
             >
-              {/* Top Accent Gradient Border */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-emerald-500 to-[#051939]" />
+              {/* Top Accent Navy Blue Border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#051939] via-blue-600 to-[#051939]" />
 
-              {/* Photo Frame with Elegant Dual-Layer Border */}
-              <div className="relative p-1 rounded-xl bg-gradient-to-b from-amber-200/70 via-slate-100 to-emerald-200/70 border border-amber-300/40 group-hover:border-emerald-400 shadow-sm transition-colors duration-300">
+              {/* Photo Frame with Elegant Dual-Layer Navy Border */}
+              <div className="relative p-1 rounded-xl bg-gradient-to-b from-[#051939]/15 via-blue-50/40 to-slate-100 border-2 border-[#051939]/20 group-hover:border-[#051939]/80 shadow-sm transition-colors duration-300">
                 <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
                   {teacher.photo ? (
                     <Image
@@ -90,18 +91,18 @@ export default function TeachersSection() {
               {/* Teacher Info */}
               <div className="pt-3 pb-1 px-1 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xs sm:text-[13px] font-extrabold text-[#051939] group-hover:text-[#06874A] transition-colors leading-tight line-clamp-1">
+                  <h3 className="text-xs sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight line-clamp-1">
                     {language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                   </h3>
                   <div className="mt-1.5">
-                    <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
-                      {teacher.designation}
+                    <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
+                      {language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation}
                     </span>
                   </div>
                 </div>
 
                 {/* Animated Bottom Indicator */}
-                <div className="w-6 group-hover:w-12 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto mt-2 rounded-full transition-all duration-300" />
+                <div className="w-6 group-hover:w-12 h-0.5 bg-gradient-to-r from-[#051939] to-blue-600 mx-auto mt-2 rounded-full transition-all duration-300" />
               </div>
             </Link>
           ))}
@@ -121,3 +122,4 @@ export default function TeachersSection() {
     </section>
   );
 }
+
