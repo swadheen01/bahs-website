@@ -109,7 +109,7 @@ export default function AlumniSection() {
                 <FaAward size={13} />
               </div>
 
-              {/* Navy Blue Frame with Inner Golden Badge */}
+              {/* Navy Blue Frame with Navy Graduation Cap Badge */}
               <div className="relative mb-5 mt-1">
                 <div className="relative p-1.5 rounded-full bg-gradient-to-tr from-[#051939] via-blue-700 to-[#051939] shadow-[0_0_18px_rgba(5,25,57,0.3)] group-hover:shadow-[0_0_30px_rgba(13,101,217,0.5)] group-hover:scale-105 transition-all duration-500">
                   <div className="p-0.5 bg-white rounded-full">
@@ -132,8 +132,8 @@ export default function AlumniSection() {
                   </div>
                 </div>
 
-                {/* Golden Badge Anchored on the Frame */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-white w-7 h-7 rounded-full shadow-md border-2 border-white z-30 flex items-center justify-center">
+                {/* Navy Blue Badge Anchored on the Frame */}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#051939] to-blue-700 text-white w-7 h-7 rounded-full shadow-md border-2 border-white z-30 flex items-center justify-center">
                   <FaGraduationCap size={13} />
                 </div>
               </div>
@@ -145,7 +145,7 @@ export default function AlumniSection() {
                     {language === "en" && person.nameEnglish ? person.nameEnglish : person.nameBengali}
                   </h3>
                   <div className="mt-2.5">
-                    <span className="inline-block text-[11px] sm:text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-sm shadow-amber-500/25 border border-amber-300/40 line-clamp-1">
+                    <span className="inline-block text-[11px] sm:text-xs font-bold px-3.5 py-1 rounded-full bg-gradient-to-r from-[#051939] to-[#0D65D9] text-white shadow-sm shadow-blue-500/20 border border-blue-400/30 line-clamp-1">
                       {person.degree}
                     </span>
                   </div>
