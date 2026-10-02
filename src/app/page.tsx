@@ -9,7 +9,7 @@ import TeachersSection from "@/components/home/TeachersSection";
 import AlumniSection from "@/components/home/AlumniSection";
 import schoolInfo from "@/data/school-info.json";
 import Link from "next/link";
-import { FaExternalLinkAlt, FaGraduationCap, FaBookOpen, FaAward, FaStar } from "react-icons/fa";
+import { FaExternalLinkAlt, FaGraduationCap, FaBookOpen, FaAward, FaStar, FaFacebook } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const classStyles: Record<number, { gradient: string; shadow: string; accent: string }> = {
@@ -169,10 +169,50 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column (1 Col): Notice Board & Official Links (Pulled right up snugly!) */}
+            {/* Right Column (1 Col): Notice Board, Facebook & Official Links (Pulled right up snugly!) */}
             <div className="space-y-6">
               {/* Notice Board */}
               <NoticeBoard />
+
+              {/* Follow Us on Facebook (ফেসবুকে আমরা) */}
+              <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-blue-100 glossy-shine transition-all duration-300 hover:shadow-xl group">
+                <div className="bg-gradient-to-r from-[#1877F2] to-[#0D65D9] text-white px-5 py-3.5 flex items-center justify-between">
+                  <h2 className="font-bold text-base flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white">
+                      <FaFacebook size={16} />
+                    </span>
+                    {t("ফেসবুকে আমরা", "Follow Us on Facebook")}
+                  </h2>
+                  <span className="text-[10px] bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20 font-medium">
+                    {t("অফিসিয়াল পেজ", "Official Page")}
+                  </span>
+                </div>
+                <div className="p-4 bg-gradient-to-b from-blue-50/50 to-white">
+                  <div className="flex items-center gap-3 mb-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-[#1877F2] text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+                      <FaFacebook size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xs md:text-sm text-[#051939] leading-tight">
+                        {language === "en" ? "Baniyachong Adarsha High School" : "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়"}
+                      </h3>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                        {t("সাম্প্রতিক তথ্য, নোটিশ ও ছবি পেতে আমাদের পেজে যুক্ত থাকুন", "Stay connected for latest updates, notices & memories")}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=100048911620274"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#1877F2] to-[#0D65D9] hover:from-[#166fe5] hover:to-[#0b5ac5] text-white text-xs font-bold transition-all duration-300 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 group-hover:scale-[1.01]"
+                  >
+                    <FaFacebook size={14} />
+                    <span>{t("ফেসবুক পেজ ভিজিট করুন", "Visit Facebook Page")}</span>
+                    <FaExternalLinkAlt size={10} className="ml-1 opacity-80" />
+                  </a>
+                </div>
+              </div>
 
               {/* Official Links (Now directly beneath Notice Board with NO empty space) */}
               <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 glossy-shine transition-all duration-300 hover:shadow-xl">

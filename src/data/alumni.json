@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": 5,
+    "nameBengali": "ডাঃ সুবিমল চন্দ্র চন্দ",
+    "nameEnglish": "Dr. Subimol Chandra Chanda",
+    "institution": "ওসমানী মেডিকেল কলেজ হাসপাতাল, সিলেট",
+    "degree": "এম.বি.বি.এস",
+    "photo": "/images/alumni/Subimol.jpg",
+    "year": null
+  },
+  {
+    "id": 2,
+    "nameBengali": "তাহমিদুল হক রোভ",
+    "nameEnglish": "Tahmidul Haque Ruvo",
+    "institution": "BUET",
+    "degree": "BSc. in Mechanical Engineering ",
+    "photo": "/images/alumni/ruvo.jpg",
+    "year": "2022"
+  }
+]

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaGraduationCap } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import initialAlumni from "@/data/alumni.json";
+import schoolInfo from "@/data/school-info.json";
 
 interface Alumni {
   id: number;
@@ -14,57 +16,58 @@ interface Alumni {
 }
 
 export default function AlumniSection() {
-  const [alumni, setAlumni] = useState<Alumni[]>([]);
-  const [showSection, setShowSection] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [alumni, setAlumni] = useState<Alumni[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("bahs_cached_alumni");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return (initialAlumni as Alumni[]) || [];
+  });
+
+  const [showSection, setShowSection] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("bahs_show_alumni");
+        if (cached !== null) return cached === "true";
+      } catch (e) {}
+    }
+    return schoolInfo.showAlumniSection ?? true;
+  });
+
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/school-info", { next: { revalidate: 30 } }).then((res) => res.json()),
-      fetch("/api/alumni", { next: { revalidate: 30 } }).then((res) => res.json())
-    ])
-    .then(([infoData, alumniData]) => {
-      if (infoData && typeof infoData.showAlumniSection !== "undefined") {
-        setShowSection(infoData.showAlumniSection);
-      }
-      if (Array.isArray(alumniData)) {
-        setAlumni(alumniData);
-      }
-    })
-    .catch(() => {})
-    .finally(() => {
-      setLoading(false);
-    });
+    fetch("/api/school-info")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.showAlumniSection !== "undefined") {
+          setShowSection(data.showAlumniSection);
+          try {
+            sessionStorage.setItem("bahs_show_alumni", String(data.showAlumniSection));
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/alumni")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAlumni(data);
+          try {
+            sessionStorage.setItem("bahs_cached_alumni", JSON.stringify(data));
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  if (!showSection) return null;
-
-  if (loading) {
-    return (
-      <section className="py-12 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <div className="h-8 w-48 bg-gray-200 animate-pulse rounded mx-auto mb-3"></div>
-            <div className="w-16 h-1 bg-gray-200 animate-pulse mx-auto mb-3 rounded"></div>
-            <div className="h-3 w-64 bg-gray-200 animate-pulse rounded mx-auto"></div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="rounded-2xl p-4 text-center border border-gray-100">
-                <div className="w-28 h-28 mx-auto rounded-full bg-gray-200 animate-pulse mb-3"></div>
-                <div className="h-4 w-20 bg-gray-200 animate-pulse rounded mx-auto mb-2"></div>
-                <div className="h-3 w-16 bg-gray-200 animate-pulse rounded mx-auto mb-1"></div>
-                <div className="h-2 w-24 bg-gray-200 animate-pulse rounded mx-auto"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!alumni || alumni.length === 0) return null;
+  if (!showSection || !alumni || alumni.length === 0) return null;
 
   return (
     <section className="py-12 bg-white border-t border-gray-100">
