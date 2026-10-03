@@ -57,7 +57,7 @@ export default function TeachersSection() {
         </div>
 
         {/* Teachers Grid with Premium Navy Frames */}
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 md:gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 max-w-5xl mx-auto">
           {teachers.map((teacher) => (
             <Link
               key={teacher.id}
@@ -76,11 +76,11 @@ export default function TeachersSection() {
                       alt={teacher.nameBengali}
                       fill
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
-                      sizes="(max-width: 640px) 120px, 220px"
+                      sizes="(max-width: 640px) 160px, 220px"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50">
-                      <FaUsers size={30} className="sm:text-4xl" />
+                      <FaUsers size={40} className="sm:text-4xl" />
                     </div>
                   )}
 
@@ -90,13 +90,13 @@ export default function TeachersSection() {
               </div>
 
               {/* Teacher Info */}
-              <div className="pt-2 sm:pt-3 pb-1 flex-1 flex flex-col justify-between">
+              <div className="pt-3 pb-1 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-[11px] sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight">
+                  <h3 className="text-xs sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight">
                     {language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                   </h3>
-                  <div className="mt-1 sm:mt-1.5">
-                    <span className="inline-block text-[9px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-1.5 sm:px-2 py-0.5 rounded-2xl sm:rounded-full shadow-xs leading-tight">
+                  <div className="mt-1.5">
+                    <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-2 sm:px-2 py-0.5 rounded-2xl sm:rounded-full shadow-xs leading-tight">
                       {(language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation) + (teacher.mainSubject ? ` (${teacher.mainSubject})` : "")}
                     </span>
                   </div>
