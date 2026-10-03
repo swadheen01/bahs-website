@@ -12,3 +12,4 @@ export async function GET() {
   const count = await pendingTeacherEditsDB.getCount();
   return NextResponse.json({ count });
 }
+

@@ -21,3 +21,4 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: e.message }, { status: 400 });
   }
 }
+

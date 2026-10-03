@@ -23,3 +23,4 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   await pendingTeacherEditsDB.submit(teacherId, body, session.user.name);
   return NextResponse.json({ success: true });
 }
+
