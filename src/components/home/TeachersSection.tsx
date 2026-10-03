@@ -20,7 +20,7 @@ interface Teacher {
 
 export default function TeachersSection() {
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
-    return (initialTeachers.slice(0, 6) as Teacher[]) || [];
+    return (initialTeachers.slice(0, 12) as Teacher[]) || [];
   });
   const { t, language } = useLanguage();
 
@@ -29,7 +29,7 @@ export default function TeachersSection() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setTeachers(data.slice(0, 6));
+          setTeachers(data.slice(0, 12));
         }
       })
       .catch(() => {});
@@ -37,7 +37,7 @@ export default function TeachersSection() {
 
   return (
     <section className="py-14 bg-gradient-to-b from-gray-50 via-white to-gray-50 border-t border-gray-100">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2 sm:px-4">
         {/* Section Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200/80 mb-3 shadow-xs">
@@ -57,12 +57,12 @@ export default function TeachersSection() {
         </div>
 
         {/* Teachers Grid with Premium Navy Frames */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 md:gap-5 max-w-5xl mx-auto">
           {teachers.map((teacher) => (
             <Link
               key={teacher.id}
               href={`/administration/all-teachers/${teacher.id}`}
-              className="group relative bg-white rounded-2xl p-2.5 sm:p-3 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
+              className="group relative bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
             >
               {/* Top Accent Navy Blue Border */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#051939] via-blue-600 to-[#051939]" />
@@ -76,11 +76,11 @@ export default function TeachersSection() {
                       alt={teacher.nameBengali}
                       fill
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
-                      sizes="(max-width: 640px) 160px, 220px"
+                      sizes="(max-width: 640px) 120px, 220px"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50">
-                      <FaUsers size={40} />
+                      <FaUsers size={30} className="sm:text-4xl" />
                     </div>
                   )}
 
@@ -90,13 +90,13 @@ export default function TeachersSection() {
               </div>
 
               {/* Teacher Info */}
-              <div className="pt-3 pb-1 px-1 flex-1 flex flex-col justify-between">
+              <div className="pt-2 sm:pt-3 pb-1 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xs sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight line-clamp-1">
+                  <h3 className="text-[11px] sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight line-clamp-1">
                     {language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                   </h3>
-                  <div className="mt-1.5">
-                    <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
+                  <div className="mt-1 sm:mt-1.5">
+                    <span className="inline-block text-[9px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-1.5 sm:px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
                       {(language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation) + (teacher.mainSubject ? ` (${teacher.mainSubject})` : "")}
                     </span>
                   </div>
