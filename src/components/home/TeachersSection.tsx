@@ -92,11 +92,11 @@ export default function TeachersSection() {
               {/* Teacher Info */}
               <div className="pt-2 sm:pt-3 pb-1 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-[11px] sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight line-clamp-1">
+                  <h3 className="text-[11px] sm:text-[13px] font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight">
                     {language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                   </h3>
                   <div className="mt-1 sm:mt-1.5">
-                    <span className="inline-block text-[9px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-1.5 sm:px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
+                    <span className="inline-block text-[9px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-1.5 sm:px-2 py-0.5 rounded-2xl sm:rounded-full shadow-xs leading-tight">
                       {(language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation) + (teacher.mainSubject ? ` (${teacher.mainSubject})` : "")}
                     </span>
                   </div>
