@@ -112,11 +112,17 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
                 <InfoRow icon={<FaBook />} label={t("বিষয়", "Subject")} value={teacher.subject} />
                 {teacher.courses && (
                   <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center gap-2 min-w-[180px] text-gray-500">
+                    <div className="flex items-center gap-2 min-w-[180px] text-gray-500 pt-1">
                       <span className="text-[#06874A] text-sm"><FaBook /></span>
                       <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t("কোর্স ও প্রশিক্ষণ", "Courses & Training")}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-800 whitespace-pre-line">{teacher.courses}</span>
+                    <div className="flex-1 text-sm font-semibold text-gray-800">
+                      <ul className="list-disc list-inside space-y-1.5 ml-1 sm:ml-0">
+                        {teacher.courses.split('\n').map((course: string, i: number) => (
+                          <li key={i} className="leading-relaxed text-gray-700">{course.trim()}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
               </div>

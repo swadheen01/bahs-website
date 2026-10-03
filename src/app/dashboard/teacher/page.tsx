@@ -176,16 +176,66 @@ export default function TeacherDashboardPage() {
                   </div>
                 </form>
               ) : profile ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                  <div><p className="text-gray-500 font-bold">নাম (বাংলায়)</p><p>{profile.name_bengali}</p></div>
-                  <div><p className="text-gray-500 font-bold">নাম (ইংরেজিতে)</p><p>{profile.name_english || "-"}</p></div>
-                  <div><p className="text-gray-500 font-bold">পদবি</p><p>{profile.designation}</p></div>
-                  <div><p className="text-gray-500 font-bold">প্রধান বিষয়</p><p>{profile.main_subject || "-"}</p></div>
-                  <div><p className="text-gray-500 font-bold">ইমেইল</p><p>{profile.email || "-"}</p></div>
-                  <div><p className="text-gray-500 font-bold">মোবাইল</p><p>{profile.contact_no || "-"}</p></div>
-                  <div><p className="text-gray-500 font-bold">শিক্ষাগত যোগ্যতা</p><p>{profile.qualification || "-"}</p></div>
-                  <div><p className="text-gray-500 font-bold">অভিজ্ঞতা</p><p>{profile.experience || "-"}</p></div>
-                  <div className="sm:col-span-2"><p className="text-gray-500 font-bold">কোর্স ও প্রশিক্ষণ</p><p className="whitespace-pre-wrap">{profile.courses || "-"}</p></div>
+                <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                  {/* Formal Header */}
+                  <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                    <h3 className="text-lg font-bold text-[#051939]">ব্যক্তিগত তথ্যাবলী</h3>
+                    <p className="text-xs text-gray-500 mt-1">আপনার প্রোফাইলের বর্তমান তথ্য নিচে দেওয়া হলো।</p>
+                  </div>
+                  
+                  {/* Details List */}
+                  <div className="divide-y divide-gray-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">নাম (বাংলায়)</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.name_bengali}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">নাম (ইংরেজিতে)</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-sans font-medium">{profile.name_english || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">পদবি</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">
+                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold border border-blue-100">
+                          {profile.designation}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">প্রধান বিষয়</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.main_subject || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">ইমেইল</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-sans">{profile.email || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">যোগাযোগ নম্বর</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-mono">{profile.contact_no || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">শিক্ষাগত যোগ্যতা</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium leading-relaxed">{profile.qualification || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">অভিজ্ঞতা</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.experience || "-"}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="text-sm font-semibold text-gray-600">কোর্স ও প্রশিক্ষণ</div>
+                      <div className="text-sm text-gray-800 sm:col-span-2">
+                        {profile.courses ? (
+                          <ul className="list-disc list-inside space-y-1.5">
+                            {profile.courses.split('\n').map((course: string, i: number) => (
+                              <li key={i} className="leading-relaxed text-gray-700">{course.trim()}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          "-"
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <p className="text-gray-400">প্রোফাইল লোড হচ্ছে...</p>

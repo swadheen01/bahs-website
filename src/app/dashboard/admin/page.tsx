@@ -19,7 +19,8 @@ import {
   FaAward,
   FaClock,
   FaCalendarAlt,
-  FaLandmark
+  FaLandmark,
+  FaBell
 } from "react-icons/fa";
 
 export default function AdminDashboardPage() {
@@ -35,7 +36,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (user?.role === "admin") {
-      fetch("/api/teachers/pending-count")
+      fetch("/api/teachers/pending-count", { cache: "no-store" })
         .then(res => res.json())
         .then(data => setPendingTeacherEdits(data.count || 0))
         .catch(() => {});
@@ -180,21 +181,25 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Clean User Info */}
-        <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-xl">
-          <div className="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">
-            {user.name.charAt(0)}
-          </div>
-          <div className="text-right">
-            <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
-            <span className="text-[10px] text-emerald-300 font-medium">
-              প্রধান এডমিন
-              {pendingTeacherEdits > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                  🔔 {pendingTeacherEdits}
-                </span>
-              )}
-            </span>
+        {/* Clean User Info & Notifications */}
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/admin/teachers" className="relative p-2 text-white hover:text-amber-300 transition-colors bg-white/10 rounded-full">
+            <FaBell size={18} />
+            {pendingTeacherEdits > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center border border-[#051939]">
+                {pendingTeacherEdits}
+              </span>
+            )}
+          </Link>
+          
+          <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-xl">
+            <div className="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">
+              {user.name.charAt(0)}
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
+              <span className="text-[10px] text-emerald-300 font-medium">প্রধান এডমিন</span>
+            </div>
           </div>
         </div>
       </header>
