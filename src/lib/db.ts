@@ -88,8 +88,6 @@ export interface Teacher {
   mpoIndex?: string;
   joiningDate?: string;
   birthDate?: string;
-  fatherName?: string;
-  motherName?: string;
   email?: string;
   contactNo?: string;
   qualification?: string;
@@ -97,6 +95,12 @@ export interface Teacher {
   interest?: string;
   presentAddress?: string;
   permanentAddress?: string;
+  mainSubject?: string;
+  courses?: string;
+  hasPendingEdit?: boolean;
+  pendingEditData?: any;
+  pendingEditSubmittedBy?: string;
+  pendingEditSubmittedAt?: string;
 }
 
 export const teachersDB = {
@@ -104,13 +108,15 @@ export const teachersDB = {
     const { data } = await supabase.from('teachers').select('*').order('sort_order', { ascending: true });
     return (data || []).map(t => ({
       id: t.id, nameBengali: t.name_bengali, nameEnglish: t.name_english, designation: t.designation, designationEn: t.designation_en, subject: t.subject, category: t.category, photo: t.photo, order: t.sort_order,
-      mpoIndex: t.mpo_index, joiningDate: t.joining_date, birthDate: t.birth_date, fatherName: t.father_name, motherName: t.mother_name, email: t.email, contactNo: t.contact_no, qualification: t.qualification, experience: t.experience, interest: t.interest, presentAddress: t.present_address, permanentAddress: t.permanent_address
+      mpoIndex: t.mpo_index, joiningDate: t.joining_date, birthDate: t.birth_date, email: t.email, contactNo: t.contact_no, qualification: t.qualification, experience: t.experience, interest: t.interest, presentAddress: t.present_address, permanentAddress: t.permanent_address,
+      mainSubject: t.main_subject, courses: t.courses, hasPendingEdit: t.has_pending_edit, pendingEditData: t.pending_edit_data, pendingEditSubmittedBy: t.pending_edit_submitted_by, pendingEditSubmittedAt: t.pending_edit_submitted_at
     }));
   },
   add: async (teacher: Omit<Teacher, "id">) => {
     const { data, error } = await supabase.from('teachers').insert({
       name_bengali: teacher.nameBengali, name_english: teacher.nameEnglish, designation: teacher.designation, designation_en: teacher.designationEn, subject: teacher.subject, category: teacher.category, photo: teacher.photo, sort_order: teacher.order,
-      mpo_index: teacher.mpoIndex, joining_date: teacher.joiningDate, birth_date: teacher.birthDate, father_name: teacher.fatherName, mother_name: teacher.motherName, email: teacher.email, contact_no: teacher.contactNo, qualification: teacher.qualification, experience: teacher.experience, interest: teacher.interest, present_address: teacher.presentAddress, permanent_address: teacher.permanentAddress
+      mpo_index: teacher.mpoIndex, joining_date: teacher.joiningDate, birth_date: teacher.birthDate, email: teacher.email, contact_no: teacher.contactNo, qualification: teacher.qualification, experience: teacher.experience, interest: teacher.interest, present_address: teacher.presentAddress, permanent_address: teacher.permanentAddress,
+      main_subject: teacher.mainSubject, courses: teacher.courses, has_pending_edit: teacher.hasPendingEdit, pending_edit_data: teacher.pendingEditData, pending_edit_submitted_by: teacher.pendingEditSubmittedBy, pending_edit_submitted_at: teacher.pendingEditSubmittedAt
     }).select().single();
     if (error) throw error;
     return { ...data, nameBengali: data.name_bengali, nameEnglish: data.name_english, designationEn: data.designation_en, order: data.sort_order };
@@ -128,8 +134,6 @@ export const teachersDB = {
     if (data.mpoIndex !== undefined) updateData.mpo_index = data.mpoIndex;
     if (data.joiningDate !== undefined) updateData.joining_date = data.joiningDate;
     if (data.birthDate !== undefined) updateData.birth_date = data.birthDate;
-    if (data.fatherName !== undefined) updateData.father_name = data.fatherName;
-    if (data.motherName !== undefined) updateData.mother_name = data.motherName;
     if (data.email !== undefined) updateData.email = data.email;
     if (data.contactNo !== undefined) updateData.contact_no = data.contactNo;
     if (data.qualification !== undefined) updateData.qualification = data.qualification;
@@ -137,10 +141,58 @@ export const teachersDB = {
     if (data.interest !== undefined) updateData.interest = data.interest;
     if (data.presentAddress !== undefined) updateData.present_address = data.presentAddress;
     if (data.permanentAddress !== undefined) updateData.permanent_address = data.permanentAddress;
+    if (data.mainSubject !== undefined) updateData.main_subject = data.mainSubject;
+    if (data.courses !== undefined) updateData.courses = data.courses;
+    if (data.hasPendingEdit !== undefined) updateData.has_pending_edit = data.hasPendingEdit;
+    if (data.pendingEditData !== undefined) updateData.pending_edit_data = data.pendingEditData;
+    if (data.pendingEditSubmittedBy !== undefined) updateData.pending_edit_submitted_by = data.pendingEditSubmittedBy;
+    if (data.pendingEditSubmittedAt !== undefined) updateData.pending_edit_submitted_at = data.pendingEditSubmittedAt;
     await supabase.from('teachers').update(updateData).eq('id', id);
   },
   delete: async (id: number) => {
     await supabase.from('teachers').delete().eq('id', id);
+  },
+};
+
+export const pendingTeacherEditsDB = {
+  // Get count of teachers with pending edits
+  getCount: async (): Promise<number> => {
+    const { count } = await supabase.from('teachers').select('id', { count: 'exact', head: true }).eq('has_pending_edit', true);
+    return count || 0;
+  },
+  // Approve: apply pending_edit_data to teacher, clear pending
+  approve: async (teacherId: number) => {
+    const { data: teacher } = await supabase.from('teachers').select('pending_edit_data').eq('id', teacherId).single();
+    if (!teacher?.pending_edit_data) throw new Error('No pending edit');
+    const edit = teacher.pending_edit_data;
+    const updateData: any = { has_pending_edit: false, pending_edit_data: null, pending_edit_submitted_by: null, pending_edit_submitted_at: null };
+    if (edit.nameEnglish !== undefined) updateData.name_english = edit.nameEnglish;
+    if (edit.photo !== undefined) updateData.photo = edit.photo;
+    if (edit.mpoIndex !== undefined) updateData.mpo_index = edit.mpoIndex;
+    if (edit.joiningDate !== undefined) updateData.joining_date = edit.joiningDate;
+    if (edit.birthDate !== undefined) updateData.birth_date = edit.birthDate;
+    if (edit.email !== undefined) updateData.email = edit.email;
+    if (edit.contactNo !== undefined) updateData.contact_no = edit.contactNo;
+    if (edit.qualification !== undefined) updateData.qualification = edit.qualification;
+    if (edit.experience !== undefined) updateData.experience = edit.experience;
+    if (edit.mainSubject !== undefined) updateData.main_subject = edit.mainSubject;
+    if (edit.courses !== undefined) updateData.courses = edit.courses;
+    if (edit.presentAddress !== undefined) updateData.present_address = edit.presentAddress;
+    if (edit.permanentAddress !== undefined) updateData.permanent_address = edit.permanentAddress;
+    await supabase.from('teachers').update(updateData).eq('id', teacherId);
+  },
+  // Reject: clear pending data without applying
+  reject: async (teacherId: number) => {
+    await supabase.from('teachers').update({ has_pending_edit: false, pending_edit_data: null, pending_edit_submitted_by: null, pending_edit_submitted_at: null }).eq('id', teacherId);
+  },
+  // Submit edit (from teacher account)
+  submit: async (teacherId: number, editData: any, submittedBy: string) => {
+    await supabase.from('teachers').update({
+      has_pending_edit: true,
+      pending_edit_data: editData,
+      pending_edit_submitted_by: submittedBy,
+      pending_edit_submitted_at: new Date().toISOString(),
+    }).eq('id', teacherId);
   },
 };
 

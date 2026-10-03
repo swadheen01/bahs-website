@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaChalkboardTeacher, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaArrowLeft } from "react-icons/fa";
+import { FaChalkboardTeacher, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaBell, FaCheck, FaTimes } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface Teacher {
@@ -19,8 +19,6 @@ interface Teacher {
   mpoIndex?: string;
   joiningDate?: string;
   birthDate?: string;
-  fatherName?: string;
-  motherName?: string;
   email?: string;
   contactNo?: string;
   qualification?: string;
@@ -28,11 +26,14 @@ interface Teacher {
   interest?: string;
   presentAddress?: string;
   permanentAddress?: string;
+  mainSubject?: string;
+  courses?: string;
+  hasPendingEdit?: boolean;
 }
 
 const emptyForm: Partial<Teacher> = {
   nameBengali: "", nameEnglish: "", designation: "", designationEn: "", subject: "", category: "faculty", photo: "", order: 0,
-  mpoIndex: "", joiningDate: "", birthDate: "", fatherName: "", motherName: "", email: "", contactNo: "", qualification: "", experience: "", interest: "", presentAddress: "", permanentAddress: "",
+  mpoIndex: "", joiningDate: "", birthDate: "", email: "", contactNo: "", qualification: "", experience: "", interest: "", presentAddress: "", permanentAddress: "", mainSubject: "", courses: ""
 };
 
 export default function AdminTeachersPage() {
@@ -89,6 +90,17 @@ export default function AdminTeachersPage() {
     await loadTeachers();
   };
 
+  const handleApprove = async (id: number) => {
+    await fetch(`/api/teachers/${id}/approve`, { method: "POST" });
+    await loadTeachers();
+  };
+
+  const handleReject = async (id: number) => {
+    if (!confirm("এই পরিবর্তন প্রত্যাখ্যান করবেন?")) return;
+    await fetch(`/api/teachers/${id}/reject`, { method: "POST" });
+    await loadTeachers();
+  };
+
   const handleEdit = (t: Teacher) => {
     setForm(t);
     setEditId(t.id);
@@ -122,6 +134,16 @@ export default function AdminTeachersPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-5xl">
+        {teachers.some(t => t.hasPendingEdit) && (
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <FaBell className="text-amber-600 mt-0.5 shrink-0" size={18} />
+            <div>
+              <p className="font-bold text-amber-900 text-sm">শিক্ষকের তথ্য পরিবর্তনের আবেদন</p>
+              <p className="text-xs text-amber-700 mt-0.5">{teachers.filter(t => t.hasPendingEdit).length}জন শিক্ষক তাদের তথ্য পরিবর্তনের আবেদন করেছেন। নিচের তালিকা থেকে পর্যালোচনা করুন।</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-[#051939]">সকল শিক্ষকবৃন্দের তালিকা ({teachers.length} জন)</h2>
           <button
@@ -173,6 +195,16 @@ export default function AdminTeachersPage() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">প্রধান বিষয় (Bracket-এ দেখাবে)</label>
+                  <input
+                    type="text"
+                    value={form.mainSubject || ""}
+                    onChange={(e) => setForm({ ...form, mainSubject: e.target.value })}
+                    placeholder="ICT, গণিত, বাংলা"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#051939]"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">বিষয় (যদি থাকে)</label>
                   <input
                     type="text"
@@ -217,6 +249,14 @@ export default function AdminTeachersPage() {
               <div className="pt-3 border-t border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">বিস্তারিত প্রোফাইল তথ্য (ঐচ্ছিক)</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Qualification</label>
+                    <input type="text" value={form.qualification || ""} onChange={(e) => setForm({ ...form, qualification: e.target.value })} placeholder="M.A., B.Ed." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Courses & Training</label>
+                    <textarea value={form.courses || ""} onChange={(e) => setForm({ ...form, courses: e.target.value })} placeholder="মাস্টার ট্রেইনার (UITRCE)&#10;কারিকুলাম মাস্টার ট্রেইনার&#10;ICT4E জেলা শিক্ষক এ্যাম্বাসেডর, হবিগঞ্জ" rows={4} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
+                  </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">MPO Index Number</label>
                     <input type="text" value={form.mpoIndex || ""} onChange={(e) => setForm({ ...form, mpoIndex: e.target.value })} placeholder="n/a" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
@@ -230,24 +270,12 @@ export default function AdminTeachersPage() {
                     <input type="text" value={form.birthDate || ""} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} placeholder="10 Feb, 1982" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Father's Name</label>
-                    <input type="text" value={form.fatherName || ""} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} placeholder="Father's Name" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Mother's Name</label>
-                    <input type="text" value={form.motherName || ""} onChange={(e) => setForm({ ...form, motherName: e.target.value })} placeholder="Mother's Name" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
                     <input type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Contact No.</label>
                     <input type="text" value={form.contactNo || ""} onChange={(e) => setForm({ ...form, contactNo: e.target.value })} placeholder="01700000000" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Qualification</label>
-                    <input type="text" value={form.qualification || ""} onChange={(e) => setForm({ ...form, qualification: e.target.value })} placeholder="M.A., B.Ed." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Experience</label>
@@ -319,7 +347,15 @@ export default function AdminTeachersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-bold text-gray-800">
-                      {t.nameBengali}
+                      <div className="flex items-center gap-2">
+                        {t.nameBengali}
+                        {t.hasPendingEdit && (
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                            পরিবর্তন
+                          </span>
+                        )}
+                      </div>
                       {t.nameEnglish && <p className="text-xs font-sans text-gray-400 font-normal">{t.nameEnglish}</p>}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
@@ -328,6 +364,17 @@ export default function AdminTeachersPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
+                        {t.hasPendingEdit && (
+                          <>
+                            <button onClick={() => handleApprove(t.id)} className="text-green-600 hover:text-green-800 p-2 rounded hover:bg-green-50" title="অনুমোদন করুন">
+                              <FaCheck size={16} />
+                            </button>
+                            <button onClick={() => handleReject(t.id)} className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50" title="প্রত্যাখ্যান করুন">
+                              <FaTimes size={16} />
+                            </button>
+                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                          </>
+                        )}
                         <button
                           onClick={() => handleEdit(t)}
                           className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
@@ -350,6 +397,7 @@ export default function AdminTeachersPage() {
             </table>
           )}
         </div>
+
       </div>
     </div>
   );

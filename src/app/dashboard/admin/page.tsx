@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,12 +25,22 @@ import {
 export default function AdminDashboardPage() {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
+  const [pendingTeacherEdits, setPendingTeacherEdits] = useState(0);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
       router.replace("/login");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetch("/api/teachers/pending-count")
+        .then(res => res.json())
+        .then(data => setPendingTeacherEdits(data.count || 0))
+        .catch(() => {});
+    }
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -92,9 +102,18 @@ export default function AdminDashboardPage() {
     {
       title: "শিক্ষক ব্যবস্থাপনা",
       desc: "সকল শিক্ষকের তথ্য ও ছবি যোগ, পরিবর্তন বা মুছে ফেলুন",
-      icon: <FaChalkboardTeacher size={28} className="text-green-600" />,
+      icon: (
+        <div className="relative">
+          <FaChalkboardTeacher size={28} className="text-green-600" />
+          {pendingTeacherEdits > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center">
+              {pendingTeacherEdits}
+            </span>
+          )}
+        </div>
+      ),
       href: "/dashboard/admin/teachers",
-      badge: "CRUD",
+      badge: pendingTeacherEdits > 0 ? `${pendingTeacherEdits} পরিবর্তন` : "CRUD",
       color: "border-green-500 hover:border-green-600"
     },
     {
@@ -168,7 +187,14 @@ export default function AdminDashboardPage() {
           </div>
           <div className="text-right">
             <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
-            <span className="text-[10px] text-emerald-300 font-medium">এডমিনিস্ট্রেটর</span>
+            <span className="text-[10px] text-emerald-300 font-medium">
+              প্রধান এডমিন
+              {pendingTeacherEdits > 0 && (
+                <span className="ml-2 inline-flex items-center gap-1 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                  🔔 {pendingTeacherEdits}
+                </span>
+              )}
+            </span>
           </div>
         </div>
       </header>
@@ -194,7 +220,7 @@ export default function AdminDashboardPage() {
                   <div className="p-3 bg-gray-50 rounded-xl group-hover:scale-110 transition-transform">
                     {mod.icon}
                   </div>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${mod.badge.includes('পরিবর্তন') ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
                     {mod.badge}
                   </span>
                 </div>

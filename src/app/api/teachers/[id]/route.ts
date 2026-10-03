@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
@@ -6,6 +7,13 @@ import { teachersDB } from "@/lib/db";
 
 async function getSession() {
   return getIronSession<IronSessionData>(await cookies(), sessionOptions);
+}
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const { data } = await supabase.from('teachers').select('*').eq('id', id).single();
+  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  return NextResponse.json(data);
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

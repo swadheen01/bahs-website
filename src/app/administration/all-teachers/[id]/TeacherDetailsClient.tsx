@@ -79,7 +79,7 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
               )}
               <div className="mt-3">
                 <span className="inline-block bg-[#06874A] text-white text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full shadow">
-                  {language === "en" && teacher.designation_en ? teacher.designation_en : teacher.designation}
+                  {(language === "en" && teacher.designation_en ? teacher.designation_en : teacher.designation) + (teacher.main_subject ? ` (${teacher.main_subject})` : "")}
                 </span>
               </div>
             </div>
@@ -96,8 +96,6 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
                 <InfoRow icon={<FaIdCard />} label={t("এমপিও ইনডেক্স", "MPO Index Number")} value={teacher.mpo_index} />
                 <InfoRow icon={<FaCalendarAlt />} label={t("যোগদানের তারিখ", "Joining Date")} value={teacher.joining_date} />
                 <InfoRow icon={<FaCalendarAlt />} label={t("জন্ম তারিখ", "Birth Date")} value={teacher.birth_date} />
-                <InfoRow icon={<FaUserFriends />} label={t("পিতার নাম", "Father's Name")} value={teacher.father_name} />
-                <InfoRow icon={<FaUserFriends />} label={t("মাতার নাম", "Mother's Name")} value={teacher.mother_name} />
               </div>
 
               {/* Right Column */}
@@ -108,9 +106,19 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
                 <InfoRow icon={<FaEnvelope />} label={t("ইমেইল", "Email")} value={teacher.email} />
                 <InfoRow icon={<FaPhone />} label={t("যোগাযোগ নম্বর", "Contact No.")} value={teacher.contact_no} mono />
                 <InfoRow icon={<FaGraduationCap />} label={t("শিক্ষাগত যোগ্যতা", "Qualification")} value={teacher.qualification} />
+                <InfoRow icon={<FaBook />} label={t("প্রধান বিষয়", "Main Subject")} value={teacher.main_subject} />
                 <InfoRow icon={<FaClock />} label={t("অভিজ্ঞতা", "Experience")} value={teacher.experience} />
                 <InfoRow icon={<FaHeart />} label={t("বিশেষ আগ্রহ", "Interest")} value={teacher.interest} />
                 <InfoRow icon={<FaBook />} label={t("বিষয়", "Subject")} value={teacher.subject} />
+                {teacher.courses && (
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
+                    <div className="flex items-center gap-2 min-w-[180px] text-gray-500">
+                      <span className="text-[#06874A] text-sm"><FaBook /></span>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t("কোর্স ও প্রশিক্ষণ", "Courses & Training")}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-800 whitespace-pre-line">{teacher.courses}</span>
+                  </div>
+                )}
               </div>
             </div>
 
