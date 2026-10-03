@@ -10,7 +10,7 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় | EIIN: 129344",
+  title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
   description:
     "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়ের অফিসিয়াল ওয়েবসাইট। উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ। Baniyachong Adarsha High School official website.",
   keywords: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়, BAHS, Baniyachong, Habiganj, School, Bangladesh",
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     apple: "/images/logo/logo.png",
   },
   openGraph: {
-    title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় | BAHS",
-    description: "উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ | EIIN: 129344",
+    title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
+    description: "উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ",
     type: "website",
     locale: "bn_BD",
     siteName: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয় | BAHS",
-    description: "উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ | EIIN: 129344",
+    title: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
+    description: "উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ",
     images: ["/images/logo/logo.png"],
   },
 };

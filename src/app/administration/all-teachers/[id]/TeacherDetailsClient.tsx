@@ -53,10 +53,10 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
           {(user?.role === "admin" || user?.role === "teacher") && (
             <Link
               href={user.role === "admin" ? `/dashboard/admin/teachers?editId=${teacher.id}` : `/dashboard/teacher?editId=${teacher.id}`}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow transition-colors"
+              className="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-full shadow-sm transition-colors border border-blue-100"
+              title={t("এডিট করুন", "Edit")}
             >
-              <FaEdit />
-              <span>{t("এডিট করুন", "Edit Profile")}</span>
+              <FaEdit size={16} />
             </Link>
           )}
         </div>
