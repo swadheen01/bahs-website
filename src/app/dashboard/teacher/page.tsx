@@ -10,6 +10,7 @@ export default function TeacherDashboardPage() {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
+  const [teachers, setTeachers] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,24 +23,10 @@ export default function TeacherDashboardPage() {
   }, [user, loading, router]);
 
   const fetchProfile = async () => {
-    if (user?.teacherId) {
-      const res = await fetch(`/api/teachers/${user.teacherId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProfile(data);
-        setEditForm({
-          nameEnglish: data.name_english || "",
-          photo: data.photo || "",
-          email: data.email || "",
-          contactNo: data.contact_no || "",
-          qualification: data.qualification || "",
-          experience: data.experience || "",
-          mainSubject: data.main_subject || "",
-          courses: data.courses || "",
-          presentAddress: data.present_address || "",
-          permanentAddress: data.permanent_address || "",
-        });
-      }
+    const res = await fetch(`/api/teachers`);
+    if (res.ok) {
+      const data = await res.json();
+      setTeachers(data);
     }
   };
 
@@ -47,17 +34,35 @@ export default function TeacherDashboardPage() {
     fetchProfile();
   }, [user]);
 
+  const handleEditClick = (t: any) => {
+    setProfile(t);
+    setEditForm({
+      nameEnglish: t.nameEnglish || "",
+      photo: t.photo || "",
+      email: t.email || "",
+      contactNo: t.contactNo || "",
+      qualification: t.qualification || "",
+      experience: t.experience || "",
+      mainSubject: t.mainSubject || "",
+      courses: t.courses || "",
+      presentAddress: t.presentAddress || "",
+      permanentAddress: t.permanentAddress || "",
+    });
+    setIsEditing(true);
+    setSuccessMsg("");
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const res = await fetch(`/api/teachers/${user?.teacherId}/pending-edit`, {
+    const res = await fetch(`/api/teachers/${profile.id}/pending-edit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editForm),
     });
     setIsSubmitting(false);
     if (res.ok) {
-      setSuccessMsg("আপনার পরিবর্তনের আবেদন এডমিনের কাছে পাঠানো হয়েছে। অনুমোদনের পর পরিবর্তন দেখা যাবে।");
+      setSuccessMsg("পরিবর্তনের আবেদন এডমিনের কাছে পাঠানো হয়েছে। অনুমোদনের পর পরিবর্তন দেখা যাবে।");
       setIsEditing(false);
       fetchProfile();
     } else {
@@ -91,10 +96,10 @@ export default function TeacherDashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="bg-white rounded-xl shadow p-6 mb-6">
           <h2 className="text-xl font-bold text-[#051939] mb-2">স্বাগতম, {user.name}!</h2>
-          <p className="text-sm text-gray-600">আপনি বানিয়াচং আদর্শ উচ্চ বিদ্যালয়ের শিক্ষক প্যানেলে সফলভাবে লগইন করেছেন।</p>
+          <p className="text-sm text-gray-600">আপনি যেকোনো শিক্ষকের তথ্যের পরিবর্তনের আবেদন করতে পারবেন, যা এডমিনের অনুমোদনের পর আপডেট হবে।</p>
         </div>
         
         {successMsg && (
@@ -104,27 +109,26 @@ export default function TeacherDashboardPage() {
           </div>
         )}
 
-        {profile?.has_pending_edit && !successMsg && (
-          <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <FaExclamationTriangle className="text-amber-600 mt-0.5 shrink-0" size={18} />
-            <p className="font-bold text-amber-900 text-sm">আপনার পরিবর্তনের আবেদন এডমিনের অনুমোদনের অপেক্ষায় আছে।</p>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-[#051939] border-b pb-2 flex-1">আমার প্রোফাইল</h2>
-                {!isEditing && (
-                  <button onClick={() => setIsEditing(true)} className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-sm hover:bg-blue-100 transition">
-                    <FaUserEdit /> এডিট করুন
+            <div className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-[#051939]">শিক্ষক ডিরেক্টরি</h3>
+                  <p className="text-xs text-gray-500 mt-1">যেকোনো শিক্ষকের প্রোফাইল আপডেট করতে এডিট বাটনে ক্লিক করুন।</p>
+                </div>
+                {isEditing && (
+                  <button onClick={() => setIsEditing(false)} className="text-sm text-blue-600 hover:underline">
+                    তালিকায় ফিরে যান
                   </button>
                 )}
               </div>
               
               {isEditing ? (
-                <form onSubmit={handleEditSubmit} className="space-y-4">
+                <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+                  <h4 className="font-bold text-gray-800 mb-4 pb-2 border-b">
+                    {profile.nameBengali} এর তথ্য পরিবর্তন
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-1">নাম (ইংরেজিতে)</label>
@@ -168,80 +172,46 @@ export default function TeacherDashboardPage() {
                   </div>
                   <div className="flex gap-2 pt-2 border-t mt-4">
                     <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700">
-                      {isSubmitting ? "সাবমিট হচ্ছে..." : "সাবমিট করুন"}
+                      {isSubmitting ? "সাবমিট হচ্ছে..." : "পরিবর্তনের আবেদন করুন"}
                     </button>
                     <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm">
                       বাতিল
                     </button>
                   </div>
                 </form>
-              ) : profile ? (
-                <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                  {/* Formal Header */}
-                  <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                    <h3 className="text-lg font-bold text-[#051939]">ব্যক্তিগত তথ্যাবলী</h3>
-                    <p className="text-xs text-gray-500 mt-1">আপনার প্রোফাইলের বর্তমান তথ্য নিচে দেওয়া হলো।</p>
-                  </div>
-                  
-                  {/* Details List */}
-                  <div className="divide-y divide-gray-100">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">নাম (বাংলায়)</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.name_bengali}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">নাম (ইংরেজিতে)</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-sans font-medium">{profile.name_english || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">পদবি</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">
-                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold border border-blue-100">
-                          {profile.designation}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">প্রধান বিষয়</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.main_subject || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">ইমেইল</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-sans">{profile.email || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">যোগাযোগ নম্বর</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-mono">{profile.contact_no || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">শিক্ষাগত যোগ্যতা</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium leading-relaxed">{profile.qualification || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">অভিজ্ঞতা</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2 font-medium">{profile.experience || "-"}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="text-sm font-semibold text-gray-600">কোর্স ও প্রশিক্ষণ</div>
-                      <div className="text-sm text-gray-800 sm:col-span-2">
-                        {profile.courses ? (
-                          <ul className="list-disc list-inside space-y-1.5">
-                            {profile.courses.split('\n').map((course: string, i: number) => (
-                              <li key={i} className="leading-relaxed text-gray-700">{course.trim()}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          "-"
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               ) : (
-                <p className="text-gray-400">প্রোফাইল লোড হচ্ছে...</p>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 text-gray-600 border-b">
+                      <th className="px-4 py-3 text-left">নাম ও পদবি</th>
+                      <th className="px-4 py-3 text-right">অ্যাকশন</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {teachers.map((t: any) => (
+                      <tr key={t.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <p className="font-bold text-gray-800 flex items-center gap-2">
+                            {t.nameBengali}
+                            {t.hasPendingEdit && (
+                              <span className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded-full" title="পেন্ডিং এডিট আছে">⏳</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button onClick={() => handleEditClick(t)} className="flex items-center justify-end w-full gap-1 text-blue-600 hover:text-blue-800">
+                            <FaUserEdit /> এডিট
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
+          
           <div className="space-y-4">
             <Link href="/notices" className="block bg-white p-5 rounded-xl shadow border-l-4 border-amber-500 hover:shadow-md transition">
               <FaBullhorn size={24} className="text-amber-500 mb-2" />

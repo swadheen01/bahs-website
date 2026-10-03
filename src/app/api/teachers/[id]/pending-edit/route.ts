@@ -15,10 +15,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
   const { id } = await params;
   const teacherId = parseInt(id);
-  // Teachers can only submit for their own profile
-  if (session.user.role === "teacher" && session.user.teacherId !== teacherId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
   const body = await req.json();
   await pendingTeacherEditsDB.submit(teacherId, body, session.user.name);
   return NextResponse.json({ success: true });

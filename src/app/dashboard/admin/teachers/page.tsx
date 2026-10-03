@@ -135,11 +135,31 @@ export default function AdminTeachersPage() {
 
       <div className="container mx-auto px-4 py-6 max-w-5xl">
         {teachers.some(t => t.hasPendingEdit) && (
-          <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <FaBell className="text-amber-600 mt-0.5 shrink-0" size={18} />
-            <div>
-              <p className="font-bold text-amber-900 text-sm">শিক্ষকের তথ্য পরিবর্তনের আবেদন</p>
-              <p className="text-xs text-amber-700 mt-0.5">{teachers.filter(t => t.hasPendingEdit).length}জন শিক্ষক তাদের তথ্য পরিবর্তনের আবেদন করেছেন। নিচের তালিকা থেকে পর্যালোচনা করুন।</p>
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-3 mb-4">
+              <FaBell className="text-amber-600 mt-0.5 shrink-0" size={18} />
+              <div>
+                <p className="font-bold text-amber-900 text-sm">শিক্ষকের তথ্য পরিবর্তনের আবেদন</p>
+                <p className="text-xs text-amber-700 mt-0.5">নিচের আবেদনগুলো পর্যালোচনা করে অ্যাপ্রুভ বা রিজেক্ট করুন।</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {teachers.filter(t => t.hasPendingEdit).map(t => (
+                <div key={t.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+                  <div>
+                    <p className="font-bold text-sm text-gray-800">{t.nameBengali}</p>
+                    <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleApprove(t.id)} className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-sm">
+                      <FaCheck size={12} /> অ্যাপ্রুভ
+                    </button>
+                    <button onClick={() => handleReject(t.id)} className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-sm">
+                      <FaTimes size={12} /> রিজেক্ট
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -359,22 +379,11 @@ export default function AdminTeachersPage() {
                       {t.nameEnglish && <p className="text-xs font-sans text-gray-400 font-normal">{t.nameEnglish}</p>}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
-                      {t.designation}
+                      {t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}
                       {t.subject && <span className="block text-xs text-[#06874A]">{t.subject}</span>}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {t.hasPendingEdit && (
-                          <>
-                            <button onClick={() => handleApprove(t.id)} className="text-green-600 hover:text-green-800 p-2 rounded hover:bg-green-50" title="অনুমোদন করুন">
-                              <FaCheck size={16} />
-                            </button>
-                            <button onClick={() => handleReject(t.id)} className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50" title="প্রত্যাখ্যান করুন">
-                              <FaTimes size={16} />
-                            </button>
-                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
-                          </>
-                        )}
                         <button
                           onClick={() => handleEdit(t)}
                           className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
