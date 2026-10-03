@@ -4,9 +4,10 @@ import Link from "next/link";
 import {
   FaUserCircle, FaArrowLeft, FaIdCard, FaBook, FaBriefcase,
   FaCalendarAlt, FaPhone, FaEnvelope, FaHome, FaMapMarkerAlt,
-  FaGraduationCap, FaHeart, FaUserFriends, FaClock,
+  FaGraduationCap, FaHeart, FaUserFriends, FaClock, FaEdit,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useAuth } from "@/lib/AuthContext";
 
 interface InfoCardProps {
   icon: React.ReactNode;
@@ -35,17 +36,30 @@ function InfoCard({ icon, label, value, mono, fullWidth }: InfoCardProps) {
 
 export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-5xl">
-        <Link
-          href="/administration/all-teachers"
-          className="inline-flex items-center gap-2 mb-8 text-[#06874A] hover:text-[#051939] transition-colors font-medium bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100"
-        >
-          <FaArrowLeft />
-          <span>{t("সকল শিক্ষকমণ্ডলীর তালিকায় ফিরে যান", "Back to All Faculty Members")}</span>
-        </Link>
+        <div className="flex justify-between items-center mb-8">
+          <Link
+            href="/administration/all-teachers"
+            className="inline-flex items-center gap-2 text-[#06874A] hover:text-[#051939] transition-colors font-medium bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100"
+          >
+            <FaArrowLeft />
+            <span>{t("সকল শিক্ষকমণ্ডলীর তালিকায় ফিরে যান", "Back to All Faculty Members")}</span>
+          </Link>
+
+          {(user?.role === "admin" || user?.role === "teacher") && (
+            <Link
+              href={user.role === "admin" ? `/dashboard/admin/teachers?editId=${teacher.id}` : `/dashboard/teacher?editId=${teacher.id}`}
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow transition-colors"
+            >
+              <FaEdit />
+              <span>{t("এডিট করুন", "Edit Profile")}</span>
+            </Link>
+          )}
+        </div>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           {/* Top Banner with Navy Theme */}

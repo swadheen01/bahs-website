@@ -23,9 +23,7 @@ export default function LoginPage() {
   };
 
   if (user) {
-    if (user.role === "admin") router.replace("/dashboard/admin");
-    else if (user.role === "teacher") router.replace("/dashboard/teacher");
-    else router.replace("/dashboard/student");
+    router.replace("/");
     return null;
   }
 
@@ -35,11 +33,7 @@ export default function LoginPage() {
     setError("");
     const result = await login(username, password);
     if (result.success) {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      if (data.user?.role === "admin") router.push("/dashboard/admin");
-      else if (data.user?.role === "teacher") router.push("/dashboard/teacher");
-      else router.push("/dashboard/student");
+      router.push("/");
     } else {
       setError(result.error || "লগইন ব্যর্থ হয়েছে");
       setLoading(false);

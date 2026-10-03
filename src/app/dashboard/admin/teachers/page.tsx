@@ -62,6 +62,14 @@ export default function AdminTeachersPage() {
     if (user?.role === "admin") loadTeachers();
   }, [user]);
 
+  useEffect(() => {
+    const editIdParam = new URLSearchParams(window.location.search).get("editId");
+    if (editIdParam && teachers.length > 0 && !showForm) {
+      const t = teachers.find(x => x.id.toString() === editIdParam);
+      if (t) handleEdit(t);
+    }
+  }, [teachers]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

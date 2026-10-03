@@ -15,6 +15,7 @@ export default function TeacherDashboardPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [showManagement, setShowManagement] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || (user.role !== "teacher" && user.role !== "admin"))) {
@@ -33,6 +34,17 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     fetchProfile();
   }, [user]);
+
+  useEffect(() => {
+    const editId = new URLSearchParams(window.location.search).get("editId");
+    if (editId && teachers.length > 0 && !isEditing) {
+      const t = teachers.find((x: any) => x.id.toString() === editId);
+      if (t) {
+        setShowManagement(true);
+        handleEditClick(t);
+      }
+    }
+  }, [teachers]);
 
   const handleEditClick = (t: any) => {
     setProfile(t);
@@ -109,122 +121,130 @@ export default function TeacherDashboardPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-              <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-bold text-[#051939]">শিক্ষক ডিরেক্টরি</h3>
-                  <p className="text-xs text-gray-500 mt-1">যেকোনো শিক্ষকের প্রোফাইল আপডেট করতে এডিট বাটনে ক্লিক করুন।</p>
-                </div>
+        {!showManagement ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button onClick={() => setShowManagement(true)} className="block bg-white p-6 rounded-xl shadow border-l-4 border-green-500 hover:shadow-md transition text-left">
+              <FaUserEdit size={28} className="text-green-500 mb-3" />
+              <h3 className="font-bold text-gray-800 text-lg">শিক্ষক ব্যবস্থাপনা</h3>
+              <p className="text-sm text-gray-500 mt-1">যেকোনো শিক্ষকের প্রোফাইলের তথ্য আপডেট করুন</p>
+            </button>
+            <Link href="/notices" className="block bg-white p-6 rounded-xl shadow border-l-4 border-amber-500 hover:shadow-md transition">
+              <FaBullhorn size={28} className="text-amber-500 mb-3" />
+              <h3 className="font-bold text-gray-800 text-lg">নোটিশসমূহ দেখুন</h3>
+              <p className="text-sm text-gray-500 mt-1">বিদ্যালয়ের সাম্প্রতিক সকল বিজ্ঞপ্তি ও রুটিন দেখুন</p>
+            </Link>
+            <Link href="/academics/routine" className="block bg-white p-6 rounded-xl shadow border-l-4 border-blue-500 hover:shadow-md transition">
+              <FaBook size={28} className="text-blue-500 mb-3" />
+              <h3 className="font-bold text-gray-800 text-lg">ক্লাস রুটিন</h3>
+              <p className="text-sm text-gray-500 mt-1">সাপ্তাহিক ক্লাসের সময়সূচী ও বিষয়ভিত্তিক তথ্য</p>
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-[#051939]">শিক্ষক ডিরেক্টরি</h3>
+                <p className="text-xs text-gray-500 mt-1">যেকোনো শিক্ষকের প্রোফাইল আপডেট করতে এডিট বাটনে ক্লিক করুন।</p>
+              </div>
+              <div className="flex items-center gap-3">
                 {isEditing && (
-                  <button onClick={() => setIsEditing(false)} className="text-sm text-blue-600 hover:underline">
+                  <button onClick={() => setIsEditing(false)} className="text-sm text-blue-600 hover:underline font-semibold border-r pr-3">
                     তালিকায় ফিরে যান
                   </button>
                 )}
+                <button onClick={() => { setShowManagement(false); setIsEditing(false); }} className="text-sm text-red-600 hover:underline font-semibold">
+                  বন্ধ করুন
+                </button>
               </div>
-              
-              {isEditing ? (
-                <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
-                  <h4 className="font-bold text-gray-800 mb-4 pb-2 border-b">
-                    {profile.nameBengali} এর তথ্য পরিবর্তন
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">নাম (ইংরেজিতে)</label>
-                      <input type="text" value={editForm.nameEnglish} onChange={(e) => setEditForm({ ...editForm, nameEnglish: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">ইমেইল</label>
-                      <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">যোগাযোগ নম্বর</label>
-                      <input type="text" value={editForm.contactNo} onChange={(e) => setEditForm({ ...editForm, contactNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">শিক্ষাগত যোগ্যতা</label>
-                      <input type="text" value={editForm.qualification} onChange={(e) => setEditForm({ ...editForm, qualification: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">অভিজ্ঞতা</label>
-                      <input type="text" value={editForm.experience} onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">প্রধান বিষয়</label>
-                      <input type="text" value={editForm.mainSubject} onChange={(e) => setEditForm({ ...editForm, mainSubject: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-1">কোর্স ও প্রশিক্ষণ</label>
-                      <textarea value={editForm.courses} onChange={(e) => setEditForm({ ...editForm, courses: e.target.value })} rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-1">বর্তমান ঠিকানা</label>
-                      <input type="text" value={editForm.presentAddress} onChange={(e) => setEditForm({ ...editForm, presentAddress: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-1">স্থায়ী ঠিকানা</label>
-                      <input type="text" value={editForm.permanentAddress} onChange={(e) => setEditForm({ ...editForm, permanentAddress: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <FileUpload label="প্রোফাইল ছবি" value={editForm.photo} onChange={(url) => setEditForm({ ...editForm, photo: url })} helpText="নতুন ছবি আপলোড করুন" />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-2 border-t mt-4">
-                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700">
-                      {isSubmitting ? "সাবমিট হচ্ছে..." : "পরিবর্তনের আবেদন করুন"}
-                    </button>
-                    <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm">
-                      বাতিল
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-600 border-b">
-                      <th className="px-4 py-3 text-left">নাম ও পদবি</th>
-                      <th className="px-4 py-3 text-right">অ্যাকশন</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {teachers.map((t: any) => (
-                      <tr key={t.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <p className="font-bold text-gray-800 flex items-center gap-2">
-                            {t.nameBengali}
-                            {t.hasPendingEdit && (
-                              <span className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded-full" title="পেন্ডিং এডিট আছে">⏳</span>
-                            )}
-                          </p>
-                          <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <button onClick={() => handleEditClick(t)} className="flex items-center justify-end w-full gap-1 text-blue-600 hover:text-blue-800">
-                            <FaUserEdit /> এডিট
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
             </div>
+            
+            {isEditing ? (
+              <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+                <h4 className="font-bold text-gray-800 mb-4 pb-2 border-b">
+                  {profile.nameBengali} এর তথ্য পরিবর্তন
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">নাম (ইংরেজিতে)</label>
+                    <input type="text" value={editForm.nameEnglish} onChange={(e) => setEditForm({ ...editForm, nameEnglish: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">ইমেইল</label>
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">যোগাযোগ নম্বর</label>
+                    <input type="text" value={editForm.contactNo} onChange={(e) => setEditForm({ ...editForm, contactNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">শিক্ষাগত যোগ্যতা</label>
+                    <input type="text" value={editForm.qualification} onChange={(e) => setEditForm({ ...editForm, qualification: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">অভিজ্ঞতা</label>
+                    <input type="text" value={editForm.experience} onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">প্রধান বিষয়</label>
+                    <input type="text" value={editForm.mainSubject} onChange={(e) => setEditForm({ ...editForm, mainSubject: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">কোর্স ও প্রশিক্ষণ</label>
+                    <textarea value={editForm.courses} onChange={(e) => setEditForm({ ...editForm, courses: e.target.value })} rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">বর্তমান ঠিকানা</label>
+                    <input type="text" value={editForm.presentAddress} onChange={(e) => setEditForm({ ...editForm, presentAddress: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">স্থায়ী ঠিকানা</label>
+                    <input type="text" value={editForm.permanentAddress} onChange={(e) => setEditForm({ ...editForm, permanentAddress: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FileUpload label="প্রোফাইল ছবি" value={editForm.photo} onChange={(url) => setEditForm({ ...editForm, photo: url })} helpText="নতুন ছবি আপলোড করুন" />
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2 border-t mt-4">
+                  <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700">
+                    {isSubmitting ? "সাবমিট হচ্ছে..." : "পরিবর্তনের আবেদন করুন"}
+                  </button>
+                  <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm">
+                    বাতিল
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-600 border-b">
+                    <th className="px-4 py-3 text-left">নাম ও পদবি</th>
+                    <th className="px-4 py-3 text-right">অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {teachers.map((t: any) => (
+                    <tr key={t.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <p className="font-bold text-gray-800 flex items-center gap-2">
+                          {t.nameBengali}
+                          {t.hasPendingEdit && (
+                            <span className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded-full" title="পেন্ডিং এডিট আছে">⏳</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button onClick={() => handleEditClick(t)} className="flex items-center justify-end w-full gap-1 text-blue-600 hover:text-blue-800">
+                          <FaUserEdit /> এডিট
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-          
-          <div className="space-y-4">
-            <Link href="/notices" className="block bg-white p-5 rounded-xl shadow border-l-4 border-amber-500 hover:shadow-md transition">
-              <FaBullhorn size={24} className="text-amber-500 mb-2" />
-              <h3 className="font-bold text-gray-800">নোটিশসমূহ দেখুন</h3>
-              <p className="text-xs text-gray-500 mt-1">বিদ্যালয়ের সাম্প্রতিক সকল বিজ্ঞপ্তি ও রুটিন দেখুন</p>
-            </Link>
-            <Link href="/academics/routine" className="block bg-white p-5 rounded-xl shadow border-l-4 border-blue-500 hover:shadow-md transition">
-              <FaBook size={24} className="text-blue-500 mb-2" />
-              <h3 className="font-bold text-gray-800">ক্লাস রুটিন</h3>
-              <p className="text-xs text-gray-500 mt-1">সাপ্তাহিক ক্লাসের সময়সূচী ও বিষয়ভিত্তিক তথ্য</p>
-            </Link>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
