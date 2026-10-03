@@ -9,20 +9,26 @@ import {
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface InfoCardProps {
+  icon: React.ReactNode;
   label: string;
   value?: string | null;
   mono?: boolean;
   fullWidth?: boolean;
 }
 
-function InfoCard({ label, value, mono, fullWidth }: InfoCardProps) {
+function InfoCard({ icon, label, value, mono, fullWidth }: InfoCardProps) {
   if (!value) return null;
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-100 p-4 ${fullWidth ? 'sm:col-span-2' : ''}`}>
-      <p className="text-xs font-semibold text-gray-500 mb-1">{label}</p>
-      <p className={`text-[15px] font-bold text-gray-800 ${mono ? "font-mono" : ""}`}>
-        {value}
-      </p>
+    <div className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5 flex items-start gap-4 ${fullWidth ? 'sm:col-span-2' : ''}`}>
+      <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#06874A] shrink-0 border border-emerald-100">
+        {icon}
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-gray-500 mb-1 tracking-wide">{label}</p>
+        <p className={`text-[15px] font-bold text-gray-800 leading-snug ${mono ? "font-mono" : ""}`}>
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -86,38 +92,43 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
 
           {/* Profile Details Grid */}
           <div className="p-6 sm:p-10 bg-gray-50/50">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InfoCard label={t("এমপিও ইনডেক্স নং", "MPO Index Number")} value={teacher.mpo_index} />
-              <InfoCard label={t("যোগদানের তারিখ", "Joining Date")} value={teacher.joining_date} />
-              <InfoCard label={t("জন্মতারিখ", "Birth Date")} value={teacher.birth_date} />
-              <InfoCard label={t("জাতীয় পরিচয়পত্র নং", "NID No")} value={teacher.nid} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <InfoCard icon={<FaIdCard size={18} />} label={t("এমপিও ইনডেক্স নং", "MPO Index Number")} value={teacher.mpo_index} />
+              <InfoCard icon={<FaCalendarAlt size={18} />} label={t("যোগদানের তারিখ", "Joining Date")} value={teacher.joining_date} />
+              <InfoCard icon={<FaCalendarAlt size={18} />} label={t("জন্মতারিখ", "Birth Date")} value={teacher.birth_date} />
+              <InfoCard icon={<FaIdCard size={18} />} label={t("জাতীয় পরিচয়পত্র নং", "NID No")} value={teacher.nid} />
               
-              <InfoCard label={t("পিতার নাম", "Father's Name")} value={teacher.father_name} />
-              <InfoCard label={t("মাতার নাম", "Mother's Name")} value={teacher.mother_name} />
+              <InfoCard icon={<FaUserFriends size={18} />} label={t("পিতার নাম", "Father's Name")} value={teacher.father_name} />
+              <InfoCard icon={<FaUserFriends size={18} />} label={t("মাতার নাম", "Mother's Name")} value={teacher.mother_name} />
               
-              <InfoCard label={t("ইমেইল", "Email")} value={teacher.email} />
-              <InfoCard label={t("মোবাইল নং", "Contact No.")} value={teacher.contact_no} mono />
+              <InfoCard icon={<FaEnvelope size={18} />} label={t("ইমেইল", "Email")} value={teacher.email} />
+              <InfoCard icon={<FaPhone size={18} />} label={t("মোবাইল নং", "Contact No.")} value={teacher.contact_no} mono />
               
-              <InfoCard label={t("যোগ্যতা", "Qualification")} value={teacher.qualification} />
-              <InfoCard label={t("অভিজ্ঞতা", "Experience")} value={teacher.experience} />
-              <InfoCard label={t("প্রধান বিষয়", "Main Subject")} value={teacher.main_subject} />
-              <InfoCard label={t("অন্যান্য বিষয়", "Other Subjects")} value={teacher.subject} />
+              <InfoCard icon={<FaGraduationCap size={18} />} label={t("যোগ্যতা", "Qualification")} value={teacher.qualification} />
+              <InfoCard icon={<FaClock size={18} />} label={t("অভিজ্ঞতা", "Experience")} value={teacher.experience} />
+              <InfoCard icon={<FaBook size={18} />} label={t("প্রধান বিষয়", "Main Subject")} value={teacher.main_subject} />
+              <InfoCard icon={<FaBook size={18} />} label={t("অন্যান্য বিষয়", "Other Subjects")} value={teacher.subject} />
               
-              <InfoCard label={t("আগ্রহ", "Interest")} value={teacher.interest} fullWidth />
+              <InfoCard icon={<FaHeart size={18} />} label={t("আগ্রহ", "Interest")} value={teacher.interest} fullWidth />
 
               {teacher.courses && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:col-span-2">
-                  <p className="text-xs font-semibold text-gray-500 mb-2">{t("কোর্স ও প্রশিক্ষণ", "Courses & Training")}</p>
-                  <ul className="list-disc list-inside space-y-1 ml-1 text-[15px] font-bold text-gray-800">
-                    {teacher.courses.split('\n').map((course: string, i: number) => (
-                      <li key={i}>{course.trim()}</li>
-                    ))}
-                  </ul>
+                <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5 flex items-start gap-4 sm:col-span-2">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#06874A] shrink-0 border border-emerald-100">
+                    <FaBook size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-2 tracking-wide">{t("কোর্স ও প্রশিক্ষণ", "Courses & Training")}</p>
+                    <ul className="list-disc list-inside space-y-1.5 ml-1 text-[15px] font-bold text-gray-800">
+                      {teacher.courses.split('\n').map((course: string, i: number) => (
+                        <li key={i}>{course.trim()}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
 
-              <InfoCard label={t("বর্তমান ঠিকানা", "Present Address")} value={teacher.present_address} fullWidth />
-              <InfoCard label={t("স্থায়ী ঠিকানা", "Permanent Address")} value={teacher.permanent_address} fullWidth />
+              <InfoCard icon={<FaHome size={18} />} label={t("বর্তমান ঠিকানা", "Present Address")} value={teacher.present_address} fullWidth />
+              <InfoCard icon={<FaMapMarkerAlt size={18} />} label={t("স্থায়ী ঠিকানা", "Permanent Address")} value={teacher.permanent_address} fullWidth />
             </div>
           </div>
         </div>

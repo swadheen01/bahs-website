@@ -15,6 +15,7 @@ interface Teacher {
   subject?: string;
   category: string;
   photo?: string;
+  mainSubject?: string;
 }
 
 export default function TeachersSection() {
@@ -96,7 +97,7 @@ export default function TeachersSection() {
                   </h3>
                   <div className="mt-1.5">
                     <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-2 py-0.5 rounded-full line-clamp-1 shadow-xs">
-                      {language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation}
+                      {(language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation) + (teacher.mainSubject ? ` (${teacher.mainSubject})` : "")}
                     </span>
                   </div>
                 </div>
