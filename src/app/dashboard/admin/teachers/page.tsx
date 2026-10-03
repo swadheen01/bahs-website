@@ -29,6 +29,7 @@ interface Teacher {
   mainSubject?: string;
   courses?: string;
   hasPendingEdit?: boolean;
+  pendingEditData?: any;
 }
 
 const emptyForm: Partial<Teacher> = {
@@ -144,22 +145,57 @@ export default function AdminTeachersPage() {
               </div>
             </div>
             <div className="space-y-3">
-              {teachers.filter(t => t.hasPendingEdit).map(t => (
-                <div key={t.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
-                  <div>
-                    <p className="font-bold text-sm text-gray-800">{t.nameBengali}</p>
-                    <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
+              {teachers.filter(t => t.hasPendingEdit).map(t => {
+                const pendingData = typeof t.pendingEditData === 'string' 
+                  ? JSON.parse(t.pendingEditData) 
+                  : t.pendingEditData || {};
+                
+                // Fields mapping
+                const fieldMap: Record<string, string> = {
+                  nameEnglish: "নাম (ইংরেজিতে)",
+                  email: "ইমেইল",
+                  contactNo: "যোগাযোগ নম্বর",
+                  qualification: "শিক্ষাগত যোগ্যতা",
+                  experience: "অভিজ্ঞতা",
+                  mainSubject: "প্রধান বিষয়",
+                  courses: "কোর্স ও প্রশিক্ষণ",
+                  presentAddress: "বর্তমান ঠিকানা",
+                  permanentAddress: "স্থায়ী ঠিকানা",
+                  photo: "প্রোফাইল ছবি"
+                };
+
+                return (
+                  <div key={t.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-amber-200 shadow-sm gap-4">
+                    <div className="flex-1 w-full">
+                      <p className="font-bold text-sm text-gray-800">{t.nameBengali}</p>
+                      <p className="text-xs text-gray-500 mb-3">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
+                      
+                      {/* Show Changes */}
+                      <div className="bg-gray-50 p-3 rounded border border-gray-100 space-y-1">
+                        <p className="text-[11px] font-bold uppercase text-gray-400 mb-2 border-b pb-1">প্রস্তাবিত পরিবর্তনসমূহ:</p>
+                        {Object.entries(pendingData).map(([key, val]) => {
+                          if (!val && !(t as any)[key]) return null;
+                          return (
+                            <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-xs">
+                              <span className="text-gray-500 font-medium">{fieldMap[key] || key}:</span>
+                              <span className="sm:col-span-2 text-blue-700 font-semibold break-words">{String(val)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex sm:flex-col gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                      <button onClick={() => handleApprove(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
+                        <FaCheck size={12} /> অ্যাপ্রুভ
+                      </button>
+                      <button onClick={() => handleReject(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
+                        <FaTimes size={12} /> রিজেক্ট
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleApprove(t.id)} className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-sm">
-                      <FaCheck size={12} /> অ্যাপ্রুভ
-                    </button>
-                    <button onClick={() => handleReject(t.id)} className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-sm">
-                      <FaTimes size={12} /> রিজেক্ট
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
