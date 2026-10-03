@@ -70,7 +70,7 @@ export default function HomePage() {
       <StatsSection />
 
       {/* President & Headmaster Messages + Notice Board */}
-      <section className="py-12 bg-gradient-to-b from-gray-50 to-gray-100/60">
+      <section className="pt-12 pb-6 bg-gradient-to-b from-gray-50 to-gray-100/60">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Left Column (2 Cols): History & Messages */}
