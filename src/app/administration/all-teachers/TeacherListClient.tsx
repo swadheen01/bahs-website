@@ -156,3 +156,4 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
     </>
   );
 }
+

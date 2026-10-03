@@ -13,3 +13,4 @@ export default async function NoticesPage() {
 
   return <NoticeTable notices={notices} />;
 }
+

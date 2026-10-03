@@ -140,3 +140,4 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
     </div>
   );
 }
+

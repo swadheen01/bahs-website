@@ -161,7 +161,9 @@ export default function HomePage() {
                         — {language === "en" ? schoolInfo.presidentMessage.nameEn : schoolInfo.presidentMessage.name}
                       </p>
                       <p className="text-xs text-gray-500 font-medium">
-                        {t("সভাপতি, পরিচালনা পর্ষদ", "President, Governing Body")}
+                        {language === "en"
+                          ? (schoolInfo.presidentMessage.designationEn || "Upazila Rural Development Officer, Baniyachong & President, Managing Committee")
+                          : (schoolInfo.presidentMessage.designation || "উপজেলা পল্লী উন্নয়ন কর্মকর্তা, বানিয়াচং, হবিগঞ্জ ও সভাপতি, পরিচালনা পর্ষদ")}
                       </p>
                     </div>
                   </div>

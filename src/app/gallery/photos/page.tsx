@@ -37,3 +37,4 @@ export default async function PhotoGalleryPage() {
 
   return <PhotoGalleryClient photos={photos} />;
 }
+

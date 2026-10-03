@@ -8,3 +8,4 @@ export default async function AlumniPage() {
 
   return <AlumniListClient alumni={alumni} />;
 }
+

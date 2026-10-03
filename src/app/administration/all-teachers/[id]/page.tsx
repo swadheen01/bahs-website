@@ -19,3 +19,4 @@ export default async function TeacherDetailsPage({ params }: { params: Promise<{
 
   return <TeacherDetailsClient teacher={teacher} />;
 }
+
