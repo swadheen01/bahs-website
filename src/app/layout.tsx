@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     description: "উপজেলাঃ বানিয়াচং, জেলাঃ হবিগঞ্জ",
     type: "website",
     locale: "bn_BD",
-    siteName: "বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
     images: [
       {
         url: "/images/logo/logo.png",
