@@ -180,3 +180,12 @@ html.splash-hidden #bahs-splash-screen {
   transform: rotate(25deg) translateY(100%);
 }
 
+
+@keyframes custom-shimmer {
+  0% { transform: translateX(-150%) skewX(-15deg); }
+  100% { transform: translateX(250%) skewX(-15deg); }
+}
+.animate-shimmer-sweep {
+  animation: custom-shimmer 1.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight, FaRegCalendarAlt } from "react-icons/fa";
 import { getBengaliDate } from "@/lib/bengaliCalendar";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -42,7 +42,7 @@ export default function CalendarClient() {
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
   const isHoliday = (date: Date) => {
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
     return holidays.find(h => {
       const s = new Date(h.startDate).getTime();
       const e = new Date(h.endDate).getTime();
@@ -52,9 +52,9 @@ export default function CalendarClient() {
   };
 
   const monthNamesEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const monthNamesBn = ["?????????", "???????????", "?????", "??????", "??", "???", "?????", "?????", "??????????", "???????", "???????", "????????"];
+  const monthNamesBn = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
   const weekDaysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const weekDaysBn = ["???", "???", "?????", "???", "????", "?????", "???"];
+  const weekDaysBn = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র", "শনি"];
 
   return (
     <div className="py-12 bg-gray-50 min-h-screen">
@@ -70,7 +70,7 @@ export default function CalendarClient() {
               </h2>
               <p className="text-emerald-600 font-bold text-sm mt-1 flex items-center justify-center gap-1">
                 <FaRegCalendarAlt />
-                {t("??????????? ???????????", "Academic Calendar")}
+                {t("অ্যাকাডেমিক ক্যালেন্ডার", "Academic Calendar")}
               </p>
             </div>
             <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-emerald-100 hover:text-emerald-600 transition">
@@ -147,15 +147,15 @@ export default function CalendarClient() {
           <div className="mt-8 flex items-center justify-center gap-6 text-xs md:text-sm font-medium text-gray-600">
             <div className="flex items-center gap-2">
               <span className="w-4 h-4 rounded bg-red-50 border border-red-200"></span>
-              {t("??????/???????? ????", "Govt/Other Holiday")}
+              {t("সরকারি/অন্যান্য ছুটি", "Govt/Other Holiday")}
             </div>
             <div className="flex items-center gap-2">
               <span className="w-4 h-4 rounded bg-rose-50/50 border border-rose-100"></span>
-              {t("????????? ????", "Weekly Holiday")}
+              {t("সাপ্তাহিক ছুটি", "Weekly Holiday")}
             </div>
             <div className="flex items-center gap-2">
               <span className="w-4 h-4 rounded bg-white border border-gray-100 ring-2 ring-[#06874A]"></span>
-              {t("????? ???", "Today")}
+              {t("আজকের দিন", "Today")}
             </div>
           </div>
         </div>
@@ -163,3 +163,4 @@ export default function CalendarClient() {
     </div>
   );
 }
+

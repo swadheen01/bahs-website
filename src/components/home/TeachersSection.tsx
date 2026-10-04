@@ -87,8 +87,8 @@ export default function TeachersSection() {
                   )}
 
                   {loadingId === teacher.id && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center transition-all">
-                      <div className="w-8 h-8 border-3 border-[#051939] border-t-transparent rounded-full animate-spin shadow-lg"></div>
+                    <div className="absolute inset-0 bg-[#051939]/20 backdrop-blur-[2px] z-20 overflow-hidden rounded-lg">
+                      <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-transparent via-white/70 to-transparent opacity-90 animate-shimmer-sweep"></div>
                     </div>
                   )}
 
