@@ -14,15 +14,6 @@ interface Slider {
 export default function HeroSlider({ initialSlides: propSlides }: { initialSlides?: Slider[] }) {
   const [slides, setSlides] = useState<Slider[]>(() => {
     if (propSlides && propSlides.length > 0) return propSlides;
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("bahs_hero_sliders");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {}
-    }
     return (initialSlides as Slider[]) || [];
   });
   const [currentSlide, setCurrentSlide] = useState(0);
