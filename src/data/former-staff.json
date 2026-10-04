@@ -8,7 +8,53 @@
       "designationEn": "Former Headmaster",
       "tenure": "১৯৮৫ - ১৯৯৫",
       "photo": "/images/teachers/default_avatar.png"
+    },
+    {
+      "id": "fh-2",
+      "name": "বিপুল ভুষণ রায়",
+      "nameEn": "Bipul Bhushan Roy",
+      "designation": "প্রাক্তন প্রধান শিক্ষক",
+      "designationEn": "Former Headmaster",
+      "tenure": "অজানা",
+      "photo": "/images/teachers/default_avatar.png"
+    },
+    {
+      "id": "fh-3",
+      "name": "আঃ শহিদ",
+      "nameEn": "A. Shahid",
+      "designation": "প্রাক্তন প্রধান শিক্ষক",
+      "designationEn": "Former Headmaster",
+      "tenure": "অজানা",
+      "photo": "/images/teachers/default_avatar.png"
     }
   ],
-  "teachers": []
+  "teachers": [
+    {
+      "id": "ft-1",
+      "name": "মোঃ আব্দুল হামিদ",
+      "nameEn": "Md. Abdul Hamid",
+      "designation": "প্রাক্তন শিক্ষক",
+      "designationEn": "Former Teacher",
+      "tenure": "অজানা",
+      "photo": "/images/teachers/default_avatar.png"
+    },
+    {
+      "id": "ft-2",
+      "name": "মোঃ আহমদ আলী",
+      "nameEn": "Md. Ahmad Ali",
+      "designation": "প্রাক্তন শিক্ষক",
+      "designationEn": "Former Teacher",
+      "tenure": "অজানা",
+      "photo": "/images/teachers/default_avatar.png"
+    },
+    {
+      "id": "ft-3",
+      "name": "খেলা চক্রবর্তী",
+      "nameEn": "Khela Chakraborty",
+      "designation": "প্রাক্তন শিক্ষক",
+      "designationEn": "Former Teacher",
+      "tenure": "অজানা",
+      "photo": "/images/teachers/default_avatar.png"
+    }
+  ]
 }
