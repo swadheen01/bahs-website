@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { FaUserTie, FaCalendarAlt, FaLandmark, FaUserCircle } from "react-icons/fa";
+import { useState, useEffect, useMemo } from "react";
+import { FaUserCircle, FaSearch, FaTimes, FaUserTie } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface FormerStaff {
@@ -15,16 +16,17 @@ interface FormerStaff {
 }
 
 export default function FormerStaffPage() {
-  const { t, language } = useLanguage();
   const [headmasters, setHeadmasters] = useState<FormerStaff[]>([]);
   const [teachers, setTeachers] = useState<FormerStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"headmaster" | "teacher">("headmaster");
+  const [query, setQuery] = useState("");
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     fetch("/api/former-staff")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setHeadmasters(data.headmasters || []);
         setTeachers(data.teachers || []);
         setLoading(false);
@@ -34,94 +36,155 @@ export default function FormerStaffPage() {
 
   const currentList = activeTab === "headmaster" ? headmasters : teachers;
 
-  return (
-    <div className={`min-h-screen bg-gray-50 pb-20 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-12 shadow-md">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <FaLandmark size={16} />
-            <span>{t("ঐতিহ্য ও নেতৃত্ব", "Heritage & Leadership")}</span>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">
-            {t("প্রাক্তন শিক্ষকমণ্ডলী", "Former Faculty of BAHS")}
-          </h1>
-          <p className="text-gray-300 text-xs sm:text-sm mt-2 flex items-center gap-2">
-            <Link href="/" className="hover:text-yellow-300 transition-colors">
-              {t("প্রচ্ছদ", "Home")}
-            </Link>
-            <span>&rsaquo;</span>
-            <span>{t("প্রশাসন", "Administration")}</span>
-            <span>&rsaquo;</span>
-            <span className="text-yellow-300 font-bold">{t("সাবেক শিক্ষকমণ্ডলী", "Former Faculty")}</span>
-          </p>
-        </div>
-      </div>
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return currentList;
+    return currentList.filter(
+      (t) =>
+        t.name?.toLowerCase().includes(q) ||
+        t.nameEn?.toLowerCase().includes(q) ||
+        t.designation?.toLowerCase().includes(q) ||
+        t.designationEn?.toLowerCase().includes(q)
+    );
+  }, [query, currentList]);
 
-      <div className="container mx-auto px-4 -mt-6 max-w-6xl space-y-8 relative z-10">
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100">
+  return (
+    <>
+      {/* Page Header with Full Bilingual Support */}
+      <div className="bg-[#465b6a] pt-12 pb-20 shadow-inner">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white">
+            {t("সাবেক শিক্ষকমণ্ডলী", "Former Faculty Members")}
+          </h1>
+          <div className="w-16 h-1 bg-[#06874A] mx-auto mt-4 mb-2 rounded-full"></div>
+          <p className="text-gray-200 text-sm md:text-base">
+            {language === "en"
+              ? `Baniyachong Adarsha High School`
+              : `বানিয়াচং আদর্শ উচ্চ বিদ্যালয়`}
+          </p>
           
-          <div className="flex flex-wrap gap-4 mb-8 border-b border-gray-100 pb-4">
+          <div className="mt-8 flex justify-center gap-4">
             <button
-              onClick={() => setActiveTab("headmaster")}
-              className={`px-5 py-2.5 rounded-xl font-bold transition-all duration-300 ${activeTab === "headmaster" ? "bg-[#051939] text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => { setActiveTab("headmaster"); setQuery(""); }}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === "headmaster" ? "bg-white text-[#051939] shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
             >
               {t("প্রাক্তন প্রধান শিক্ষক", "Former Headmasters")}
             </button>
             <button
-              onClick={() => setActiveTab("teacher")}
-              className={`px-5 py-2.5 rounded-xl font-bold transition-all duration-300 ${activeTab === "teacher" ? "bg-[#051939] text-white shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => { setActiveTab("teacher"); setQuery(""); }}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === "teacher" ? "bg-white text-[#051939] shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
             >
               {t("অন্যান্য প্রাক্তন শিক্ষক", "Other Former Teachers")}
             </button>
           </div>
-
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="w-10 h-10 border-4 border-[#06874A] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : currentList.length === 0 ? (
-            <div className="text-center py-20">
-              <FaUserCircle size={60} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500 font-medium">{t("কোনো তথ্য পাওয়া যায়নি", "No records found")}</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {currentList.map((staff) => (
-                <div
-                  key={staff.id}
-                  className="group relative bg-white rounded-2xl p-4 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col items-center text-center overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#051939] via-blue-600 to-[#051939]" />
-                  
-                  <div className="relative w-32 h-40 mb-4 rounded-xl overflow-hidden border-2 border-[#051939]/10 p-1 group-hover:border-[#051939]/30 transition-colors">
-                    <img
-                      src={staff.photo || "/images/teachers/default_avatar.png"}
-                      alt={staff.name}
-                      className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-
-                  <h3 className="font-extrabold text-[#051939] text-lg mb-1 group-hover:text-blue-700 transition-colors">
-                    {language === "en" ? staff.nameEn : staff.name}
-                  </h3>
-                  
-                  <span className="inline-block text-[11px] font-bold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-3 py-1 rounded-full mb-3">
-                    {language === "en" ? staff.designationEn : staff.designation}
-                  </span>
-
-                  <div className="mt-auto pt-3 border-t border-gray-100 w-full">
-                    <p className="text-xs font-mono font-bold text-emerald-700 flex items-center justify-center gap-1.5 bg-emerald-50 py-1.5 rounded-lg border border-emerald-100">
-                      <FaCalendarAlt />
-                      {t("কর্মকাল:", "Tenure:")} {staff.tenure}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
-    </div>
+
+      {/* Search Box */}
+      <div className="container mx-auto px-4 -mt-6 mb-4">
+        <div className="max-w-xl mx-auto relative">
+          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("নাম বা পদবি দিয়ে খুঁজুন...", "Search by name or designation...")}
+            className="w-full pl-11 pr-10 py-3 rounded-2xl border border-gray-200 shadow-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#06874A] focus:border-transparent placeholder:text-gray-400 transition"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+              aria-label="Clear search"
+            >
+              <FaTimes size={15} />
+            </button>
+          )}
+        </div>
+        {query && (
+          <p className="text-center text-sm text-gray-500 mt-2">
+            {filtered.length === 0
+              ? t(`"${query}" এর জন্য কোনো শিক্ষক পাওয়া যায়নি`, `No faculty member found for "${query}"`)
+              : t(`${filtered.length} জন শিক্ষক পাওয়া গেছে`, `Found ${filtered.length} faculty members`)}
+          </p>
+        )}
+      </div>
+
+      {/* Teachers Grid with Premium Navy Frames */}
+      <div className="container mx-auto px-4 mt-6 pb-20">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-10 h-10 border-4 border-[#06874A] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <FaUserCircle size={60} className="text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg">
+              {t("কোনো শিক্ষক পাওয়া যায়নি", "No faculty member found")}
+            </p>
+            <button
+              onClick={() => setQuery("")}
+              className="mt-3 text-[#06874A] text-sm hover:underline font-semibold"
+            >
+              {t("সকল শিক্ষকমণ্ডলী দেখুন", "View All Faculty Members")}
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {filtered.map((teacher) => (
+              <div
+                key={teacher.id}
+                className="group relative bg-white rounded-2xl p-3 sm:p-3.5 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center cursor-default"
+              >
+                {/* Top Accent Navy Blue Border */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#051939] via-blue-600 to-[#051939]" />
+
+                {/* Photo Frame with Dual-Layer Regal Navy Border */}
+                <div className="relative p-1.5 rounded-xl bg-gradient-to-b from-[#051939]/15 via-blue-50/40 to-slate-100 border-2 border-[#051939]/20 group-hover:border-[#051939]/80 shadow-sm transition-colors duration-300">
+                  <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
+                    {teacher.photo ? (
+                      <img
+                        src={teacher.photo}
+                        alt={language === "en" && teacher.nameEn ? teacher.nameEn : teacher.name}
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50 group-hover:text-slate-400 transition-colors">
+                        <FaUserCircle size={80} className="opacity-50" />
+                      </div>
+                    )}
+
+                    {/* Subtle Inner Glass Vignette on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#051939]/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Teacher Info */}
+                <div className="pt-3.5 pb-1 px-1 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm md:text-base font-extrabold text-[#051939] group-hover:text-blue-700 transition-colors leading-tight line-clamp-1">
+                      {language === "en" && teacher.nameEn ? teacher.nameEn : teacher.name}
+                    </h3>
+                    <div className="mt-1.5">
+                      <span className="inline-block text-[11px] md:text-xs font-semibold text-[#051939] bg-blue-50/90 border border-blue-200/80 px-2.5 py-0.5 rounded-full line-clamp-1 shadow-xs">
+                        {language === "en" && teacher.designationEn ? teacher.designationEn : teacher.designation}
+                      </span>
+                    </div>
+                    {teacher.tenure && (
+                      <p className="text-[11px] font-mono font-bold text-gray-500 mt-2 bg-gray-50 border border-gray-100 rounded inline-block px-2 py-0.5">
+                        {t("কর্মকাল:", "Tenure:")} {teacher.tenure}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Animated Bottom Indicator */}
+                  <div className="w-8 group-hover:w-16 h-0.5 bg-gradient-to-r from-[#051939] to-blue-600 mx-auto mt-3 rounded-full transition-all duration-300" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
