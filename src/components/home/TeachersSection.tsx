@@ -22,6 +22,7 @@ export default function TeachersSection() {
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
     return (initialTeachers.slice(0, 12) as Teacher[]) || [];
   });
+  const [loadingId, setLoadingId] = useState<number | null>(null);
   const { t, language } = useLanguage();
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function TeachersSection() {
             <Link
               key={teacher.id}
               href={`/administration/all-teachers/${teacher.id}`}
+              onClick={() => setLoadingId(teacher.id)}
               className="group relative bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
             >
               {/* Top Accent Navy Blue Border */}
@@ -81,6 +83,12 @@ export default function TeachersSection() {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-300 bg-slate-50">
                       <FaUsers size={40} className="sm:text-4xl" />
+                    </div>
+                  )}
+
+                  {loadingId === teacher.id && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center transition-all">
+                      <div className="w-8 h-8 border-3 border-[#051939] border-t-transparent rounded-full animate-spin shadow-lg"></div>
                     </div>
                   )}
 
