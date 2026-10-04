@@ -90,9 +90,9 @@ export async function POST(req: Request) {
       revalidatePath("/dashboard/admin/sliders");
     } catch (e) {}
 
-    return NextResponse.json(newSlide);
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newSlide);
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -103,7 +103,7 @@ export async function PUT(req: Request) {
     const items: any[] = Array.isArray(body) ? body : body.sliders;
 
     if (!Array.isArray(items)) {
-      return NextResponse.json({ error: "Invalid array of sliders" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Invalid array of sliders" }, { status: 400 });
     }
 
     const local = await readLocalSliders();
@@ -144,8 +144,8 @@ export async function PUT(req: Request) {
       revalidatePath("/dashboard/admin/sliders");
     } catch (e) {}
 
-    return NextResponse.json({ success: true, sliders: local });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, sliders: local });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

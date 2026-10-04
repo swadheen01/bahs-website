@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
@@ -61,7 +62,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await writeLocalGallery(local);
   }
 
-  return NextResponse.json({ success: true });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -82,5 +83,5 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const filtered = local.filter((item: any) => String(item.id) !== String(id));
   await writeLocalGallery(filtered);
 
-  return NextResponse.json({ success: true });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
 }

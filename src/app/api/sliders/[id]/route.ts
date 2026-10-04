@@ -55,7 +55,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     revalidatePath("/dashboard/admin/sliders");
   } catch (e) {}
 
-  return NextResponse.json({ success: true });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -81,5 +81,5 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     revalidatePath("/dashboard/admin/sliders");
   } catch (e) {}
 
-  return NextResponse.json({ success: true });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
 }

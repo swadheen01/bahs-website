@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "কোনো ফাইল পাওয়া যায়নি" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "কোনো ফাইল পাওয়া যায়নি" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -39,13 +40,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({
       success: true,
       url: publicUrl,
       fileName,
     });
   } catch (error: any) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "ফাইল আপলোড ব্যর্থ হয়েছে: " + (error?.message || "") }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "ফাইল আপলোড ব্যর্থ হয়েছে: " + (error?.message || "") }, { status: 500 });
   }
 }

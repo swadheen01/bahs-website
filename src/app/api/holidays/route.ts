@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
       }
 
       await saveHolidaysData(data);
-      return NextResponse.json({ success: true, data });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, data });
     }
 
     if (body.action === "addHoliday") {
@@ -108,7 +109,7 @@ export async function POST(req: Request) {
       };
       data.holidays = [newHoliday, ...(data.holidays || [])];
       await saveHolidaysData(data);
-      return NextResponse.json({ success: true, holiday: newHoliday, holidays: data.holidays });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, holiday: newHoliday, holidays: data.holidays });
     }
 
     if (body.action === "editHoliday" || body.action === "updateHoliday") {
@@ -125,14 +126,14 @@ export async function POST(req: Request) {
           description: body.description !== undefined ? body.description : data.holidays[index].description,
         };
         await saveHolidaysData(data);
-        return NextResponse.json({ success: true, holiday: data.holidays[index], holidays: data.holidays });
+        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, holiday: data.holidays[index], holidays: data.holidays });
       }
-      return NextResponse.json({ error: "Holiday not found" }, { status: 404 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Holiday not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -147,15 +148,15 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      return NextResponse.json({ error: "Missing holiday id" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing holiday id" }, { status: 400 });
     }
 
     const data = await getHolidaysData();
     data.holidays = (data.holidays || []).filter((h: any) => h.id !== id);
     await saveHolidaysData(data);
 
-    return NextResponse.json({ success: true, holidays: data.holidays });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, holidays: data.holidays });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -118,7 +119,7 @@ export async function POST(req: Request) {
 
       const merged = [...existing, ...newItems];
       await saveResultsToFile(merged);
-      return NextResponse.json({ success: true, count: newItems.length, results: merged });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, count: newItems.length, results: merged });
     } else {
       // Single insert
       const numId = Date.now() % 2147483647;
@@ -143,10 +144,10 @@ export async function POST(req: Request) {
 
       const merged = [newItem, ...existing];
       await saveResultsToFile(merged);
-      return NextResponse.json({ success: true, result: newItem });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: newItem });
     }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -155,7 +156,7 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const id = body.id;
     if (!id) {
-      return NextResponse.json({ error: "Missing result id" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing result id" }, { status: 400 });
     }
 
     // Update in Supabase notices table where type='result'
@@ -181,12 +182,12 @@ export async function PUT(req: Request) {
     if (index !== -1) {
       existing[index] = { ...existing[index], ...body };
       await saveResultsToFile(existing);
-      return NextResponse.json({ success: true, result: existing[index] });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: existing[index] });
     }
 
-    return NextResponse.json({ success: true, result: body });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: body });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -201,7 +202,7 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      return NextResponse.json({ error: "Missing result id" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing result id" }, { status: 400 });
     }
 
     // Delete from Supabase notices table where type='result'
@@ -217,8 +218,8 @@ export async function DELETE(req: Request) {
     const filtered = existing.filter((r) => String(r.id) !== String(id));
     await saveResultsToFile(filtered);
 
-    return NextResponse.json({ success: true, remaining: filtered.length });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, remaining: filtered.length });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

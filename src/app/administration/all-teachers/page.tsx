@@ -1,7 +1,7 @@
 import { teachersDB } from "@/lib/db";
 import TeacherListClient from "./TeacherListClient";
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export default async function AllTeachersPage() {
   const teachers = await teachersDB.getAll();

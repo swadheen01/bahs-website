@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.user || !["admin", "teacher"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const body = await req.json();
@@ -42,5 +42,5 @@ export async function POST(req: NextRequest) {
     revalidatePath("/");
   } catch (e) {}
 
-  return NextResponse.json(newNotice, { status: 201 });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newNotice, { status: 201 });
 }

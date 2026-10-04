@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
@@ -16,7 +17,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.user || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const body = await req.json();
   const newAlumni = await alumniDB.add({
@@ -27,6 +28,6 @@ export async function POST(req: NextRequest) {
     photo: body.photo || "/images/alumni/default.jpg",
     year: body.year || null,
   });
-  return NextResponse.json(newAlumni, { status: 201 });
+  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newAlumni, { status: 201 });
 }
 

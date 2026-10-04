@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -119,9 +120,9 @@ export async function PUT(req: Request) {
       // Ignore read-only filesystem on Vercel
     }
 
-    return NextResponse.json({ success: true, data });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 

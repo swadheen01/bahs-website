@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
@@ -10,7 +11,7 @@ export async function POST(req: NextRequest) {
     const { username, password } = await req.json();
 
     if (!username || !password) {
-      return NextResponse.json({ error: "Username and password required" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
     let user = null;
@@ -35,13 +36,13 @@ export async function POST(req: NextRequest) {
       finalUser = user || { id: 3, name: "ডেমো শিক্ষার্থী", username: "student", role: "student", teacherId: null, class: null };
     } else {
       if (!user) {
-        return NextResponse.json({ error: "ব্যবহারকারী খুঁজে পাওয়া যায়নি" }, { status: 401 });
+        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "ব্যবহারকারী খুঁজে পাওয়া যায়নি" }, { status: 401 });
       }
       isValid = await bcrypt.compare(password, user.passwordHash);
     }
 
     if (!isValid || !finalUser) {
-      return NextResponse.json({ error: "পাসওয়ার্ড সঠিক নয়" }, { status: 401 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "পাসওয়ার্ড সঠিক নয়" }, { status: 401 });
     }
 
     const session = await getIronSession<IronSessionData>(await cookies(), sessionOptions);
@@ -55,13 +56,13 @@ export async function POST(req: NextRequest) {
     };
     await session.save();
 
-    return NextResponse.json({
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({
       success: true,
       user: session.user,
     });
   } catch (err) {
     console.error("Login error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 

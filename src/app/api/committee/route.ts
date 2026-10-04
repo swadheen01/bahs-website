@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -103,9 +104,9 @@ export async function POST(req: Request) {
       if (index !== -1) {
         members[index] = { ...members[index], ...body };
         await saveCommitteeData(members);
-        return NextResponse.json({ success: true, member: members[index] });
+        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: members[index] });
       }
-      return NextResponse.json({ success: true, member: body });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: body });
     }
 
     // Add new
@@ -147,9 +148,9 @@ export async function POST(req: Request) {
     const updated = [...members, newMember];
     await saveCommitteeData(updated);
 
-    return NextResponse.json({ success: true, member: newMember, members: updated });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: newMember, members: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -164,7 +165,7 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      return NextResponse.json({ error: "Missing member id" }, { status: 400 });
+      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing member id" }, { status: 400 });
     }
 
     const cleanId = String(id).replace("mc-", "");
@@ -179,8 +180,8 @@ export async function DELETE(req: Request) {
     const filtered = members.filter((m: any) => m.id !== id);
     await saveCommitteeData(filtered);
 
-    return NextResponse.json({ success: true, members: filtered });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, members: filtered });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
