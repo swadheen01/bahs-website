@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { FaFilePdf, FaDownload, FaEye, FaTimes, FaSearch, FaFileAlt, FaBell } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaFilePdf, FaDownload, FaEye, FaTimes, FaSearch, FaFileAlt, FaBell, FaExpand, FaCompress } from "react-icons/fa";
 import { safeDownloadFile } from "@/lib/downloadFile";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -22,7 +22,58 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [previewNotice, setPreviewNotice] = useState<Notice | null>(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+  const [pdfFullscreen, setPdfFullscreen] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const blobUrlRef = useRef<string | null>(null);
   const { t } = useLanguage();
+
+  // Create a blob URL for base64 PDFs so <iframe> can render them safely.
+  // For regular HTTPS/path URLs, use them directly.
+  useEffect(() => {
+    // Cleanup previous blob URL
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+    setPdfBlobUrl(null);
+    setPdfLoading(false);
+
+    if (!previewNotice?.fileUrl) return;
+    const url = previewNotice.fileUrl;
+
+    if (url.startsWith("data:application/pdf")) {
+      // Convert base64 data URL → Blob URL
+      setPdfLoading(true);
+      try {
+        const parts = url.split(",");
+        const byteCharacters = atob(parts[1]);
+        const byteNumbers = new Uint8Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const blob = new Blob([byteNumbers], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+        blobUrlRef.current = blobUrl;
+        setPdfBlobUrl(blobUrl);
+      } catch (e) {
+        console.error("PDF blob URL creation failed:", e);
+      } finally {
+        setPdfLoading(false);
+      }
+    } else if (isPdfFile(url)) {
+      // Regular URL — iframe can use it directly
+      setPdfBlobUrl(url);
+    }
+
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewNotice]);
 
   const filtered = notices.filter((n) => {
     const matchesSearch = !search || n.title.toLowerCase().includes(search.toLowerCase());
@@ -48,6 +99,11 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
     e.stopPropagation();
     if (!notice.fileUrl) return;
     safeDownloadFile(notice.fileUrl, `${notice.title.replace(/[^a-zA-Z0-9\u0980-\u09FF_-]/g, "_")}`);
+  };
+
+  const closeModal = () => {
+    setPreviewNotice(null);
+    setPdfFullscreen(false);
   };
 
   return (
@@ -180,19 +236,23 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
         </div>
       </div>
 
-      {/* Preview Modal (Safe Viewer) */}
+      {/* ─── Preview Modal ─── */}
       {previewNotice && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
-          onClick={() => setPreviewNotice(null)}
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+          onClick={closeModal}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            className={`bg-white rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden ${
+              isPdfFile(previewNotice.fileUrl)
+                ? "max-w-5xl max-h-[95vh]"
+                : "max-w-3xl max-h-[90vh]"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="bg-[#051939] text-white px-5 py-4 flex items-center justify-between">
-              <div className="pr-4">
+            {/* Header */}
+            <div className="bg-[#051939] text-white px-5 py-4 flex items-center justify-between shrink-0">
+              <div className="pr-4 min-w-0">
                 <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider block">
                   {previewNotice.date}
                 </span>
@@ -201,45 +261,133 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                 </h3>
               </div>
               <button
-                onClick={() => setPreviewNotice(null)}
-                className="text-gray-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+                onClick={closeModal}
+                className="text-gray-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition shrink-0"
               >
                 <FaTimes size={18} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center bg-gray-50">
+            {/* Body */}
+            <div className="overflow-hidden flex-1 flex flex-col bg-gray-50 min-h-0">
+
+              {/* ── Image ── */}
               {previewNotice.fileUrl && isImageFile(previewNotice.fileUrl) ? (
-                <div className="max-w-full rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
-                  <img
-                    src={previewNotice.fileUrl}
-                    alt={previewNotice.title}
-                    className="max-h-[60vh] object-contain mx-auto"
-                  />
+                <div className="p-4 sm:p-6 flex items-center justify-center flex-1 overflow-y-auto">
+                  <div className="max-w-full rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
+                    <img
+                      src={previewNotice.fileUrl}
+                      alt={previewNotice.title}
+                      className="max-h-[65vh] object-contain mx-auto"
+                    />
+                  </div>
                 </div>
+
+              /* ── PDF ── */
               ) : previewNotice.fileUrl && isPdfFile(previewNotice.fileUrl) ? (
-                <div className="w-full h-[60vh] rounded-xl overflow-hidden shadow border border-gray-200 bg-white flex flex-col items-center justify-center p-6 text-center">
-                  <FaFilePdf size={64} className="text-red-500 mb-4" />
-                  <p className="font-bold text-gray-800 text-lg mb-2">
-                    {t("পিডিএফ ডকুমেন্ট ফাইল", "PDF Document File")}
-                  </p>
-                  <p className="text-xs text-gray-500 mb-6 max-w-md">
-                    {t(
-                      "সম্পূর্ণ নোটিশটি পড়তে নিচের বাটনে ক্লিক করে ফাইলটি সরাসরি ডাউনলোড বা ওপেন করুন।",
-                      "Click the button below to download or open the full notice document."
-                    )}
-                  </p>
-                  <button
-                    onClick={(e) => handleDownload(e, previewNotice)}
-                    className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm shadow transition"
-                  >
-                    <FaDownload size={14} />
-                    <span>{t("পিডিএফ ডাউনলোড করুন", "Download PDF")}</span>
-                  </button>
+                <div className="flex flex-col flex-1 min-h-0">
+
+                  {/* PDF mini-toolbar */}
+                  <div className="flex items-center justify-between px-4 py-2 bg-red-50 border-b border-red-100 shrink-0">
+                    <div className="flex items-center gap-2">
+                      <FaFilePdf className="text-red-500" size={15} />
+                      <span className="text-xs font-bold text-red-700">
+                        {t("পিডিএফ ভিউয়ার", "PDF Viewer")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPdfFullscreen((v) => !v)}
+                        className="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 text-xs px-2 py-1 rounded hover:bg-gray-200 transition"
+                        title={pdfFullscreen ? t("ছোট করুন", "Exit Fullscreen") : t("ফুলস্ক্রিন", "Fullscreen")}
+                      >
+                        {pdfFullscreen ? <FaCompress size={12} /> : <FaExpand size={12} />}
+                        <span className="hidden sm:inline">
+                          {pdfFullscreen ? t("ছোট করুন", "Exit Fullscreen") : t("ফুলস্ক্রিন", "Fullscreen")}
+                        </span>
+                      </button>
+                      <button
+                        onClick={(e) => handleDownload(e, previewNotice)}
+                        className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm transition"
+                      >
+                        <FaDownload size={11} />
+                        <span>{t("ডাউনলোড", "Download")}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Fullscreen overlay */}
+                  {pdfFullscreen && pdfBlobUrl && (
+                    <div className="fixed inset-0 z-[60] flex flex-col bg-gray-900" onClick={(e) => e.stopPropagation()}>
+                      <div className="bg-[#051939] text-white px-4 py-2.5 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FaFilePdf className="text-red-400 shrink-0" size={14} />
+                          <span className="text-sm font-bold line-clamp-1">{previewNotice.title}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={(e) => handleDownload(e, previewNotice)}
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition"
+                          >
+                            <FaDownload size={11} />
+                            {t("ডাউনলোড", "Download")}
+                          </button>
+                          <button
+                            onClick={() => setPdfFullscreen(false)}
+                            className="text-gray-300 hover:text-white p-1.5 rounded hover:bg-white/10 transition"
+                          >
+                            <FaCompress size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <iframe
+                        src={`${pdfBlobUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                        className="flex-1 w-full border-0"
+                        title={previewNotice.title}
+                      />
+                    </div>
+                  )}
+
+                  {/* Inline PDF iframe */}
+                  {pdfLoading ? (
+                    <div className="flex-1 flex items-center justify-center gap-3 py-16 text-gray-500 text-sm">
+                      <svg className="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      {t("পিডিএফ লোড হচ্ছে...", "Loading PDF...")}
+                    </div>
+                  ) : pdfBlobUrl ? (
+                    <iframe
+                      src={`${pdfBlobUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                      className="flex-1 w-full border-0"
+                      style={{ minHeight: "65vh" }}
+                      title={previewNotice.title}
+                    />
+                  ) : (
+                    /* Fallback if blob creation failed */
+                    <div className="flex-1 flex flex-col items-center justify-center py-12 px-6 text-center">
+                      <FaFilePdf size={56} className="text-red-400 mb-4" />
+                      <p className="font-bold text-gray-700 mb-2">
+                        {t("পিডিএফ লোড করা যায়নি", "PDF could not be loaded")}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-5">
+                        {t("ব্রাউজার সরাসরি দেখাতে পারছে না, ডাউনলোড করে দেখুন।", "Your browser cannot display it inline. Please download.")}
+                      </p>
+                      <button
+                        onClick={(e) => handleDownload(e, previewNotice)}
+                        className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm shadow transition"
+                      >
+                        <FaDownload size={14} />
+                        {t("পিডিএফ ডাউনলোড করুন", "Download PDF")}
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+              /* ── Other file types ── */
               ) : (
-                <div className="p-8 text-center text-gray-600">
+                <div className="p-8 text-center text-gray-600 flex flex-col items-center flex-1 justify-center">
                   <FaFileAlt size={48} className="mx-auto text-blue-500 mb-3" />
                   <p className="font-medium text-sm">
                     {t("সংযুক্ত ফাইলটি ডাউনলোড করে দেখতে পারেন", "You can download the attached file to view")}
@@ -248,23 +396,23 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
               )}
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-between">
-              <span className="text-xs text-gray-500">
+            {/* Footer */}
+            <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
+              <span className="text-xs text-gray-500 hidden sm:block">
                 {t("বানিয়াচং আদর্শ উচ্চ বিদ্যালয় নোটিশ বোর্ড", "Baniyachong Adarsha High School Notice Board")}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 {previewNotice.fileUrl && (
                   <button
                     onClick={(e) => handleDownload(e, previewNotice)}
-                    className="inline-flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition cursor-pointer"
+                    className="inline-flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition"
                   >
                     <FaDownload size={12} />
                     <span>{t("ফাইল ডাউনলোড করুন", "Download File")}</span>
                   </button>
                 )}
                 <button
-                  onClick={() => setPreviewNotice(null)}
+                  onClick={closeModal}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-xl text-xs transition"
                 >
                   {t("বন্ধ করুন", "Close")}
@@ -277,4 +425,3 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
     </div>
   );
 }
-
