@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.user || !["admin", "teacher"].includes(session.user.role)) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const body = await req.json();
@@ -42,5 +42,5 @@ export async function POST(req: NextRequest) {
     revalidatePath("/");
   } catch (e) {}
 
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newNotice, { status: 201 });
+  return NextResponse.json(newNotice, { status: 201 });
 }

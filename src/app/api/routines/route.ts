@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -122,7 +122,8 @@ export async function POST(req: Request) {
       data.routineFiles = [newFile, ...(data.routineFiles || [])];
       await saveRoutinesData(data);
 
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, file: newFile, routineFiles: data.routineFiles });
+      revalidatePath("/academics/routine");
+      return NextResponse.json({ success: true, file: newFile, routineFiles: data.routineFiles });
     }
 
     if (body.action === "editFile") {
@@ -153,23 +154,26 @@ export async function POST(req: Request) {
         await saveRoutinesData(data);
       }
 
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, file: body });
+      revalidatePath("/academics/routine");
+      return NextResponse.json({ success: true, file: body });
     }
 
     if (body.action === "updateWeekly") {
       const cls = body.class;
       if (!cls || !body.routine) {
-        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing class or routine" }, { status: 400 });
+        return NextResponse.json({ error: "Missing class or routine" }, { status: 400 });
       }
       if (!data.weeklyRoutines) data.weeklyRoutines = {};
       data.weeklyRoutines[cls] = body.routine;
       await saveRoutinesData(data);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, class: cls, routine: body.routine });
+
+      revalidatePath("/academics/routine");
+      return NextResponse.json({ success: true, class: cls, routine: body.routine });
     }
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -184,7 +188,7 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing file id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing file id" }, { status: 400 });
     }
 
     // 1. Delete from Supabase notices table where type='routine'
@@ -204,8 +208,9 @@ export async function DELETE(req: Request) {
     data.routineFiles = (data.routineFiles || []).filter((f: any) => String(f.id) !== String(id));
     await saveRoutinesData(data);
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, routineFiles: data.routineFiles });
+    revalidatePath("/academics/routine");
+    return NextResponse.json({ success: true, routineFiles: data.routineFiles });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

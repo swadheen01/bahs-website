@@ -4,7 +4,7 @@ import path from "path";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 
 const dataFilePath = path.join(process.cwd(), "src", "data", "former-staff.json");
 
@@ -27,13 +27,13 @@ async function saveData(data: any) {
 
 export async function GET() {
   const data = await getData();
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(data);
+  return NextResponse.json(data);
 }
 
 export async function POST(req: Request) {
   const session = await getIronSession<IronSessionData>(await cookies(), sessionOptions);
   if (!session.user || session.user.role !== "admin") {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   try {
@@ -55,7 +55,10 @@ export async function POST(req: Request) {
       };
       collection.push(newItem);
       await saveData(data);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, item: newItem });
+      try {
+        revalidatePath("/administration/former-staff");
+      } catch (e) {}
+      return NextResponse.json({ success: true, item: newItem });
     }
 
     if (body.action === "edit") {
@@ -71,9 +74,12 @@ export async function POST(req: Request) {
           photo: body.photo || collection[index].photo
         };
         await saveData(data);
-        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, item: collection[index] });
+        try {
+          revalidatePath("/administration/former-staff");
+        } catch (e) {}
+        return NextResponse.json({ success: true, item: collection[index] });
       }
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     if (body.action === "delete") {
@@ -83,11 +89,14 @@ export async function POST(req: Request) {
         data.teachers = data.teachers.filter((item: any) => item.id !== body.id);
       }
       await saveData(data);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+      try {
+        revalidatePath("/administration/former-staff");
+      } catch (e) {}
+      return NextResponse.json({ success: true });
     }
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

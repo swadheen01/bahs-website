@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
@@ -14,7 +14,7 @@ async function getSession() {
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session.user || !["admin", "teacher"].includes(session.user.role)) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const { id } = await params;
   const body = await req.json();
@@ -23,13 +23,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     revalidatePath("/notices");
     revalidatePath("/");
   } catch (e) {}
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session.user || session.user.role !== "admin") {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const { id } = await params;
   await noticesDB.delete(parseInt(id));
@@ -37,5 +37,5 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     revalidatePath("/notices");
     revalidatePath("/");
   } catch (e) {}
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true });
 }

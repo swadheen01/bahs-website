@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -52,10 +52,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     revalidatePath("/");
-    revalidatePath("/dashboard/admin/sliders");
   } catch (e) {}
 
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -78,8 +77,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   try {
     revalidatePath("/");
-    revalidatePath("/dashboard/admin/sliders");
   } catch (e) {}
 
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true });
 }

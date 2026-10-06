@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
@@ -20,20 +20,30 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session.user || session.user.role !== "admin") {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const { id } = await params;
   const body = await req.json();
   await teachersDB.update(parseInt(id), body);
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  try {
+    revalidatePath("/administration/all-teachers");
+    revalidatePath(`/administration/all-teachers/${id}`);
+    revalidatePath("/");
+  } catch (e) {}
+  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session.user || session.user.role !== "admin") {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   const { id } = await params;
   await teachersDB.delete(parseInt(id));
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true });
+  try {
+    revalidatePath("/administration/all-teachers");
+    revalidatePath(`/administration/all-teachers/${id}`);
+    revalidatePath("/");
+  } catch (e) {}
+  return NextResponse.json({ success: true });
 }

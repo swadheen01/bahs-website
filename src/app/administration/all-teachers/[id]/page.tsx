@@ -2,7 +2,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import TeacherDetailsClient from "./TeacherDetailsClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400; // 24h ISR, revalidated on-demand when teacher profile updates
 
 export default async function TeacherDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

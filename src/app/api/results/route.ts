@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -119,7 +119,8 @@ export async function POST(req: Request) {
 
       const merged = [...existing, ...newItems];
       await saveResultsToFile(merged);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, count: newItems.length, results: merged });
+      revalidatePath("/academics/results");
+      return NextResponse.json({ success: true, count: newItems.length, results: merged });
     } else {
       // Single insert
       const numId = Date.now() % 2147483647;
@@ -144,10 +145,11 @@ export async function POST(req: Request) {
 
       const merged = [newItem, ...existing];
       await saveResultsToFile(merged);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: newItem });
+      revalidatePath("/academics/results");
+      return NextResponse.json({ success: true, result: newItem });
     }
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -156,7 +158,7 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const id = body.id;
     if (!id) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing result id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing result id" }, { status: 400 });
     }
 
     // Update in Supabase notices table where type='result'
@@ -182,12 +184,14 @@ export async function PUT(req: Request) {
     if (index !== -1) {
       existing[index] = { ...existing[index], ...body };
       await saveResultsToFile(existing);
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: existing[index] });
+      revalidatePath("/academics/results");
+      return NextResponse.json({ success: true, result: existing[index] });
     }
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, result: body });
+    revalidatePath("/academics/results");
+    return NextResponse.json({ success: true, result: body });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -202,7 +206,7 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing result id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing result id" }, { status: 400 });
     }
 
     // Delete from Supabase notices table where type='result'
@@ -218,8 +222,9 @@ export async function DELETE(req: Request) {
     const filtered = existing.filter((r) => String(r.id) !== String(id));
     await saveResultsToFile(filtered);
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, remaining: filtered.length });
+    revalidatePath("/academics/results");
+    return NextResponse.json({ success: true, remaining: filtered.length });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

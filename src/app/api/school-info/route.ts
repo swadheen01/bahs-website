@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -120,9 +120,10 @@ export async function PUT(req: Request) {
       // Ignore read-only filesystem on Vercel
     }
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, data });
+    revalidatePath("/");
+    revalidatePath("/about");
+    return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

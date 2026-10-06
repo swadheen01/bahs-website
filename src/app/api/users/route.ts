@@ -1,4 +1,3 @@
-import { revalidatePath } from "@/lib/legacy-cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
@@ -23,19 +22,19 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.user || session.user.role !== "admin") {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const body = await req.json();
   const { name, username, password, role, teacherId, class: cls } = body;
 
   if (!name || !username || !password || !role) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "All fields required" }, { status: 400 });
+    return NextResponse.json({ error: "All fields required" }, { status: 400 });
   }
 
   const existing = await usersDB.findByUsername(username);
   if (existing) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Username already exists" }, { status: 400 });
+    return NextResponse.json({ error: "Username already exists" }, { status: 400 });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -47,6 +46,5 @@ export async function POST(req: NextRequest) {
   });
 
   const { passwordHash: _, ...safeUser } = newUser;
-  try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(safeUser, { status: 201 });
+  return NextResponse.json(safeUser, { status: 201 });
 }
-

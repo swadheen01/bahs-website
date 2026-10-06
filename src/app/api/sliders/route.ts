@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -87,12 +87,11 @@ export async function POST(req: Request) {
 
     try {
       revalidatePath("/");
-      revalidatePath("/dashboard/admin/sliders");
     } catch (e) {}
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newSlide);
+    return NextResponse.json(newSlide);
   } catch (err: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -103,7 +102,7 @@ export async function PUT(req: Request) {
     const items: any[] = Array.isArray(body) ? body : body.sliders;
 
     if (!Array.isArray(items)) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Invalid array of sliders" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid array of sliders" }, { status: 400 });
     }
 
     const local = await readLocalSliders();
@@ -141,11 +140,10 @@ export async function PUT(req: Request) {
 
     try {
       revalidatePath("/");
-      revalidatePath("/dashboard/admin/sliders");
     } catch (e) {}
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, sliders: local });
+    return NextResponse.json({ success: true, sliders: local });
   } catch (err: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

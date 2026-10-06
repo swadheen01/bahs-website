@@ -1,4 +1,3 @@
-import { revalidatePath } from "@/lib/legacy-cache";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -148,7 +147,7 @@ export async function POST(req: NextRequest) {
     const { sessionToken, exam, year, board, roll, reg, captcha } = body;
 
     if (!sessionToken || !captcha || !roll) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(
+      return NextResponse.json(
         { success: false, message: "অনুগ্রহ করে রোল ও সিকিউরিটি ক্যাপচা কোড প্রদান করুন।" },
         { status: 400 }
       );
@@ -158,7 +157,7 @@ export async function POST(req: NextRequest) {
     try {
       sessionCookie = Buffer.from(sessionToken, "base64").toString("utf-8");
     } catch {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(
+      return NextResponse.json(
         { success: false, message: "অধিবেশনের মেয়াদ শেষ হয়ে গেছে। ক্যাপচা রিফ্রেশ করে আবার চেষ্টা করুন।" },
         { status: 400 }
       );
@@ -192,7 +191,7 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
 
     if (data.status === 0 && data.res) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({
+      return NextResponse.json({
         success: true,
         result: data.res,
         showMarks: data.showmarks || 0,
@@ -204,14 +203,14 @@ export async function POST(req: NextRequest) {
       } else if (errorMsg.includes("not found") || errorMsg.includes("No Result")) {
         errorMsg = "প্রদত্ত তথ্যের জন্য কোনো ফলাফল পাওয়া যায়নি। রোল ও সন রিচেক করুন।";
       }
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({
+      return NextResponse.json({
         success: false,
         message: errorMsg,
       });
     }
   } catch (error: any) {
     console.error("Board result submit error:", error.message);
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(
+    return NextResponse.json(
       {
         success: false,
         message: "বোর্ড সার্ভার থেকে ফলাফল আনতে ত্রুটি হয়েছে। অনুগ্রহ করে সরাসরি সরকারি পোর্টালে চেষ্টা করুন।",

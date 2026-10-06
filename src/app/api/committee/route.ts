@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
@@ -15,7 +15,7 @@ async function getCommitteeData() {
   }
 }
 
-async function saveCommitteeData(data: any) {
+async function saveCommitteeData(data: any[]) {
   try {
     await writeFile(committeeFilePath, JSON.stringify(data, null, 2), "utf-8");
   } catch (e) {
@@ -104,9 +104,17 @@ export async function POST(req: Request) {
       if (index !== -1) {
         members[index] = { ...members[index], ...body };
         await saveCommitteeData(members);
-        try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: members[index] });
+        try {
+          revalidatePath("/administration/managing-committee");
+          revalidatePath("/about");
+        } catch (e) {}
+        return NextResponse.json({ success: true, member: members[index] });
       }
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: body });
+      try {
+        revalidatePath("/administration/managing-committee");
+        revalidatePath("/about");
+      } catch (e) {}
+      return NextResponse.json({ success: true, member: body });
     }
 
     // Add new
@@ -148,9 +156,14 @@ export async function POST(req: Request) {
     const updated = [...members, newMember];
     await saveCommitteeData(updated);
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, member: newMember, members: updated });
+    try {
+      revalidatePath("/administration/managing-committee");
+      revalidatePath("/about");
+    } catch (e) {}
+
+    return NextResponse.json({ success: true, member: newMember, members: updated });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -165,7 +178,7 @@ export async function DELETE(req: Request) {
     }
 
     if (!id) {
-      try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: "Missing member id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing member id" }, { status: 400 });
     }
 
     const cleanId = String(id).replace("mc-", "");
@@ -180,8 +193,13 @@ export async function DELETE(req: Request) {
     const filtered = members.filter((m: any) => m.id !== id);
     await saveCommitteeData(filtered);
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ success: true, members: filtered });
+    try {
+      revalidatePath("/administration/managing-committee");
+      revalidatePath("/about");
+    } catch (e) {}
+
+    return NextResponse.json({ success: true, members: filtered });
   } catch (error: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

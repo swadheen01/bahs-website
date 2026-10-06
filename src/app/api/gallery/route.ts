@@ -1,4 +1,4 @@
-import { revalidatePath } from "@/lib/legacy-cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
@@ -93,8 +93,12 @@ export async function POST(req: Request) {
     local.unshift(newItem);
     await writeLocalGallery(local);
 
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json(newItem);
+    try {
+      revalidatePath("/gallery/photos");
+    } catch (e) {}
+
+    return NextResponse.json(newItem);
   } catch (err: any) {
-    try { revalidatePath("/", "layout"); } catch(e) {} return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
