@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "@/lib/legacy-cache";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";

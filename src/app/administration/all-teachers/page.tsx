@@ -1,7 +1,7 @@
 import { teachersDB } from "@/lib/db";
 import TeacherListClient from "./TeacherListClient";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export default async function AllTeachersPage() {
   const teachers = await teachersDB.getAll();

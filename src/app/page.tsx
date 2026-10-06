@@ -1,7 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import HomeClient from "./HomeClient";
 
-export const revalidate = 86400; // 1 day ISR
+// The home page reads live school content. Render it per request instead of
+// persisting ISR artifacts on every invalidation.
+export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const { data } = await supabase

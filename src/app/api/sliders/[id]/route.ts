@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "@/lib/legacy-cache";
 import { supabase } from "@/lib/supabase";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";

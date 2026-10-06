@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "@/lib/legacy-cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";

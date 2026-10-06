@@ -3,7 +3,7 @@ import defaultGallery from "@/data/gallery.json";
 import { supabase } from "@/lib/supabase";
 import PhotoGalleryClient from "./PhotoGalleryClient";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "ফটোগ্যালারী | বানিয়াচং আদর্শ উচ্চ বিদ্যালয়",
