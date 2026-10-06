@@ -31,6 +31,7 @@ export default function Footer() {
   const quickLinks = [
     { name: t("প্রতিষ্ঠানের ইতিহাস", "History"), href: "/about" },
     { name: t("সকল শিক্ষকমণ্ডলী", "All Faculty"), href: "/administration/all-teachers" },
+    { name: t("প্রাক্তন শিক্ষকবৃন্দ", "Former Teachers"), href: "/administration/former-staff" },
     { name: t("কর্মচারী বৃন্দ", "Staff Members"), href: "/administration/staff" },
     { name: t("কৃতি শিক্ষার্থীবৃন্দ", "Outstanding Students"), href: "/alumni" },
     { name: t("নোটিশ বোর্ড", "Notice Board"), href: "/notices" },

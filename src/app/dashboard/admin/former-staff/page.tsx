@@ -68,8 +68,8 @@ export default function AdminFormerStaffPage() {
     setForm({
       name: "",
       nameEn: "",
-      designation: activeTab === "headmaster" ? "প্রাক্তন প্রধান শিক্ষক" : "প্রাক্তন শিক্ষক",
-      designationEn: activeTab === "headmaster" ? "Former Headmaster" : "Former Teacher",
+      designation: activeTab === "headmaster" ? "প্রাক্তন প্রধান শিক্ষক" : "প্রাক্তন সহকারী শিক্ষক",
+      designationEn: activeTab === "headmaster" ? "Former Headmaster" : "Former Assistant Teacher",
       tenure: "",
       photo: "",
     });
@@ -185,7 +185,7 @@ export default function AdminFormerStaffPage() {
           onClick={() => { setActiveTab("teacher"); setIsFormOpen(false); }}
           className={`px-4 py-2 rounded-lg font-semibold transition ${activeTab === "teacher" ? "bg-[#051939] text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
         >
-          {t("প্রাক্তন অন্যান্য শিক্ষক", "Other Former Teachers")}
+          {t("প্রাক্তন সহকারী শিক্ষক ও অন্যান্য", "Former Assistant Teachers & Others")}
         </button>
       </div>
 

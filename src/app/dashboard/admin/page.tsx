@@ -126,11 +126,11 @@ export default function AdminDashboardPage() {
       color: "border-orange-500 hover:border-orange-600"
     },
     {
-      title: "সাবেক শিক্ষকমণ্ডলী",
-      desc: "প্রাক্তন প্রধান শিক্ষক ও অন্যান্য শিক্ষকদের তালিকা",
+      title: "প্রাক্তন শিক্ষকবৃন্দ ব্যবস্থাপনা",
+      desc: "প্রাক্তন প্রধান শিক্ষক ও সহকারী শিক্ষকদের তালিকা পরিচালনা করুন",
       icon: <FaUserTie size={28} className="text-teal-600" />,
       href: "/dashboard/admin/former-staff",
-      badge: "সাবেক",
+      badge: "প্রাক্তন",
       color: "border-teal-500 hover:border-teal-600"
     },
     {

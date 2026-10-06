@@ -67,6 +67,7 @@ export default function Navbar() {
       children: [
         { label: t("ম্যানেজিং কমিটি", "Managing Committee"), href: "/administration/managing-committee" },
         { label: t("সকল শিক্ষকমণ্ডলী", "All Faculty"), href: "/administration/all-teachers" },
+        { label: t("প্রাক্তন শিক্ষকবৃন্দ", "Former Teachers"), href: "/administration/former-staff" },
         { label: t("কর্মচারী বৃন্দ", "Staff Members"), href: "/administration/staff" },
       ],
     },
