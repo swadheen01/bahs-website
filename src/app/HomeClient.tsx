@@ -163,7 +163,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                       <p className="text-xs text-gray-500 font-medium">
                         {language === "en"
                           ? (schoolInfo.presidentMessage.designationEn || "Upazila Rural Development Officer, Baniyachong & President, Managing Committee")
-                          : (schoolInfo.presidentMessage.designation || "উপজেলা পল্লী উন্নয়ন কর্মকর্তা, বানিয়াচং, হবিগঞ্জ ও সভাপতি, পরিচালনা পর্ষদ")}
+                          : (schoolInfo.presidentMessage.designation || "উপজেলা পল্লী উন্নয়ন কর্মকর্তা, বানিয়াচং, হবিগঞ্জ ও সভাপতি, পরিচালনা পরিষদ")}
                       </p>
                     </div>
                   </div>

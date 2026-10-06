@@ -163,7 +163,7 @@ export default function AdminCommitteePage() {
           <span className="text-gray-600">|</span>
           <h1 className="text-lg font-bold flex items-center gap-2">
             <FaLandmark className="text-yellow-400" />
-            ম্যানেজিং কমিটি (পরিচালনা পর্ষদ) ব্যবস্থাপনা
+            ম্যানেজিং কমিটি (পরিচালনা পরিষদ) ব্যবস্থাপনা
           </h1>
         </div>
 
@@ -184,7 +184,7 @@ export default function AdminCommitteePage() {
           <div>
             <h2 className="text-xl font-bold text-[#051939]">ম্যানেজিং কমিটির সদস্যবৃন্দ</h2>
             <p className="text-xs text-gray-500 mt-1">
-              বিদ্যালয় পরিচালনা পর্ষদের সভাপতি, দাতা, প্রতিষ্ঠাতা, শিক্ষক ও অভিভাবক প্রতিনিধিদের পরিচালনা করুন।
+              বিদ্যালয় পরিচালনা পরিষদের সভাপতি, দাতা, প্রতিষ্ঠাতা, শিক্ষক ও অভিভাবক প্রতিনিধিদের পরিচালনা করুন।
             </p>
           </div>
 

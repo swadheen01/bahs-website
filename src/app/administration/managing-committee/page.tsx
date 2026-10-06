@@ -43,7 +43,7 @@ export default function ManagingCommitteePage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
             <FaLandmark size={16} />
-            <span>{t("প্রশাসনিক পরিচালনা পর্ষদ", "School Governance")}</span>
+            <span>{t("প্রশাসনিক পরিচালনা পরিষদ", "School Governance")}</span>
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">
             {t("বিদ্যালয় পরিচালনা কমিটি (ম্যানেজিং কমিটি)", "School Managing Committee (SMC)")}
@@ -69,7 +69,7 @@ export default function ManagingCommitteePage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {t("সভাপতি, পরিচালনা পর্ষদ", "President")}
+                    {t("সভাপতি, পরিচালনা পরিষদ", "President")}
                   </span>
                   <span className="text-xs text-gray-500 font-mono">
                     {president.term || "২০২৪ - ২০২৬"}
@@ -179,7 +179,7 @@ export default function ManagingCommitteePage() {
           <div className="border-b border-gray-100 pb-4">
             <h2 className="text-lg sm:text-xl font-bold text-[#051939] flex items-center gap-2">
               <FaUsers className="text-[#06874A]" />
-              {t("পরিচালনা পর্ষদের সম্মানিত সদস্যবৃন্দ", "Honorable Committee Members")}
+              {t("পরিচালনা পরিষদের সম্মানিত সদস্যবৃন্দ", "Honorable Committee Members")}
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
               {t(

@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: "ম্যানেজিং কমিটি ব্যবস্থাপনা",
-      desc: "বিদ্যালয় পরিচালনা পর্ষদের সভাপতি, দাতা, প্রতিষ্ঠাতা, শিক্ষক ও অভিভাবক প্রতিনিধিদের তালিকা এডিট করুন",
+      desc: "বিদ্যালয় পরিচালনা পরিষদের সভাপতি, দাতা, প্রতিষ্ঠাতা, শিক্ষক ও অভিভাবক প্রতিনিধিদের তালিকা এডিট করুন",
       icon: <FaLandmark size={28} className="text-violet-600" />,
       href: "/dashboard/admin/committee",
       badge: "কমিটি",
