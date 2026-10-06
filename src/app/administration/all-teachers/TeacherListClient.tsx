@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { FaUserCircle, FaSearch, FaTimes, FaGraduationCap } from "react-icons/fa";
+import { FaUserCircle, FaSearch, FaTimes } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface Teacher {
@@ -81,12 +81,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
         )}
       </div>
 
-      <div className="container mx-auto px-4 mb-8 text-center flex justify-center">
-        <Link href="/administration/former-staff" className="inline-flex items-center gap-2 bg-[#051939] text-white hover:bg-blue-800 transition-colors px-6 py-2.5 rounded-full font-bold shadow-md hover:shadow-lg text-sm group">
-          <FaGraduationCap size={18} className="text-emerald-400 group-hover:text-yellow-300 transition-colors" />
-          {t("প্রাক্তন শিক্ষকবৃন্দ দেখুন", "View Former Teachers")}
-        </Link>
-      </div>
+
 
       {/* Teachers Grid with Premium Navy Frames */}
       <div className="container mx-auto px-4 mt-6">

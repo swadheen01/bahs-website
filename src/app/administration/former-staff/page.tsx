@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import {
   FaUserCircle,
@@ -7,7 +6,6 @@ import {
   FaTimes,
   FaUserTie,
   FaGraduationCap,
-  FaUsers,
   FaAward,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -145,17 +143,6 @@ export default function FormerStaffPage() {
               ? `Baniyachong Adarsha High School — Honoring Our Former Educators (${headmasters.length + teachers.length} Members)`
               : `বানিয়াচং আদর্শ উচ্চ বিদ্যালয় — আমাদের শ্রদ্ধেয় প্রাক্তন শিক্ষকবৃন্দ (মোট ${headmasters.length + teachers.length} জন)`}
           </p>
-
-          {/* Navigation Button to Current Faculty */}
-          <div className="mt-6 flex justify-center">
-            <Link
-              href="/administration/all-teachers"
-              className="inline-flex items-center gap-2 bg-[#051939] text-white hover:bg-blue-800 transition-colors px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg text-sm group"
-            >
-              <FaUsers size={16} className="text-emerald-400 group-hover:text-yellow-300 transition-colors" />
-              <span>{t("বর্তমান শিক্ষকমণ্ডলী দেখুন", "View Current Faculty")}</span>
-            </Link>
-          </div>
 
           {/* Filter Pills */}
           <div className="mt-6 flex flex-wrap justify-center gap-2.5 sm:gap-3">
