@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import schoolInfo from "@/data/school-info.json";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaFacebook, FaInfoCircle, FaExternalLinkAlt } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -9,18 +10,26 @@ export default function ContactClient() {
   return (
     <div>
       {/* Page Banner */}
-      <div className="bg-[#051939] text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl md:text-3xl font-bold">
+      <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-10 shadow-md">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <FaMapMarkerAlt size={15} />
+            <span>{t("যোগাযোগ ও তথ্য কেন্দ্র", "Contact & Information")}</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight">
             {t("যোগাযোগ", "Contact Us")}
           </h1>
-          <p className="text-gray-300 text-sm mt-1">
-            {t("প্রচ্ছদ › যোগাযোগ", "Home › Contact Us")}
+          <p className="text-gray-300 text-xs sm:text-sm mt-2 flex items-center gap-2">
+            <Link href="/" className="hover:text-yellow-300 transition-colors">
+              {t("প্রচ্ছদ", "Home")}
+            </Link>
+            <span>&rsaquo;</span>
+            <span className="text-yellow-300 font-bold">{t("যোগাযোগ", "Contact Us")}</span>
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10">
+      <div className="container mx-auto px-4 py-10 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Info */}
           <div>

@@ -20,10 +20,44 @@ export const noticesDB = {
         .from('notices')
         .select('id, title, date, date_iso, type, file_url, is_new, added_by')
         .not('type', 'in', '("routine","slider","gallery","staff","calendar","result","committee","school_info")')
+        .order('date_iso', { ascending: false, nullsFirst: false })
         .order('id', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map(n => ({
+
+      // Helper to parse dates robustly (handles ISO, English, and Bengali date formats)
+      const parseNoticeTimestamp = (item: any): number => {
+        if (item.date_iso) {
+          const ts = new Date(item.date_iso).getTime();
+          if (!isNaN(ts)) return ts;
+        }
+        if (item.date) {
+          const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+          let str = String(item.date);
+          bnDigits.forEach((d, i) => {
+            str = str.replaceAll(d, String(i));
+          });
+          const bnMonths: Record<string, string> = {
+            "জানুয়ারি": "Jan", "ফেব্রুয়ারি": "Feb", "মার্চ": "Mar", "এপ্রিল": "Apr",
+            "মে": "May", "জুন": "Jun", "জুলাই": "Jul", "আগস্ট": "Aug",
+            "সেপ্টেম্বর": "Sep", "অক্টোবর": "Oct", "নভেম্বর": "Nov", "ডিসেম্বর": "Dec"
+          };
+          Object.entries(bnMonths).forEach(([bn, en]) => {
+            str = str.replace(bn, en);
+          });
+          const ts = new Date(str).getTime();
+          if (!isNaN(ts)) return ts;
+        }
+        return Number(item.id) || 0;
+      };
+
+      const sorted = (data || []).sort((a: any, b: any) => {
+        const timeDiff = parseNoticeTimestamp(b) - parseNoticeTimestamp(a);
+        if (timeDiff !== 0) return timeDiff;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      });
+
+      return sorted.map(n => ({
         id: n.id,
         title: n.title,
         date: n.date,

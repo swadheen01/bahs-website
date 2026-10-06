@@ -92,7 +92,7 @@ export default function AboutPage() {
     <div className={`min-h-screen bg-gray-50 ${language === "bn" ? "font-bengali" : "font-sans"}`}>
       {/* Page Header Banner */}
       <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-12 shadow-md">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
             <FaLandmark />
             <span>{t("পরিচিতি ও ঐতিহ্য", "About & Heritage")}</span>

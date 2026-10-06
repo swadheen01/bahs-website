@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import Link from "next/link";
 import { FaFilePdf, FaDownload, FaEye, FaTimes, FaSearch, FaFileAlt, FaBell, FaExpand, FaCompress } from "react-icons/fa";
 import { safeDownloadFile } from "@/lib/downloadFile";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -75,11 +76,44 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewNotice]);
 
-  const filtered = notices.filter((n) => {
-    const matchesSearch = !search || n.title.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === "all" || n.type === filterType;
-    return matchesSearch && matchesType;
-  });
+  const parseNoticeTimestamp = (item: Notice): number => {
+    if (item.dateISO) {
+      const ts = new Date(item.dateISO).getTime();
+      if (!isNaN(ts)) return ts;
+    }
+    if (item.date) {
+      const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+      let str = String(item.date);
+      bnDigits.forEach((d, i) => {
+        str = str.replaceAll(d, String(i));
+      });
+      const bnMonths: Record<string, string> = {
+        "জানুয়ারি": "Jan", "ফেব্রুয়ারি": "Feb", "মার্চ": "Mar", "এপ্রিল": "Apr",
+        "মে": "May", "জুন": "Jun", "জুলাই": "Jul", "আগস্ট": "Aug",
+        "সেপ্টেম্বর": "Sep", "অক্টোবর": "Oct", "নভেম্বর": "Nov", "ডিসেম্বর": "Dec"
+      };
+      Object.entries(bnMonths).forEach(([bn, en]) => {
+        str = str.replace(bn, en);
+      });
+      const ts = new Date(str).getTime();
+      if (!isNaN(ts)) return ts;
+    }
+    return Number(item.id) || 0;
+  };
+
+  const filtered = useMemo(() => {
+    const list = notices.filter((n) => {
+      const matchesSearch = !search || n.title.toLowerCase().includes(search.toLowerCase());
+      const matchesType = filterType === "all" || n.type === filterType;
+      return matchesSearch && matchesType;
+    });
+
+    return list.sort((a, b) => {
+      const timeDiff = parseNoticeTimestamp(b) - parseNoticeTimestamp(a);
+      if (timeDiff !== 0) return timeDiff;
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
+    });
+  }, [notices, search, filterType]);
 
   const isImageFile = (url: string | null) => {
     if (!url) return false;
@@ -108,15 +142,22 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
 
   return (
     <div>
-      {/* Page Banner */}
-      <div className="bg-[#051939] text-white py-8 mb-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <FaBell className="text-yellow-300" />
+      {/* Page Banner — aligned with the content column & navbar */}
+      <div className="bg-gradient-to-r from-[#051939] via-[#092b5e] to-[#051939] text-white py-10 shadow-md mb-8">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="flex items-center gap-2 text-yellow-300 text-xs font-bold uppercase tracking-wider mb-2">
+            <FaBell size={15} />
+            <span>{t("বিজ্ঞপ্তি ও নোটিশ", "Notices & Announcements")}</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight flex items-center gap-2.5">
             <span>{t("নোটিশ বোর্ড", "Notice Board")}</span>
           </h1>
-          <p className="text-gray-300 text-sm mt-1">
-            {t("প্রচ্ছদ › নোটিশ বোর্ড", "Home › Notice Board")}
+          <p className="text-gray-300 text-xs sm:text-sm mt-2 flex items-center gap-2">
+            <Link href="/" className="hover:text-yellow-300 transition-colors">
+              {t("প্রচ্ছদ", "Home")}
+            </Link>
+            <span>&rsaquo;</span>
+            <span className="text-yellow-300 font-bold">{t("নোটিশ বোর্ড", "Notice Board")}</span>
           </p>
         </div>
       </div>
