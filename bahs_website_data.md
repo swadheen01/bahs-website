@@ -10,7 +10,7 @@
 *   **EIIN Number:** 129344
 *   **School Code:** ১৯০৩ (1903)
 *   **Phone Number:** +8801309-129344
-*   **Email:** bahs129344@yahoo.com
+*   **Email:** bah129344s@gmail.com
 *   **Total Area:** ২ একর ৫২ শতক (2 Acres 52 Decimals)
 *   **Established:** ২৪শে জানুয়ারী, ১৯৮৫ (January 24, 1985)
 

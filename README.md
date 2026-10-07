@@ -11,7 +11,7 @@ This is the official website for **Baniachong Adarsha High School**, located in 
 
 - **EIIN:** 129344
 - **School Code:** 1903
-- **Contact:** +8801309-129344 | bahs129344@yahoo.com
+- **Contact:** +8801309-129344 | bah129344s@gmail.com
 
 ---
 

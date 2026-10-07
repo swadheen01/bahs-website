@@ -77,8 +77,8 @@ export default function Footer() {
               </p>
               <p className="flex items-center gap-1.5">
                 <FaEnvelope className="text-[#800505] shrink-0" />
-                <a href="mailto:bahs129344@yahoo.com" className="hover:text-white transition-colors truncate">
-                  bahs129344@yahoo.com
+                <a href="mailto:bah129344s@gmail.com" className="hover:text-white transition-colors truncate">
+                  bah129344s@gmail.com
                 </a>
               </p>
               <p className="text-gray-400 text-xs pt-1">
