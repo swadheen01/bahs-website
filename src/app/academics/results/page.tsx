@@ -19,6 +19,7 @@ import {
   FaCopy,
   FaCheck,
   FaUndo,
+  FaFileExcel,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -871,17 +872,27 @@ export default function ResultsPage() {
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Search Filter Form */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-md border-t-4 border-[#06874A]">
-              <div className="border-b border-gray-100 pb-4 mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#051939] flex items-center gap-2">
-                  <FaSchool className="text-[#06874A]" />
-                  {t("বিদ্যালয়ের অভ্যন্তরীণ ফলাফল অনুসন্ধান", "School Internal Results Search")}
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                  {t(
-                    "শ্রেণি, পরীক্ষার ধরন, শিক্ষাবর্ষ এবং রোল নম্বর নির্বাচন করে ফলাফল দেখুন।",
-                    "Select class, examination type, academic year, and roll number to check results."
-                  )}
-                </p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-4 mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#051939] flex items-center gap-2">
+                    <FaSchool className="text-[#06874A]" />
+                    {t("বিদ্যালয়ের অভ্যন্তরীণ ফলাফল অনুসন্ধান", "School Internal Results Search")}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    {t(
+                      "শ্রেণি, পরীক্ষার ধরন, শিক্ষাবর্ষ এবং রোল নম্বর নির্বাচন করে ফলাফল দেখুন।",
+                      "Select class, examination type, academic year, and roll number to check results."
+                    )}
+                  </p>
+                </div>
+                <a
+                  href="/downloads/results/bahs_sample_results_format.xlsx"
+                  download="bahs_sample_results_format.xlsx"
+                  className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-[#06874A] border border-emerald-300 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-sm shrink-0"
+                >
+                  <FaFileExcel className="text-emerald-700 text-sm" />
+                  <span>{t("নমুনা রেজাল্ট শিট (Excel)", "Sample Result Sheet (Excel)")}</span>
+                </a>
               </div>
 
               <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

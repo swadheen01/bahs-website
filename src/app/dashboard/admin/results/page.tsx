@@ -8,6 +8,7 @@ import {
   FaArrowLeft,
   FaPlus,
   FaFileCsv,
+  FaFileExcel,
   FaDownload,
   FaTrash,
   FaSearch,
@@ -20,6 +21,7 @@ import {
   FaEdit,
   FaTimes,
 } from "react-icons/fa";
+import * as XLSX from "xlsx";
 
 export default function AdminResultsPage() {
   const { user, loading } = useAuth();
@@ -178,7 +180,7 @@ export default function AdminResultsPage() {
     setShowAddModal(true);
   };
 
-  // CSV parsing
+  // Excel & CSV parsing using SheetJS
   const handleCsvFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -186,51 +188,57 @@ export default function AdminResultsPage() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const text = event.target?.result as string;
-      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-      if (lines.length < 2) {
-        alert("CSV ফাইলে পর্যাপ্ত তথ্য নেই");
-        return;
-      }
+      try {
+        const buffer = event.target?.result as ArrayBuffer;
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" }) as any[];
 
-      // Expected header: roll,name,class,section,exam,year,gpa,grade,status,bangla,english,math,science,social,ict,religion
-      const parsed: any[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
-        if (cols.length >= 6) {
-          const [
-            roll,
-            studentName,
-            cls,
-            section = "ক",
-            exam = "বার্ষিক পরীক্ষা",
-            year = "2025",
-            gpa = "5.00",
-            grade = "A+",
-            status = "উত্তীর্ণ",
-            bangla = "80",
-            english = "80",
-            math = "80",
-            science = "80",
-            social = "80",
-            ict = "80",
-            religion = "80",
-          ] = cols;
+        if (!rawRows || rawRows.length === 0) {
+          alert("ফাইলে কোনো তথ্য পাওয়া যায়নি");
+          return;
+        }
 
-          const total =
-            (Number(bangla) || 0) +
-            (Number(english) || 0) +
-            (Number(math) || 0) +
-            (Number(science) || 0) +
-            (Number(social) || 0) +
-            (Number(ict) || 0) +
-            (Number(religion) || 0);
+        const parsed: any[] = [];
+        for (const row of rawRows) {
+          // Helper to extract values supporting English and Bengali headers
+          const getVal = (...keys: string[]) => {
+            for (const k of keys) {
+              if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== "") {
+                return String(row[k]).trim();
+              }
+            }
+            return "";
+          };
+
+          const roll = getVal("roll", "রোল", "Roll");
+          const studentName = getVal("studentName", "নাম", "শিক্ষার্থীর নাম", "Name", "Student Name");
+          if (!roll && !studentName) continue; // Skip empty rows
+
+          const cls = getVal("class", "শ্রেণি", "শ্রেণী", "Class").replace(/[^0-9]/g, "") || "6";
+          const section = getVal("section", "শাখা", "Section") || "ক";
+          const exam = getVal("exam", "পরীক্ষা", "পরীক্ষার নাম", "Exam") || "বার্ষিক পরীক্ষা";
+          const year = getVal("year", "সাল", "বছর", "Year") || "2025";
+          const gpa = getVal("gpa", "জিপিএ", "GPA") || "5.00";
+          const grade = getVal("grade", "গ্রেড", "Grade") || "A+";
+          const status = getVal("status", "ফলাফল", "অবস্থা", "Status") || "উত্তীর্ণ";
+
+          const bangla = Number(getVal("bangla", "বাংলা", "Bangla")) || 0;
+          const english = Number(getVal("english", "ইংরেজি", "English")) || 0;
+          const math = Number(getVal("math", "গণিত", "Math", "Mathematics")) || 0;
+          const science = Number(getVal("science", "বিজ্ঞান", "Science")) || 0;
+          const social = Number(getVal("social", "সমাজ", "বাংলাদেশ ও বিশ্বপরিচয়", "BGS", "Social")) || 0;
+          const ict = Number(getVal("ict", "আইসিটি", "তথ্য ও যোগাযোগ প্রযুক্তি", "ICT")) || 0;
+          const religion = Number(getVal("religion", "ধর্ম", "ধর্ম ও নৈতিক শিক্ষা", "Religion")) || 0;
+
+          const total = bangla + english + math + science + social + ict + religion;
 
           parsed.push({
             roll,
             studentName,
             studentNameEn: studentName,
-            class: cls.replace(/[^0-9]/g, "") || "6",
+            class: cls,
             section,
             exam,
             year,
@@ -239,21 +247,30 @@ export default function AdminResultsPage() {
             status,
             statusEn: status.includes("উত্তীর্ণ") ? "Passed" : "Failed",
             marks: {
-              বাংলা: Number(bangla) || 0,
-              ইংরেজি: Number(english) || 0,
-              গণিত: Number(math) || 0,
-              বিজ্ঞান: Number(science) || 0,
-              সমাজ: Number(social) || 0,
-              আইসিটি: Number(ict) || 0,
-              ধর্ম: Number(religion) || 0,
+              বাংলা: bangla,
+              ইংরেজি: english,
+              গণিত: math,
+              বিজ্ঞান: science,
+              সমাজ: social,
+              আইসিটি: ict,
+              ধর্ম: religion,
             },
             totalMarks: total,
           });
         }
+
+        if (parsed.length === 0) {
+          alert("ফাইলে পর্যাপ্ত তথ্য পাওয়া যায়নি। কলামের নামগুলো সঠিক আছে কিনা চেক করুন।");
+          return;
+        }
+
+        setCsvPreview(parsed);
+      } catch (err) {
+        console.error("File parse error:", err);
+        alert("ফাইলটি পড়তে ত্রুটি হয়েছে। অনুগ্রহ করে সঠিক এক্সেল (.xlsx) বা CSV ফাইল আপলোড করুন।");
       }
-      setCsvPreview(parsed);
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
   };
 
   const handleBulkUploadSubmit = async () => {
@@ -284,22 +301,156 @@ export default function AdminResultsPage() {
     setSaving(false);
   };
 
+  // Download Sample Excel (.xlsx)
+  const handleDownloadSampleExcel = () => {
+    try {
+      const sampleData = [
+        {
+          roll: 1,
+          studentName: "মোঃ তানভীর আহমেদ",
+          class: "6",
+          section: "ক",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "5.00",
+          grade: "A+",
+          status: "উত্তীর্ণ",
+          bangla: 88,
+          english: 85,
+          math: 95,
+          science: 92,
+          social: 86,
+          ict: 94,
+          religion: 90
+        },
+        {
+          roll: 2,
+          studentName: "ফাতেমা জান্নাত",
+          class: "6",
+          section: "ক",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "4.85",
+          grade: "A",
+          status: "উত্তীর্ণ",
+          bangla: 82,
+          english: 80,
+          math: 88,
+          science: 85,
+          social: 84,
+          ict: 90,
+          religion: 88
+        },
+        {
+          roll: 3,
+          studentName: "মোঃ সোহাগ মিয়া",
+          class: "6",
+          section: "ক",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "4.50",
+          grade: "A",
+          status: "উত্তীর্ণ",
+          bangla: 75,
+          english: 72,
+          math: 85,
+          science: 80,
+          social: 78,
+          ict: 85,
+          religion: 82
+        },
+        {
+          roll: 1,
+          studentName: "সাদিয়া আক্তার",
+          class: "7",
+          section: "ক",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "5.00",
+          grade: "A+",
+          status: "উত্তীর্ণ",
+          bangla: 86,
+          english: 84,
+          math: 96,
+          science: 91,
+          social: 88,
+          ict: 95,
+          religion: 92
+        },
+        {
+          roll: 1,
+          studentName: "আহসান হাবীব",
+          class: "8",
+          section: "ক",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "5.00",
+          grade: "A+",
+          status: "উত্তীর্ণ",
+          bangla: 85,
+          english: 88,
+          math: 98,
+          science: 94,
+          social: 89,
+          ict: 96,
+          religion: 91
+        },
+        {
+          roll: 1,
+          studentName: "রাকিবুল হাসান",
+          class: "9",
+          section: "বিজ্ঞান",
+          exam: "বার্ষিক পরীক্ষা",
+          year: "2025",
+          gpa: "5.00",
+          grade: "A+",
+          status: "উত্তীর্ণ",
+          bangla: 84,
+          english: 86,
+          math: 95,
+          science: 90,
+          social: 88,
+          ict: 94,
+          religion: 90
+        },
+        {
+          roll: 1,
+          studentName: "নুসরাত জাহান মিম",
+          class: "10",
+          section: "বিজ্ঞান",
+          exam: "প্রাক-নির্বাচনী পরীক্ষা",
+          year: "2025",
+          gpa: "5.00",
+          grade: "A+",
+          status: "উত্তীর্ণ",
+          bangla: 89,
+          english: 87,
+          math: 98,
+          science: 94,
+          social: 92,
+          ict: 96,
+          religion: 95
+        }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(sampleData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Results");
+      XLSX.writeFile(wb, "bahs_sample_results_format.xlsx");
+    } catch (e) {
+      const link = document.createElement("a");
+      link.href = "/downloads/results/bahs_sample_results_format.xlsx";
+      link.setAttribute("download", "bahs_sample_results_format.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   // Download Sample CSV
   const handleDownloadSampleCsv = () => {
-    const csvContent =
-      "roll,studentName,class,section,exam,year,gpa,grade,status,bangla,english,math,science,social,ict,religion\n" +
-      "1,মোঃ তানভীর আহমেদ,6,ক,বার্ষিক পরীক্ষা,2025,5.00,A+,উত্তীর্ণ,88,85,95,92,86,94,90\n" +
-      "2,ফাতেমা জান্নাত,6,ক,বার্ষিক পরীক্ষা,2025,4.85,A,উত্তীর্ণ,82,80,88,85,84,90,88\n" +
-      "3,মোঃ সোহাগ মিয়া,6,ক,বার্ষিক পরীক্ষা,2025,4.50,A,উত্তীর্ণ,75,72,85,80,78,85,82\n" +
-      "1,সাদিয়া আক্তার,7,ক,বার্ষিক পরীক্ষা,2025,5.00,A+,উত্তীর্ণ,86,84,96,91,88,95,92\n" +
-      "1,আহসান হাবীব,8,ক,বার্ষিক পরীক্ষা,2025,5.00,A+,উত্তীর্ণ,85,88,98,94,89,96,91\n" +
-      "1,রাকিবুল হাসান,9,বিজ্ঞান,বার্ষিক পরীক্ষা,2025,5.00,A+,উত্তীর্ণ,84,86,95,90,88,94,90\n" +
-      "1,নুসরাত জাহান মিম,10,বিজ্ঞান,প্রাক-নির্বাচনী পরীক্ষা,2025,5.00,A+,উত্তীর্ণ,89,87,98,94,92,96,95\n";
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url;
+    link.href = "/downloads/results/bahs_sample_results_format.csv";
     link.setAttribute("download", "bahs_sample_results_format.csv");
     document.body.appendChild(link);
     link.click();
@@ -375,10 +526,10 @@ export default function AdminResultsPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setShowBulkModal(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
+              className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
             >
-              <FaFileCsv size={16} />
-              <span>এক্সেল / CSV বাল্ক আপলোড</span>
+              <FaFileExcel size={16} />
+              <span>এক্সেল (.xlsx) বাল্ক আপলোড</span>
             </button>
 
             <button
@@ -419,12 +570,14 @@ export default function AdminResultsPage() {
             <span className="text-xs font-bold text-blue-600 block mt-1">শিক্ষা বোর্ড সার্ভার লিঙ্কড</span>
           </div>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
-            <span className="text-xs text-gray-500 font-bold block">নমুনা এক্সেল টেমপ্লেট</span>
+            <span className="text-xs text-gray-500 font-bold block flex items-center gap-1">
+              <FaFileExcel className="text-emerald-600" /> নমুনা এক্সেল টেমপ্লেট
+            </span>
             <button
-              onClick={handleDownloadSampleCsv}
+              onClick={handleDownloadSampleExcel}
               className="text-xs font-bold text-[#06874A] hover:underline flex items-center gap-1 mt-1 cursor-pointer"
             >
-              <FaDownload size={11} /> ডাউনলোড করুন
+              <FaDownload size={11} /> এক্সেল (.xlsx) ডাউনলোড
             </button>
           </div>
         </div>
@@ -765,8 +918,8 @@ export default function AdminResultsPage() {
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="text-base font-bold text-[#051939] flex items-center gap-2">
-                <FaFileCsv className="text-blue-600 text-lg" />
-                এক্সেল / CSV ফরম্যাটে ফলাফল বাল্ক আপলোড
+                <FaFileExcel className="text-emerald-600 text-xl" />
+                এক্সেল (.xlsx / .xls) ও CSV বাল্ক আপলোড
               </h3>
               <button
                 onClick={() => setShowBulkModal(false)}
@@ -776,39 +929,48 @@ export default function AdminResultsPage() {
               </button>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2 text-xs text-blue-950">
-              <p className="font-bold flex items-center gap-1.5">
-                <FaDownload /> প্রথমে নমুনা ফরম্যাট ডাউনলোড করে এক্সেল বা স্প্রেডশিটে তথ্য সাজিয়ে নিন:
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2 text-xs text-emerald-950">
+              <p className="font-bold flex items-center gap-1.5 text-emerald-900">
+                <FaDownload className="text-emerald-700" /> প্রথমে ডেমো এক্সেল ফাইল ডাউনলোড করে শিক্ষার্থীদের ফলাফল সাজিয়ে নিন:
               </p>
-              <button
-                onClick={handleDownloadSampleCsv}
-                className="bg-white text-blue-700 border border-blue-300 font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-blue-100 transition inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <FaDownload size={11} /> নমুনা ফরম্যাট (.csv) ডাউনলোড করুন
-              </button>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  onClick={handleDownloadSampleExcel}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <FaFileExcel size={13} /> ডেমো এক্সেল (.xlsx) ডাউনলোড
+                </button>
+                <button
+                  onClick={handleDownloadSampleCsv}
+                  className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold px-3 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <FaFileCsv size={13} /> CSV ফরম্যাট
+                </button>
+              </div>
               <p className="text-[11px] text-gray-600">
-                কলামসমূহ: <code className="bg-white px-1 py-0.5 rounded">roll,studentName,class,section,exam,year,gpa,grade,status,bangla,english,math,science,social,ict,religion</code>
+                কলামসমূহ (ইংরেজি বা বাংলা যেকোনোটি ব্যবহার করতে পারেন):<br />
+                <code className="bg-white px-1 py-0.5 rounded text-[10px] text-gray-800">roll, studentName, class, section, exam, year, gpa, grade, status, bangla, english, math, science, social, ict, religion</code>
               </p>
             </div>
 
             {/* Upload Input */}
-            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:border-blue-500 transition">
+            <div className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-2xl p-6 text-center transition bg-gray-50/50 hover:bg-emerald-50/20">
               <input
                 type="file"
-                accept=".csv"
-                id="csvFilePicker"
+                accept=".xlsx, .xls, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv"
+                id="excelFilePicker"
                 onChange={handleCsvFile}
                 className="hidden"
               />
               <label
-                htmlFor="csvFilePicker"
+                htmlFor="excelFilePicker"
                 className="flex flex-col items-center justify-center gap-2 cursor-pointer"
               >
-                <FaUpload className="text-3xl text-gray-400" />
-                <span className="text-xs font-bold text-gray-700">
-                  {csvFileName ? `নির্বাচিত ফাইল: ${csvFileName}` : "আপনার সংরক্ষিত .CSV ফাইল নির্বাচন করতে ক্লিক করুন"}
+                <FaFileExcel className="text-4xl text-emerald-600" />
+                <span className="text-xs font-bold text-gray-800">
+                  {csvFileName ? `নির্বাচিত ফাইল: ${csvFileName}` : "আপনার এক্সেল (.xlsx / .xls) বা .csv ফাইল নির্বাচন করতে ক্লিক করুন"}
                 </span>
-                <span className="text-[11px] text-gray-400">শুধুমাত্র .csv ফাইল সমর্থিত</span>
+                <span className="text-[11px] text-gray-500">মাইক্রোসফট এক্সেল (.xlsx, .xls) এবং .csv ফাইল সমর্থিত</span>
               </label>
             </div>
 
