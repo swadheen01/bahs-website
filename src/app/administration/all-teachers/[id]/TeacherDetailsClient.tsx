@@ -26,7 +26,7 @@ function InfoCard({ icon, label, value, mono, fullWidth }: InfoCardProps) {
       </div>
       <div>
         <p className="text-xs font-semibold text-gray-500 mb-1 tracking-wide">{label}</p>
-        <p className={`text-[15px] font-bold text-gray-800 leading-snug ${mono ? "font-mono" : ""}`}>
+        <p className={`text-[15px] font-bold text-gray-800 leading-snug whitespace-pre-line ${mono ? "font-mono" : ""}`}>
           {value}
         </p>
       </div>
