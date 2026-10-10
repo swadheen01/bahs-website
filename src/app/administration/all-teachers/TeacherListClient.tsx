@@ -118,6 +118,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
                         src={teacher.photo}
                         alt={language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                         fill
+                        quality={90}
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       />

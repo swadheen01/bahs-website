@@ -77,6 +77,7 @@ export default function Navbar() {
       children: [
         { label: t("ক্লাস রুটিন", "Class Routine"), href: "/academics/routine" },
         { label: t("পরীক্ষার ফলাফল", "Results"), href: "/academics/results" },
+        { label: t("প্রশংসাপত্র ডাউনলোড", "Testimonial Download"), href: "/academics/testimonial" },
         { label: t("ছুটির তালিকা", "Holidays"), href: "/academics/holidays" },
       ],
     },

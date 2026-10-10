@@ -20,6 +20,7 @@ import {
   FaCheck,
   FaUndo,
   FaFileExcel,
+  FaCertificate,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -349,30 +350,38 @@ export default function ResultsPage() {
 
       <div className="container mx-auto px-4 -mt-6 max-w-6xl space-y-8 relative z-10">
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100 flex flex-col sm:flex-row gap-2">
+        <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100 flex flex-col md:flex-row gap-2">
           <button
             onClick={() => setActiveTab("board")}
-            className={`flex-1 py-3 px-5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
               activeTab === "board"
                 ? "bg-[#051939] text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
             <FaAward className={activeTab === "board" ? "text-yellow-400" : "text-gray-400"} />
-            <span>{t("জাতীয় বোর্ড ফলাফল (৮ম ও ১০ম শ্রেণি - JSC & SSC)", "National Board Results (JSC & SSC)")}</span>
+            <span>{t("জাতীয় বোর্ড ফলাফল (JSC & SSC)", "National Board Results (JSC & SSC)")}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("internal")}
-            className={`flex-1 py-3 px-5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
               activeTab === "internal"
                 ? "bg-[#06874A] text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
             <FaSchool className={activeTab === "internal" ? "text-white" : "text-gray-400"} />
-            <span>{t("বিদ্যালয়ের অভ্যন্তরীণ ফলাফল (৬ষ্ঠ-১০ম শ্রেণি)", "School Internal Results (Grades 6-10)")}</span>
+            <span>{t("অভ্যন্তরীণ ফলাফল (৬ষ্ঠ-১০ম শ্রেণি)", "School Internal Results (Grades 6-10)")}</span>
           </button>
+
+          <Link
+            href="/academics/testimonial"
+            className="flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 shadow-sm"
+          >
+            <FaCertificate className="text-amber-600" />
+            <span>{t("প্রশংসাপত্র ডাউনলোড (Testimonial)", "Testimonial Download")}</span>
+          </Link>
         </div>
 
         {/* TAB 1: BOARD RESULTS (JSC & SSC) */}
@@ -603,14 +612,24 @@ export default function ResultsPage() {
                       <span>{t("আরেকটি ফলাফল দেখুন", "Search Another Result")}</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => printElement("printable-board-card", `Board_Result_${boardRoll || "Marksheet"}`)}
-                      className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
-                    >
-                      <FaPrint size={14} />
-                      <span>{t("মার্কশিট প্রিন্ট / সেভ করুন", "Print / Save Marksheet")}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/academics/testimonial?name=${encodeURIComponent(boardResultData.name || "")}&roll=${encodeURIComponent(boardResultData.roll_no || boardRoll)}&reg=${encodeURIComponent(boardResultData.regno || boardReg || "")}&year=${encodeURIComponent(boardYear || "")}&gpa=${encodeURIComponent(boardResultData.gpa || "")}&group=${encodeURIComponent(boardResultData.stud_group || "")}&father=${encodeURIComponent(boardResultData.fname || "")}&mother=${encodeURIComponent(boardResultData.mname || "")}&session=${encodeURIComponent(boardResultData.session || "")}`}
+                        className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <FaCertificate size={14} />
+                        <span>{t("প্রশংসাপত্র তৈরি করুন", "Generate Testimonial")}</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => printElement("printable-board-card", `Board_Result_${boardRoll || "Marksheet"}`)}
+                        className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <FaPrint size={14} />
+                        <span>{t("মার্কশিট প্রিন্ট / সেভ করুন", "Print / Save Marksheet")}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1161,7 +1180,7 @@ export default function ResultsPage() {
                     </div>
                   )}
 
-                  {/* Marksheet Footer / Signatures */}
+                  {/* Marksheet Footer / Signatures & Actions */}
                   <div className="pt-8 mt-6 border-t border-gray-200 grid grid-cols-2 sm:grid-cols-3 gap-6 text-center text-xs text-gray-600">
                     <div>
                       <div className="w-32 border-b border-gray-400 mx-auto mb-1.5"></div>
@@ -1174,6 +1193,37 @@ export default function ResultsPage() {
                     <div>
                       <div className="w-32 border-b border-gray-400 mx-auto mb-1.5"></div>
                       <span>{t("প্রধান শিক্ষকের স্বাক্ষর", "Headmaster's Signature")}</span>
+                    </div>
+                  </div>
+
+                  {/* Action buttons including Testimonial */}
+                  <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-gray-100 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setResultData(null)}
+                      className="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer"
+                    >
+                      <FaUndo size={12} />
+                      <span>{t("অন্যান্য ফলাফল খুঁজুন", "Search Another Result")}</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/academics/testimonial?name=${encodeURIComponent(resultData.name || "")}&roll=${encodeURIComponent(resultData.roll || rollInput)}&class=${encodeURIComponent(resultData.class || selectedClass)}&year=${encodeURIComponent(resultData.year || selectedYear)}&gpa=${encodeURIComponent(resultData.gpa || "")}&group=${encodeURIComponent(resultData.group || "")}&father=${encodeURIComponent(resultData.fatherName || "")}&mother=${encodeURIComponent(resultData.motherName || "")}`}
+                        className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <FaCertificate size={14} />
+                        <span>{t("প্রশংসাপত্র তৈরি করুন", "Generate Testimonial")}</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => printElement("printable-marksheet", `Marksheet_${resultData.roll || "Student"}`)}
+                        className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <FaPrint size={14} />
+                        <span>{t("মার্কশিট প্রিন্ট / সেভ করুন", "Print / Save Marksheet")}</span>
+                      </button>
                     </div>
                   </div>
                 </div>

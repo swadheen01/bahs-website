@@ -22,49 +22,49 @@
   ],
   "weeklyRoutines": {
     "6": [
-      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১০:৪৫", "sunday": "বাংলা", "monday": "বাংলা", "tuesday": "গণিত", "wednesday": "English", "thursday": "বিজ্ঞান", "room": "১০১" },
-      { "period": "২য় পিরিয়ড", "time": "১০:৪৫ - ১১:৩০", "sunday": "English", "monday": "গণিত", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "English", "room": "১০১" },
-      { "period": "৩য় পিরিয়ড", "time": "১১:৩০ - ১২:১৫", "sunday": "গণিত", "monday": "বিজ্ঞান", "tuesday": "English", "wednesday": "সমাজ", "thursday": "গণিত", "room": "১০১" },
-      { "period": "বিরতি (টিফিন)", "time": "১২:১৫ - ০১:০০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
-      { "period": "৪র্থ পিরিয়ড", "time": "০১:০০ - ০১:৪৫", "sunday": "বিজ্ঞান", "monday": "সমাজ", "tuesday": "আইসিটি", "wednesday": "বাংলা", "thursday": "সমাজ", "room": "১০১" },
-      { "period": "৫ম পিরিয়ড", "time": "০১:৪৫ - ০২:৩০", "sunday": "ডিজিটাল প্রযুক্তি", "monday": "ধর্ম", "tuesday": "স্বাস্থ্য সুরক্ষা", "wednesday": "জীবন ও জীবিকা", "thursday": "ডিজিটাল প্রযুক্তি", "room": "১০১" },
-      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০২:৩০ - ০৩:১৫", "sunday": "ধর্ম ও নৈতিক শিক্ষা", "monday": "শিল্প ও সংস্কৃতি", "tuesday": "ধর্ম", "wednesday": "স্বাস্থ্য সুরক্ষা", "thursday": "খেলাধুলা", "room": "১০১" }
+      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১১:০০", "sunday": "বাংলা", "monday": "বাংলা", "tuesday": "গণিত", "wednesday": "English", "thursday": "বিজ্ঞান", "room": "১০১" },
+      { "period": "২য় পিরিয়ড", "time": "১১:০০ - ১২:০০", "sunday": "English", "monday": "গণিত", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "English", "room": "১০১" },
+      { "period": "৩য় পিরিয়ড", "time": "১২:০০ - ০১:০০", "sunday": "গণিত", "monday": "বিজ্ঞান", "tuesday": "English", "wednesday": "সমাজ", "thursday": "গণিত", "room": "১০১" },
+      { "period": "বিরতি (টিফিন)", "time": "০১:০০ - ০১:৩০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
+      { "period": "৪র্থ পিরিয়ড", "time": "০১:৩০ - ০২:৩০", "sunday": "বিজ্ঞান", "monday": "সমাজ", "tuesday": "আইসিটি", "wednesday": "বাংলা", "thursday": "সমাজ", "room": "১০১" },
+      { "period": "৫ম পিরিয়ড", "time": "০২:৩০ - ০৩:৩০", "sunday": "ডিজিটাল প্রযুক্তি", "monday": "ধর্ম", "tuesday": "স্বাস্থ্য সুরক্ষা", "wednesday": "জীবন ও জীবিকা", "thursday": "ডিজিটাল প্রযুক্তি", "room": "১০১" },
+      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০৩:৩০ - ০৪:৩০", "sunday": "ধর্ম ও নৈতিক শিক্ষা", "monday": "শিল্প ও সংস্কৃতি", "tuesday": "ধর্ম", "wednesday": "স্বাস্থ্য সুরক্ষা", "thursday": "খেলাধুলা", "room": "১০১" }
     ],
     "7": [
-      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১০:৪৫", "sunday": "গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "গণিত", "room": "১০২" },
-      { "period": "২য় পিরিয়ড", "time": "১০:৪৫ - ১১:৩০", "sunday": "বাংলা", "monday": "বিজ্ঞান", "tuesday": "গণিত", "wednesday": "English", "thursday": "সমাজ", "room": "১০২" },
-      { "period": "৩য় পিরিয়ড", "time": "১১:৩০ - ১২:১৫", "sunday": "English", "monday": "বাংলা", "tuesday": "সমাজ", "wednesday": "গণিত", "thursday": "বিজ্ঞান", "room": "১০২" },
-      { "period": "বিরতি (টিফিন)", "time": "১২:১৫ - ০১:০০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
-      { "period": "৪র্থ পিরিয়ড", "time": "০১:০০ - ০১:৪৫", "sunday": "বিজ্ঞান", "monday": "সমাজ", "tuesday": "English", "wednesday": "বাংলা", "thursday": "ডিজিটাল প্রযুক্তি", "room": "১০২" },
-      { "period": "৫ম পিরিয়ড", "time": "০১:৪৫ - ০২:৩০", "sunday": "ইতিহাস ও সমাজ", "monday": "ডিজিটাল প্রযুক্তি", "tuesday": "ধর্ম", "wednesday": "স্বাস্থ্য সুরক্ষা", "thursday": "ধর্ম", "room": "১০২" },
-      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০২:৩০ - ০৩:১৫", "sunday": "ডিজিটাল প্রযুক্তি", "monday": "ধর্ম", "tuesday": "শিল্প ও সংস্কৃতি", "wednesday": "জীবন ও জীবিকা", "thursday": "বিজ্ঞান", "room": "১০২" }
+      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১১:০০", "sunday": "গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "গণিত", "room": "১০২" },
+      { "period": "২য় পিরিয়ড", "time": "১১:০০ - ১২:০০", "sunday": "বাংলা", "monday": "বিজ্ঞান", "tuesday": "গণিত", "wednesday": "English", "thursday": "সমাজ", "room": "১০২" },
+      { "period": "৩য় পিরিয়ড", "time": "১২:০০ - ০১:০০", "sunday": "English", "monday": "বাংলা", "tuesday": "সমাজ", "wednesday": "গণিত", "thursday": "বিজ্ঞান", "room": "১০২" },
+      { "period": "বিরতি (টিফিন)", "time": "০১:০০ - ০১:৩০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
+      { "period": "৪র্থ পিরিয়ড", "time": "০১:৩০ - ০২:৩০", "sunday": "বিজ্ঞান", "monday": "সমাজ", "tuesday": "English", "wednesday": "বাংলা", "thursday": "ডিজিটাল প্রযুক্তি", "room": "১০২" },
+      { "period": "৫ম পিরিয়ড", "time": "০২:৩০ - ০৩:৩০", "sunday": "ইতিহাস ও সমাজ", "monday": "ডিজিটাল প্রযুক্তি", "tuesday": "ধর্ম", "wednesday": "স্বাস্থ্য সুরক্ষা", "thursday": "ধর্ম", "room": "১০২" },
+      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০৩:৩০ - ০৪:৩০", "sunday": "ডিজিটাল প্রযুক্তি", "monday": "ধর্ম", "tuesday": "শিল্প ও সংস্কৃতি", "wednesday": "জীবন ও জীবিকা", "thursday": "বিজ্ঞান", "room": "১০২" }
     ],
     "8": [
-      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১০:৪৫", "sunday": "English", "monday": "গণিত", "tuesday": "বিজ্ঞান", "wednesday": "বাংলা", "thursday": "English", "room": "১০৩" },
-      { "period": "২য় পিরিয়ড", "time": "১০:৪৫ - ১১:৩০", "sunday": "গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "গণিত", "room": "১০৩" },
-      { "period": "৩য় পিরিয়ড", "time": "১১:৩০ - ১২:১৫", "sunday": "বিজ্ঞান", "monday": "বাংলা", "tuesday": "গণিত", "wednesday": "English", "thursday": "সমাজ", "room": "১০৩" },
-      { "period": "বিরতি (টিফিন)", "time": "১২:১৫ - ০১:০০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
-      { "period": "৪র্থ পিরিয়ড", "time": "০১:০০ - ০১:৪৫", "sunday": "বাংলা", "monday": "বিজ্ঞান", "tuesday": "সমাজ", "wednesday": "আইসিটি", "thursday": "বিজ্ঞান", "room": "১০৩" },
-      { "period": "৫ম পিরিয়ড", "time": "০১:৪৫ - ০২:৩০", "sunday": "তথ্য প্রযুক্তি", "monday": "সমাজ", "tuesday": "ধর্ম", "wednesday": "গণিত", "thursday": "আইসিটি", "room": "১০৩" },
-      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০২:৩০ - ০৩:১৫", "sunday": "ধর্ম ও নৈতিক শিক্ষা", "monday": "ধর্ম", "tuesday": "শিল্প ও সংস্কৃতি", "wednesday": "জীবন ও জীবিকা", "thursday": "কোচিং ক্লাস", "room": "১০৩" }
+      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১১:০০", "sunday": "English", "monday": "গণিত", "tuesday": "বিজ্ঞান", "wednesday": "বাংলা", "thursday": "English", "room": "১০৩" },
+      { "period": "২য় পিরিয়ড", "time": "১১:০০ - ১২:০০", "sunday": "গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "বিজ্ঞান", "thursday": "গণিত", "room": "১০৩" },
+      { "period": "৩য় পিরিয়ড", "time": "১২:০০ - ০১:০০", "sunday": "বিজ্ঞান", "monday": "বাংলা", "tuesday": "গণিত", "wednesday": "English", "thursday": "সমাজ", "room": "১০৩" },
+      { "period": "বিরতি (টিফিন)", "time": "০১:০০ - ০১:৩০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
+      { "period": "৪র্থ পিরিয়ড", "time": "০১:৩০ - ০২:৩০", "sunday": "বাংলা", "monday": "বিজ্ঞান", "tuesday": "সমাজ", "wednesday": "আইসিটি", "thursday": "বিজ্ঞান", "room": "১০৩" },
+      { "period": "৫ম পিরিয়ড", "time": "০২:৩০ - ০৩:৩০", "sunday": "তথ্য প্রযুক্তি", "monday": "সমাজ", "tuesday": "ধর্ম", "wednesday": "গণিত", "thursday": "আইসিটি", "room": "১০৩" },
+      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০৩:৩০ - ০৪:৩০", "sunday": "ধর্ম ও নৈতিক শিক্ষা", "monday": "ধর্ম", "tuesday": "শিল্প ও সংস্কৃতি", "wednesday": "জীবন ও জীবিকা", "thursday": "কোচিং ক্লাস", "room": "১০৩" }
     ],
     "9": [
-      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১০:৪৫", "sunday": "পদার্থ/ইতিহাস", "monday": "রসায়ন/ভূগোল", "tuesday": "গণিত/উচ্চতর গণিত", "wednesday": "English", "thursday": "পদার্থ/ইতিহাস", "room": "২০১" },
-      { "period": "২য় পিরিয়ড", "time": "১০:৪৫ - ১১:৩০", "sunday": "রসায়ন/ভূগোল", "monday": "গণিত", "tuesday": "পদার্থ/ইতিহাস", "wednesday": "জীববিজ্ঞান/পৌরনীতি", "thursday": "রসায়ন/ভূগোল", "room": "২০১" },
-      { "period": "৩য় পিরিয়ড", "time": "১১:৩০ - ১২:১৫", "sunday": "গণিত/উচ্চতর গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "গণিত", "thursday": "উচ্চতর গণিত", "room": "২০১" },
-      { "period": "বিরতি (টিফিন)", "time": "১২:১৫ - ০১:০০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
-      { "period": "৪র্থ পিরিয়ড", "time": "০১:০০ - ০১:৪৫", "sunday": "English", "monday": "বাংলা", "tuesday": "রসায়ন/ভূগোল", "wednesday": "পদার্থবিজ্ঞান", "thursday": "English", "room": "২০১" },
-      { "period": "৫ম পিরিয়ড", "time": "০১:৪৫ - ০২:৩০", "sunday": "বাংলা", "monday": "আইসিটি", "tuesday": "ধর্ম", "wednesday": "রসায়ন", "thursday": "বিজ্ঞান ল্যাব", "room": "২০১" },
-      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০২:৩০ - ০৩:১৫", "sunday": "আইসিটি/বায়োলজি", "monday": "জীববিজ্ঞান", "tuesday": "আইসিটি ল্যাব", "wednesday": "ধর্ম", "thursday": "বিশেষ ক্লাস", "room": "২০১" }
+      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১১:০০", "sunday": "পদার্থ/ইতিহাস", "monday": "রসায়ন/ভূগোল", "tuesday": "গণিত/উচ্চতর গণিত", "wednesday": "English", "thursday": "পদার্থ/ইতিহাস", "room": "২০১" },
+      { "period": "২য় পিরিয়ড", "time": "১১:০০ - ১২:০০", "sunday": "রসায়ন/ভূগোল", "monday": "গণিত", "tuesday": "পদার্থ/ইতিহাস", "wednesday": "জীববিজ্ঞান/পৌরনীতি", "thursday": "রসায়ন/ভূগোল", "room": "২০১" },
+      { "period": "৩য় পিরিয়ড", "time": "১২:০০ - ০১:০০", "sunday": "গণিত/উচ্চতর গণিত", "monday": "English", "tuesday": "বাংলা", "wednesday": "গণিত", "thursday": "উচ্চতর গণিত", "room": "২০১" },
+      { "period": "বিরতি (টিফিন)", "time": "০১:০০ - ০১:৩০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
+      { "period": "৪র্থ পিরিয়ড", "time": "০১:৩০ - ০২:৩০", "sunday": "English", "monday": "বাংলা", "tuesday": "রসায়ন/ভূগোল", "wednesday": "পদার্থবিজ্ঞান", "thursday": "English", "room": "২০১" },
+      { "period": "৫ম পিরিয়ড", "time": "০২:৩০ - ০৩:৩০", "sunday": "বাংলা", "monday": "আইসিটি", "tuesday": "ধর্ম", "wednesday": "রসায়ন", "thursday": "বিজ্ঞান ল্যাব", "room": "২০১" },
+      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০৩:৩০ - ০৪:৩০", "sunday": "আইসিটি/বায়োলজি", "monday": "জীববিজ্ঞান", "tuesday": "আইসিটি ল্যাব", "wednesday": "ধর্ম", "thursday": "বিশেষ ক্লাস", "room": "২০১" }
     ],
     "10": [
-      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১০:৪৫", "sunday": "এসএসসি বিশেষ গণিত", "monday": "পদার্থ/ইতিহাস", "tuesday": "রসায়ন/ভূগোল", "wednesday": "English Grammar", "thursday": "এসএসসি টেস্ট পেপার", "room": "২০২" },
-      { "period": "২য় পিরিয়ড", "time": "১০:৪৫ - ১১:৩০", "sunday": "পদার্থ/রসায়ন", "monday": "English Writing", "tuesday": "গণিত সৃজনশীল", "wednesday": "জীববিজ্ঞান/পৌরনীতি", "thursday": "উচ্চতর গণিত", "room": "২০২" },
-      { "period": "৩য় পিরিয়ড", "time": "১১:৩০ - ১২:১৫", "sunday": "English", "monday": "গণিত", "tuesday": "উচ্চতর গণিত", "wednesday": "পদার্থবিজ্ঞান", "thursday": "রসায়ন", "room": "২০২" },
-      { "period": "বিরতি (টিফিন)", "time": "১২:১৫ - ০১:০০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
-      { "period": "৪র্থ পিরিয়ড", "time": "০১:০০ - ০১:৪৫", "sunday": "রসায়ন/ভূগোল", "monday": "বাংলা ১ম ও ২য়", "tuesday": "English", "wednesday": "গণিত", "thursday": "পদার্থবিজ্ঞান", "room": "২০২" },
-      { "period": "৫ম পিরিয়ড", "time": "০১:৪৫ - ০২:৩০", "sunday": "মডেল টেস্ট ও অনুশীলন", "monday": "জীববিজ্ঞান", "tuesday": "বিজ্ঞান ল্যাব", "wednesday": "আইসিটি প্র্যাকটিক্যাল", "thursday": "মডেল টেস্ট", "room": "২০২" },
-      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০২:৩০ - ০৩:১৫", "sunday": "বিশেষ গাইডেন্স ক্লাস", "monday": "ধর্ম", "tuesday": "মডেল টেস্ট পর্যালোচনা", "wednesday": "ধর্ম ও নৈতিকতা", "thursday": "উদ্বুদ্ধকরণ ও মূল্যায়ন", "room": "২০২" }
+      { "period": "১ম পিরিয়ড", "time": "১০:০০ - ১১:০০", "sunday": "এসএসসি বিশেষ গণিত", "monday": "পদার্থ/ইতিহাস", "tuesday": "রসায়ন/ভূগোল", "wednesday": "English Grammar", "thursday": "এসএসসি টেস্ট পেপার", "room": "২০২" },
+      { "period": "২য় পিরিয়ড", "time": "১১:০০ - ১২:০০", "sunday": "পদার্থ/রসায়ন", "monday": "English Writing", "tuesday": "গণিত সৃজনশীল", "wednesday": "জীববিজ্ঞান/পৌরনীতি", "thursday": "উচ্চতর গণিত", "room": "২০২" },
+      { "period": "৩য় পিরিয়ড", "time": "১২:০০ - ০১:০০", "sunday": "English", "monday": "গণিত", "tuesday": "উচ্চতর গণিত", "wednesday": "পদার্থবিজ্ঞান", "thursday": "রসায়ন", "room": "২০২" },
+      { "period": "বিরতি (টিফিন)", "time": "০১:০০ - ০১:৩০", "sunday": "নামাজ ও টিফিন", "monday": "নামাজ ও টিফিন", "tuesday": "নামাজ ও টিফিন", "wednesday": "নামাজ ও টিফিন", "thursday": "নামাজ ও টিফিন", "room": "-" },
+      { "period": "৪র্থ পিরিয়ড", "time": "০১:৩০ - ০২:৩০", "sunday": "রসায়ন/ভূগোল", "monday": "বাংলা ১ম ও ২য়", "tuesday": "English", "wednesday": "গণিত", "thursday": "পদার্থবিজ্ঞান", "room": "২০২" },
+      { "period": "৫ম পিরিয়ড", "time": "০২:৩০ - ০৩:৩০", "sunday": "মডেল টেস্ট ও অনুশীলন", "monday": "জীববিজ্ঞান", "tuesday": "বিজ্ঞান ল্যাব", "wednesday": "আইসিটি প্র্যাকটিক্যাল", "thursday": "মডেল টেস্ট", "room": "২০২" },
+      { "period": "৬ষ্ঠ পিরিয়ড", "time": "০৩:৩০ - ০৪:৩০", "sunday": "বিশেষ গাইডেন্স ক্লাস", "monday": "ধর্ম", "tuesday": "মডেল টেস্ট পর্যালোচনা", "wednesday": "ধর্ম ও নৈতিকতা", "thursday": "উদ্বুদ্ধকরণ ও মূল্যায়ন", "room": "২০২" }
     ]
   }
 }

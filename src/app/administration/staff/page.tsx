@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/lib/LanguageContext";
 import { FaUserTie, FaPhoneAlt, FaSearch } from "react-icons/fa";
 
@@ -104,10 +105,13 @@ export default function StaffPage() {
                   {/* Photo area */}
                   <div className="h-48 w-full bg-gradient-to-b from-gray-100 to-gray-200 relative overflow-hidden flex items-center justify-center">
                     {staff.photo ? (
-                      <img
+                      <Image
                         src={staff.photo}
                         alt={staff.nameBengali}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        quality={90}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-white/70 shadow-inner flex items-center justify-center text-gray-400 border border-white">

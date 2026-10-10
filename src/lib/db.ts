@@ -19,7 +19,7 @@ export const noticesDB = {
       const { data, error } = await supabase
         .from('notices')
         .select('id, title, date, date_iso, type, file_url, is_new, added_by')
-        .not('type', 'in', '("routine","slider","gallery","staff","calendar","result","committee","school_info")')
+        .not('type', 'in', '("routine","slider","gallery","staff","calendar","result","committee","school_info","testimonial_counter")')
         .order('date_iso', { ascending: false, nullsFirst: false })
         .order('id', { ascending: false });
 

@@ -22,7 +22,7 @@ export default function QuickLinks() {
     { label: t("ক্যালেন্ডার", "Calendar"), href: "/academics/calendar", icon: FaCalendarAlt, color: "from-[#965D03] to-amber-700" },
     { label: t("ছুটির তালিকা", "Holidays"), href: "/academics/holidays", icon: FaUmbrellaBeach, color: "from-[#691475] to-purple-800" },
     { label: t("গ্যালারী", "Gallery"), href: "/gallery/photos", icon: FaImages, color: "from-[#1877F2] to-blue-600" },
-    { label: t("ডাউনলোড", "Download"), href: "/academics/routine", icon: FaDownload, color: "from-[#2d7d46] to-green-700" },
+    { label: t("ডাউনলোড", "Download"), href: "/academics/testimonial", icon: FaDownload, color: "from-[#2d7d46] to-green-700" },
     { label: t("যোগাযোগ", "Contact"), href: "/contact", icon: FaPhoneAlt, color: "from-gray-700 to-gray-900" },
   ];
 

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaPhone,
   FaEnvelope,
@@ -149,9 +150,12 @@ export default function Footer() {
                 href="/developer"
                 className="flex items-center gap-2.5 p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition group"
               >
-                <img
+                <Image
                   src="/images/developer.png"
                   alt="স্বাধীন ইসলাম রবি"
+                  width={32}
+                  height={32}
+                  quality={90}
                   className="w-8 h-8 rounded-full object-cover border border-emerald-400/60 shrink-0"
                 />
                 <div className="min-w-0">

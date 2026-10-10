@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import {
   FaUserCircle,
   FaSearch,
@@ -7,6 +8,7 @@ import {
   FaUserTie,
   FaGraduationCap,
   FaAward,
+  FaInfoCircle,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -79,15 +81,13 @@ export default function FormerStaffPage() {
         <div className="relative p-1.5 rounded-xl bg-gradient-to-b from-[#051939]/15 via-blue-50/40 to-slate-100 border-2 border-[#051939]/20 group-hover:border-[#051939]/80 shadow-sm transition-colors duration-300">
           <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-inner flex items-center justify-center">
             {hasRealPhoto ? (
-              <img
+              <Image
                 src={teacher.photo}
                 alt={language === "en" && teacher.nameEn ? teacher.nameEn : teacher.name}
-                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = "none";
-                  const fallback = e.currentTarget.parentElement?.querySelector(".fallback-avatar") as HTMLElement;
-                  if (fallback) fallback.style.display = "flex";
-                }}
+                fill
+                quality={90}
+                sizes="(max-width: 640px) 160px, 220px"
+                className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
               />
             ) : null}
 
@@ -217,6 +217,24 @@ export default function FormerStaffPage() {
               : t(`${totalFiltered} জন শিক্ষক পাওয়া গেছে`, `Found ${totalFiltered} faculty members`)}
           </p>
         )}
+
+        {/* Notice: Work in progress */}
+        <div className="max-w-3xl mx-auto mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-2xl p-4 sm:p-4.5 shadow-sm flex items-start gap-3.5 text-amber-900">
+          <div className="p-2 bg-amber-500/10 rounded-xl text-amber-600 shrink-0 mt-0.5">
+            <FaInfoCircle size={18} />
+          </div>
+          <div className="text-xs sm:text-sm leading-relaxed">
+            <span className="font-bold text-amber-950 block sm:inline mb-0.5 sm:mb-0 sm:mr-1.5">
+              {t("বিশেষ দ্রষ্টব্য:", "Notice:")}
+            </span>
+            <span className="text-amber-800 font-medium">
+              {t(
+                "সকল প্রাক্তন শিক্ষকের নাম ও তথ্য এখনও পুরোপুরি যুক্ত করা সম্ভব হয়নি। তথ্য সংগ্রহের কাজ চলমান রয়েছে, শীঘ্রই ক্রমান্বয়ে সকলের নাম ও ছবি যুক্ত করা হবে।",
+                "The records for all former teachers have not yet been fully added. Data collection is ongoing, and remaining records will be updated soon."
+              )}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Content Area with Separate Divisions */}

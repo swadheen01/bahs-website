@@ -74,6 +74,8 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
                     src={teacher.photo}
                     alt={teacher.name_bengali}
                     fill
+                    priority
+                    quality={90}
                     className="object-cover object-top"
                     sizes="144px"
                   />

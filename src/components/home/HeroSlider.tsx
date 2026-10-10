@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import initialSlides from "@/data/sliders.json";
 import { FaChevronLeft, FaChevronRight, FaTimes, FaEye } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -124,10 +125,15 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
                   index === currentSlide ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
               >
-                <img
+                <Image
                   src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
+                  alt={slide.title || "BAHS Slider"}
+                  fill
+                  priority={index === 0}
+                  quality={100}
+                  unoptimized={false}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                  className="object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
                 />
 
                 {/* Hover indicator to signal clickable picture */}
@@ -256,11 +262,17 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             className="relative max-w-5xl max-h-[78vh] sm:max-h-[82vh] flex flex-col items-center justify-center select-none"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={slides[lightboxIndex].image}
-              alt={slides[lightboxIndex].title}
-              className="max-w-full max-h-[70vh] sm:max-h-[76vh] object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
-            />
+            <div className="relative w-[90vw] max-w-5xl h-[65vh] sm:h-[75vh]">
+              <Image
+                src={slides[lightboxIndex].image}
+                alt={slides[lightboxIndex].title || "BAHS Gallery Photo"}
+                fill
+                quality={100}
+                unoptimized={false}
+                sizes="90vw"
+                className="object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
+              />
+            </div>
 
             {/* Photo Title / Caption */}
             {slides[lightboxIndex].title && (

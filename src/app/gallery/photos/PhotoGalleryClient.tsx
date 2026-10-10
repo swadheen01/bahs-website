@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export default function PhotoGalleryClient({ photos }: { photos: any[] }) {
@@ -35,10 +36,13 @@ export default function PhotoGalleryClient({ photos }: { photos: any[] }) {
                 className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group flex flex-col"
               >
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100">
-                  <img
+                  <Image
                     src={photo.src}
                     alt={photo.caption}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    quality={90}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-4 bg-white flex-1 flex flex-col justify-between">

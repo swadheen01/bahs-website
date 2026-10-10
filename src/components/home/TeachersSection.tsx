@@ -77,6 +77,7 @@ export default function TeachersSection() {
                       src={teacher.photo}
                       alt={teacher.nameBengali}
                       fill
+                      quality={90}
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                       sizes="(max-width: 640px) 160px, 220px"
                     />

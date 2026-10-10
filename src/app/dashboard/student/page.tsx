@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaGraduationCap, FaSignOutAlt, FaHome, FaBullhorn, FaBookOpen } from "react-icons/fa";
+import { FaGraduationCap, FaSignOutAlt, FaHome, FaBullhorn, FaBookOpen, FaCertificate } from "react-icons/fa";
 
 export default function StudentDashboardPage() {
   const { user, logout, loading } = useAuth();
@@ -57,6 +57,11 @@ export default function StudentDashboardPage() {
             <FaBookOpen size={24} className="text-emerald-500 mb-2" />
             <h3 className="font-bold text-gray-800">পরীক্ষার ফলাফল</h3>
             <p className="text-xs text-gray-500 mt-1">টার্ম ও বার্ষিক পরীক্ষার রেজাল্ট দেখুন</p>
+          </Link>
+          <Link href="/academics/testimonial" className="bg-white p-5 rounded-xl shadow border-l-4 border-amber-600 hover:shadow-md transition">
+            <FaCertificate size={24} className="text-amber-600 mb-2" />
+            <h3 className="font-bold text-gray-800">প্রশংসাপত্র (Testimonial)</h3>
+            <p className="text-xs text-gray-500 mt-1">বিদ্যালয়ের অফিসিয়াল প্রশংসাপত্র তৈরি ও ডাউনলোড করুন</p>
           </Link>
         </div>
       </div>

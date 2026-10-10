@@ -7,7 +7,7 @@
       "designation": "প্রাক্তন প্রধান শিক্ষক",
       "designationEn": "Former Headmaster",
       "tenure": "১৯৮৫ - ১৯৯৫",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/amir_hossain.jpg"
     },
     {
       "id": "fh-2",
@@ -16,7 +16,7 @@
       "designation": "প্রাক্তন প্রধান শিক্ষক",
       "designationEn": "Former Headmaster",
       "tenure": "অজানা",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/bipul_bhushan.jpg"
     },
     {
       "id": "fh-3",
@@ -25,7 +25,7 @@
       "designation": "প্রাক্তন প্রধান শিক্ষক",
       "designationEn": "Former Headmaster",
       "tenure": "অজানা",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/a_shahid.jpeg"
     }
   ],
   "teachers": [
@@ -36,7 +36,7 @@
       "designation": "প্রাক্তন সহকারী শিক্ষক",
       "designationEn": "Former Assistant Teacher",
       "tenure": "অজানা",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/abdul_hamid.jpeg"
     },
     {
       "id": "ft-2",
@@ -45,7 +45,7 @@
       "designation": "প্রাক্তন সহকারী শিক্ষক",
       "designationEn": "Former Assistant Teacher",
       "tenure": "অজানা",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/ahmad_ali.jpg"
     },
     {
       "id": "ft-3",
@@ -54,7 +54,7 @@
       "designation": "প্রাক্তন সহকারী শিক্ষক",
       "designationEn": "Former Assistant Teacher",
       "tenure": "অজানা",
-      "photo": "/images/teachers/default_avatar.png"
+      "photo": "/images/former-staff/khela_chakraborty.jpeg"
     }
   ]
 }

@@ -123,8 +123,8 @@ export default function ClassRoutinePage() {
               </h2>
               <p className="text-xs text-gray-300 mt-1">
                 {t(
-                  "রবিবার থেকে বৃহস্পতিবার — সকাল ১০:০০ টা থেকে বিকাল ৩:১৫ টা পর্যন্ত",
-                  "Sunday to Thursday — 10:00 AM to 3:15 PM"
+                  "রবিবার থেকে বৃহস্পতিবার — সকাল ১০:০০ টা থেকে বিকাল ৪:৩০ টা পর্যন্ত",
+                  "Sunday to Thursday — 10:00 AM to 4:30 PM"
                 )}
               </p>
             </div>

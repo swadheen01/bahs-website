@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import HeroSlider from "@/components/home/HeroSlider";
 import MarqueeNotice from "@/components/home/MarqueeNotice";
 import QuickLinks from "@/components/home/QuickLinks";
@@ -114,10 +115,13 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                   <div className="p-5 flex-1 flex flex-col bg-white">
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 group">
-                        <img
+                        <Image
                           src="/images/teachers/headmaster.jpg"
                           alt="Headmaster"
-                          className="w-full h-full object-cover"
+                          fill
+                          quality={90}
+                          sizes="96px"
+                          className="object-cover"
                         />
                       </div>
                     </div>
@@ -146,10 +150,13 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                   <div className="p-5 flex-1 flex flex-col bg-white">
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100">
-                        <img
+                        <Image
                           src="/images/president/president.jpg"
                           alt="President"
-                          className="w-full h-full object-cover"
+                          fill
+                          quality={90}
+                          sizes="96px"
+                          className="object-cover"
                         />
                       </div>
                     </div>

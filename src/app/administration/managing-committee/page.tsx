@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import initialCommittee from "@/data/committee.json";
 import {
@@ -77,11 +78,14 @@ export default function ManagingCommitteePage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-5 mb-5">
-                  <div className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100 shrink-0">
-                    <img
+                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100 shrink-0">
+                    <Image
                       src={president.photo || "/images/president/president.jpg"}
                       alt={president.name}
-                      className="w-full h-full object-cover object-top"
+                      fill
+                      quality={90}
+                      sizes="112px"
+                      className="object-cover object-top"
                     />
                   </div>
                   <div className="text-center sm:text-left">
@@ -132,11 +136,14 @@ export default function ManagingCommitteePage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-5 mb-5">
-                  <div className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 shrink-0">
-                    <img
+                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 shrink-0">
+                    <Image
                       src={secretary.photo || "/images/teachers/headmaster.jpg"}
                       alt={secretary.name}
-                      className="w-full h-full object-cover object-top"
+                      fill
+                      quality={90}
+                      sizes="112px"
+                      className="object-cover object-top"
                     />
                   </div>
                   <div className="text-center sm:text-left">
@@ -197,11 +204,14 @@ export default function ManagingCommitteePage() {
               >
                 <div>
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
-                      <img
+                    <div className="relative w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
+                      <Image
                         src={member.photo || "/images/teachers/default_avatar.png"}
                         alt={member.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        quality={90}
+                        sizes="56px"
+                        className="object-cover"
                       />
                     </div>
                     <div className="min-w-0">

@@ -179,10 +179,13 @@ export default function AboutPage() {
             <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-6">
               <div className="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-gray-100">
                 <div className="relative w-28 h-32 rounded-2xl overflow-hidden bg-gray-100 border-4 border-emerald-100 shadow-md shrink-0">
-                  <img
+                  <Image
                     src={headmaster.photo || "/images/teachers/headmaster.jpg"}
                     alt={headmaster.name}
-                    className="w-full h-full object-cover object-top"
+                    fill
+                    quality={90}
+                    sizes="112px"
+                    className="object-cover object-top"
                   />
                 </div>
                 <div className="text-center sm:text-left">
@@ -230,10 +233,13 @@ export default function AboutPage() {
             <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-6">
               <div className="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-gray-100">
                 <div className="relative w-28 h-32 rounded-2xl overflow-hidden bg-gray-100 border-4 border-rose-100 shadow-md shrink-0">
-                  <img
+                  <Image
                     src={president.photo || "/images/president/president.jpg"}
                     alt={president.name}
-                    className="w-full h-full object-cover object-top"
+                    fill
+                    quality={90}
+                    sizes="112px"
+                    className="object-cover object-top"
                   />
                 </div>
                 <div className="text-center sm:text-left">
