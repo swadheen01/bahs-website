@@ -1,71 +1,37 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function SplashScreen() {
   const [show, setShow] = useState<boolean>(true);
   const [fadeOut, setFadeOut] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleDismiss = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
     setFadeOut(true);
     try {
       sessionStorage.setItem("bahs_splash_v2", "true");
+      document.documentElement.classList.add("splash-hidden");
     } catch (e) {}
 
     setTimeout(() => {
       setShow(false);
-      try {
-        document.documentElement.classList.add("splash-hidden");
-      } catch (e) {}
-    }, 450);
+    }, 400);
   };
 
   useEffect(() => {
-    // Check if the user has already seen the splash screen in this session
     try {
-      const hasSeen = sessionStorage.getItem("bahs_splash_v2");
-      if (hasSeen === "true") {
+      if (sessionStorage.getItem("bahs_splash_v2") === "true") {
         setShow(false);
         return;
       }
-    } catch (e) {
-      // Ignore storage errors
-    }
+    } catch (e) {}
 
-    // Fast and smooth line fill-up loading (~1.6 seconds)
-    const duration = 1600;
-    const intervalTime = 18;
-    const totalSteps = duration / intervalTime;
-    let step = 0;
+    // Failsafe auto-dismiss from React in case inline script was interrupted
+    const timeout = setTimeout(() => {
+      handleDismiss();
+    }, 1800);
 
-    timerRef.current = setInterval(() => {
-      step++;
-      const currentPct = Math.min(100, Math.round((step / totalSteps) * 100));
-      setProgress(currentPct);
-
-      if (currentPct >= 100) {
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
-        // Small pause at 100% completion so user perceives finish
-        setTimeout(() => {
-          handleDismiss();
-        }, 120);
-      }
-    }, intervalTime);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    return () => clearTimeout(timeout);
   }, []);
 
   if (!show) return null;
@@ -74,7 +40,7 @@ export default function SplashScreen() {
     <div
       id="bahs-splash-screen"
       onClick={handleDismiss}
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none cursor-pointer transition-all duration-450 ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none cursor-pointer transition-all duration-400 ${
         fadeOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
@@ -85,7 +51,6 @@ export default function SplashScreen() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-lg">
         {/* Animated Central Logo */}
         <div className="relative mb-6">
-          {/* Subtle Outer Glow Rings */}
           <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-yellow-400 opacity-40 blur-xl animate-spin-slow" />
           <div className="relative w-36 h-36 sm:w-44 sm:h-44 bg-white rounded-full p-1 sm:p-1.5 shadow-2xl border-4 border-white/90 flex items-center justify-center transform transition-transform hover:scale-105">
             <div className="relative w-full h-full">
@@ -121,24 +86,26 @@ export default function SplashScreen() {
           </p>
         </div>
 
-        {/* Progress bar loader ("line fill up loading") & Quick Enter prompt */}
+        {/* Progress bar loader & Quick Enter prompt */}
         <div className="mt-8 flex flex-col items-center gap-2.5 w-full">
           {/* Progress bar container */}
           <div className="w-64 sm:w-80 h-2.5 bg-white/20 rounded-full overflow-hidden p-0.5 border border-white/25 backdrop-blur-md shadow-inner">
             <div
-              className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-yellow-300 rounded-full transition-[width] duration-75 ease-linear shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-              style={{ width: `${progress}%` }}
+              id="bahs-splash-bar"
+              className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-yellow-300 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+              style={{ width: "0%" }}
             />
           </div>
 
           {/* Status info & Percentage */}
           <div className="flex items-center justify-between w-64 sm:w-80 text-[11px] text-gray-300 font-sans px-1">
             <span className="font-bengali text-gray-300">ওয়েবসাইট প্রস্তুত হচ্ছে...</span>
-            <span className="font-mono font-bold text-yellow-300">{progress}%</span>
+            <span id="bahs-splash-pct" className="font-mono font-bold text-yellow-300">0%</span>
           </div>
 
           <button
             type="button"
+            id="bahs-splash-skip-btn"
             onClick={(e) => {
               e.stopPropagation();
               handleDismiss();
@@ -149,6 +116,76 @@ export default function SplashScreen() {
           </button>
         </div>
       </div>
+
+      {/* Immediate Native Script for Instant Animation and Guaranteed Dismissal (zero hydration delay) */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function(){
+              try {
+                if (sessionStorage.getItem('bahs_splash_v2') === 'true') {
+                  var splash = document.getElementById('bahs-splash-screen');
+                  if (splash) splash.style.display = 'none';
+                  return;
+                }
+              } catch(e){}
+
+              function dismiss() {
+                var el = document.getElementById('bahs-splash-screen');
+                if (!el || el.dataset.dismissed) return;
+                el.dataset.dismissed = 'true';
+                el.style.transition = 'all 0.4s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'scale(1.05)';
+                el.style.pointerEvents = 'none';
+                try {
+                  sessionStorage.setItem('bahs_splash_v2', 'true');
+                  document.documentElement.classList.add('splash-hidden');
+                } catch(e){}
+                setTimeout(function(){
+                  if (el) el.style.display = 'none';
+                }, 400);
+              }
+
+              // Bind immediate native clicks even before React hydrates
+              var el = document.getElementById('bahs-splash-screen');
+              if (el) {
+                el.addEventListener('click', dismiss);
+              }
+              var btn = document.getElementById('bahs-splash-skip-btn');
+              if (btn) {
+                btn.addEventListener('click', function(e){
+                  e.stopPropagation();
+                  dismiss();
+                });
+              }
+
+              // Ultra-smooth native progress animation (~1.3s)
+              var bar = document.getElementById('bahs-splash-bar');
+              var pct = document.getElementById('bahs-splash-pct');
+              var start = Date.now();
+              var duration = 1300;
+
+              function tick() {
+                var elapsed = Date.now() - start;
+                var progress = Math.min(100, Math.round((elapsed / duration) * 100));
+                if (bar) bar.style.width = progress + '%';
+                if (pct) pct.textContent = progress + '%';
+                if (progress < 100) {
+                  requestAnimationFrame(tick);
+                } else {
+                  setTimeout(dismiss, 120);
+                }
+              }
+
+              requestAnimationFrame(tick);
+
+              // Absolute failsafe maximum timer
+              setTimeout(dismiss, 2200);
+            })();
+          `,
+        }}
+      />
     </div>
   );
 }
