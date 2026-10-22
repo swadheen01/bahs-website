@@ -1,22 +1,26 @@
 {
-  "name": "bahs-temp",
+  "name": "bahs-website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.13",
     "@supabase/supabase-js": "^2.117.2",
     "bcryptjs": "^3.0.3",
     "html-to-image": "^1.11.13",
     "iron-session": "^9.0.1",
-    "next": "16.3.6",
+    "next": "^16.4.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-icons": "^5.7.0",
+    "wrangler": "^4.152.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -26,7 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "^16.4.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
