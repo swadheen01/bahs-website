@@ -54,7 +54,6 @@ export default function TeacherDashboardPage() {
       email: t.email || "",
       contactNo: t.contactNo || "",
       qualification: t.qualification || "",
-      experience: t.experience || "",
       mainSubject: t.mainSubject || "",
       courses: t.courses || "",
       presentAddress: t.presentAddress || "",
@@ -179,10 +178,6 @@ export default function TeacherDashboardPage() {
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">শিক্ষাগত যোগ্যতা</label>
                     <input type="text" value={editForm.qualification} onChange={(e) => setEditForm({ ...editForm, qualification: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">অভিজ্ঞতা</label>
-                    <input type="text" value={editForm.experience} onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">প্রধান বিষয়</label>

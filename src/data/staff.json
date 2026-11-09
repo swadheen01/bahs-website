@@ -5,8 +5,8 @@
     "nameEnglish": "Mst. Parvin Akter",
     "designation": "অফিস সহকারী",
     "designationEn": "Office Assistant",
-    "phone": "",
-    "photo": "",
+    "phone": "01768974539",
+    "photo": "/images/teachers/default-avatar.png",
     "order": 1
   },
   {
@@ -15,8 +15,8 @@
     "nameEnglish": "Taju Mia",
     "designation": "নিরাপত্তাকর্মী",
     "designationEn": "Security Guard",
-    "phone": "",
-    "photo": "",
+    "phone": "01706990170",
+    "photo": "/images/teachers/default-avatar.png",
     "order": 2
   },
   {
@@ -25,8 +25,8 @@
     "nameEnglish": "Md. Abidur Rahman",
     "designation": "পরিচ্ছন্নতাকর্মী",
     "designationEn": "Cleaner",
-    "phone": "",
-    "photo": "",
+    "phone": "01687636827",
+    "photo": "/images/teachers/default-avatar.png",
     "order": 3
   },
   {
@@ -35,8 +35,8 @@
     "nameEnglish": "Md. Abul Kalam",
     "designation": "অফিস সহায়ক",
     "designationEn": "Office Peon",
-    "phone": "",
-    "photo": "",
+    "phone": "01758259973",
+    "photo": "/images/teachers/default-avatar.png",
     "order": 4
   },
   {
@@ -45,8 +45,8 @@
     "nameEnglish": "Mst. Khadija Akter",
     "designation": "আয়া",
     "designationEn": "Ayah",
-    "phone": "",
-    "photo": "",
+    "phone": "01756321539",
+    "photo": "/images/teachers/default-avatar.png",
     "order": 5
   }
 ]

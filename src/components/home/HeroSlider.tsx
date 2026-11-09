@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import initialSlides from "@/data/sliders.json";
-import { FaChevronLeft, FaChevronRight, FaTimes, FaEye } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaTimes, FaEye, FaImage } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface Slider {
@@ -19,34 +19,18 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
   });
   const [currentSlide, setCurrentSlide] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const { language } = useLanguage();
 
   useEffect(() => {
-    // Clean up any stale localStorage from previous versions
-    try {
-      localStorage.removeItem("bahs_cached_sliders");
-    } catch (e) {}
-
-    // Fetch latest sliders from server to ensure fresh content with cache buster
-    fetch("/api/sliders?t=" + new Date().getTime())
+    fetch("/api/sliders")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-          
-          try {
-            sessionStorage.setItem("bahs_hero_sliders", JSON.stringify(sorted));
-          } catch (e) {}
-
-          setSlides((prev) => {
-            // If the order or items changed, reset current slide to 0 to show the correct first slide instantly
-            const prevIds = prev.map(s => s.id).join(',');
-            const newIds = sorted.map(s => s.id).join(',');
-            if (prevIds !== newIds) {
-              setCurrentSlide(0);
-            }
-            return sorted;
-          });
+          setSlides(sorted);
+          setImageErrors({});
+          setCurrentSlide((prev) => (prev < sorted.length ? prev : 0));
         }
       })
       .catch((e) => console.error("Slider fetch error:", e));
@@ -57,7 +41,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
     if (slides.length <= 1 || lightboxIndex !== null) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000); // slightly increased to 4s to give more time to read, was 3s
+    }, 4500);
     return () => clearInterval(timer);
   }, [slides.length, lightboxIndex]);
 
@@ -112,8 +96,8 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
       <div className="container mx-auto max-w-5xl">
         {/* Photo Frame Container with Multi-Layered Photographic Frame Border */}
         <div className="relative p-1.5 sm:p-3 bg-gradient-to-b from-white via-slate-50 to-gray-200 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-300/80 ring-1 ring-black/5">
-          {/* Slider Viewport with Natural Horizontal Camera Photo Aspect Ratio (16:9) */}
-          <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-[#051939] select-none shadow-inner group">
+          {/* Slider Viewport with Natural Camera Photo Aspect Ratio */}
+          <div className="relative w-full aspect-[16/9] sm:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-[#051939] select-none shadow-inner group">
             {slides.map((slide, index) => (
               <div
                 key={`${slide.id}-${index}`}
@@ -121,20 +105,35 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
                 role="button"
                 tabIndex={0}
                 title={language === "en" ? "Click to view full photo" : "ছবিটি বড় করে দেখতে ক্লিক করুন"}
-                className={`absolute inset-0 transition-opacity duration-500 ease-in-out cursor-pointer ${
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
                   index === currentSlide ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
               >
-                <Image
-                  src={slide.image}
-                  alt={slide.title || "BAHS Slider"}
-                  fill
-                  priority={index === 0}
-                  quality={100}
-                  unoptimized={false}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-                  className="object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
-                />
+                {!imageErrors[`slide-${slide.id}-${index}`] ? (
+                  <Image
+                    src={slide.image}
+                    alt={slide.title || "BAHS Slider"}
+                    fill
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "low"}
+                    quality={85}
+                    onError={() =>
+                      setImageErrors((prev) => ({
+                        ...prev,
+                        [`slide-${slide.id}-${index}`]: true,
+                      }))
+                    }
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                    className="object-cover object-center group-hover:scale-[1.01] transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#051939] text-gray-300 px-6 text-center">
+                    <FaImage size={44} className="mb-2 opacity-40" />
+                    <p className="text-xs sm:text-sm text-gray-400">
+                      {language === "en" ? "Photo unavailable" : "ছবিটি প্রদর্শন করা যাচ্ছে না"}
+                    </p>
+                  </div>
+                )}
 
                 {/* Hover indicator to signal clickable picture */}
                 <div className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 hover:bg-black/80 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md backdrop-blur-xs pointer-events-none">
@@ -263,15 +262,29 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative w-[90vw] max-w-5xl h-[65vh] sm:h-[75vh]">
-              <Image
-                src={slides[lightboxIndex].image}
-                alt={slides[lightboxIndex].title || "BAHS Gallery Photo"}
-                fill
-                quality={100}
-                unoptimized={false}
-                sizes="90vw"
-                className="object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
-              />
+              {!imageErrors[`lb-${slides[lightboxIndex].id}-${lightboxIndex}`] ? (
+                <Image
+                  src={slides[lightboxIndex].image}
+                  alt={slides[lightboxIndex].title || "BAHS Gallery Photo"}
+                  fill
+                  quality={90}
+                  onError={() =>
+                    setImageErrors((prev) => ({
+                      ...prev,
+                      [`lb-${slides[lightboxIndex].id}-${lightboxIndex}`]: true,
+                    }))
+                  }
+                  sizes="90vw"
+                  className="object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-[#09224d]/80 text-gray-300 rounded-xl ring-1 ring-white/10">
+                  <FaImage size={48} className="mb-2 opacity-50" />
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    {language === "en" ? "Photo unavailable" : "ছবিটি লোড করা যায়নি"}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Photo Title / Caption */}

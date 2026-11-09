@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +20,9 @@ interface InfoCardProps {
 
 function InfoCard({ icon, label, value, mono, fullWidth }: InfoCardProps) {
   if (!value) return null;
+  const isPhone = mono && /^[0-9+ -]+$/.test(value.trim());
+  const isEmail = value.includes("@") && !value.includes(" ");
+
   return (
     <div className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5 flex items-start gap-4 ${fullWidth ? 'sm:col-span-2' : ''}`}>
       <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#06874A] shrink-0 border border-emerald-100">
@@ -26,17 +30,61 @@ function InfoCard({ icon, label, value, mono, fullWidth }: InfoCardProps) {
       </div>
       <div>
         <p className="text-xs font-semibold text-gray-500 mb-1 tracking-wide">{label}</p>
-        <p className={`text-[15px] font-bold text-gray-800 leading-snug whitespace-pre-line ${mono ? "font-mono" : ""}`}>
-          {value}
-        </p>
+        {isPhone ? (
+          <a
+            href={`tel:${value.replace(/\s+/g, '')}`}
+            className="text-[15px] font-bold text-[#051939] hover:text-[#06874A] font-mono transition-colors underline decoration-dotted underline-offset-2"
+          >
+            {value}
+          </a>
+        ) : isEmail ? (
+          <a
+            href={`mailto:${value}`}
+            className="text-[15px] font-bold text-[#051939] hover:text-[#06874A] transition-colors underline decoration-dotted underline-offset-2"
+          >
+            {value}
+          </a>
+        ) : (
+          <p className={`text-[15px] font-bold text-gray-800 leading-snug whitespace-pre-line ${mono ? "font-mono" : ""}`}>
+            {value}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
+function toBnDigits(num: number | string): string {
+  const bn = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/\d/g, (d) => bn[parseInt(d, 10)]);
+}
+
+function calculateExperience(joiningDateStr?: string | null, manualExp?: string | null, isBn = true): string | null {
+  if (joiningDateStr) {
+    const normalized = joiningDateStr.replace(/[০-৯]/g, (d) =>
+      String("০১২৩৪৫৬৭৮৯".indexOf(d))
+    );
+    const match = normalized.match(/\b(19\d\d|20\d\d)\b/);
+    if (match) {
+      const joiningYear = parseInt(match[1], 10);
+      const currentYear = new Date().getFullYear();
+      const diff = currentYear - joiningYear;
+      if (diff > 0) {
+        return isBn ? `${toBnDigits(diff)} বছরের অভিজ্ঞতা` : `${diff} ${diff > 1 ? "Years" : "Year"} Experience`;
+      } else if (diff === 0) {
+        return isBn ? "১ বছরের অভিজ্ঞতা" : "1 Year Experience";
+      }
+    }
+  }
+  if (manualExp) return manualExp;
+  return null;
+}
+
 export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const [imageError, setImageError] = useState(false);
+  const calculatedExperience = calculateExperience(teacher.joining_date, teacher.experience, language !== "en");
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -69,13 +117,14 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
             {/* Photo with Premium Navy Frame */}
             <div className="w-36 h-44 rounded-2xl overflow-hidden p-1.5 bg-gradient-to-b from-white/30 to-white/10 border-2 border-white/30 shadow-2xl relative shrink-0">
               <div className="w-full h-full rounded-xl overflow-hidden relative bg-gray-800 border border-white/20">
-                {teacher.photo ? (
+                {teacher.photo && !imageError ? (
                   <Image
                     src={teacher.photo}
                     alt={teacher.name_bengali}
                     fill
-                    priority
-                    quality={90}
+                    preload
+                    quality={85}
+                    onError={() => setImageError(true)}
                     className="object-cover object-top"
                     sizes="144px"
                   />
@@ -121,7 +170,7 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
               <InfoCard icon={<FaPhone size={18} />} label={t("মোবাইল নং", "Contact No.")} value={teacher.contact_no} mono />
               
               <InfoCard icon={<FaGraduationCap size={18} />} label={t("যোগ্যতা", "Qualification")} value={teacher.qualification} />
-              <InfoCard icon={<FaClock size={18} />} label={t("অভিজ্ঞতা", "Experience")} value={teacher.experience} />
+              <InfoCard icon={<FaClock size={18} />} label={t("অভিজ্ঞতা", "Experience")} value={calculatedExperience} />
               <InfoCard icon={<FaBook size={18} />} label={t("প্রধান বিষয়", "Main Subject")} value={teacher.main_subject} />
               <InfoCard icon={<FaBook size={18} />} label={t("অন্যান্য বিষয়", "Other Subjects")} value={teacher.subject} />
               

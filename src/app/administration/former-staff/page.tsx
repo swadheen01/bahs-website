@@ -67,7 +67,10 @@ export default function FormerStaffPage() {
     (filterMode === "teacher" && filteredTeachers.length > 0);
 
   const renderCard = (teacher: FormerStaff) => {
-    const hasRealPhoto = teacher.photo && !teacher.photo.includes("default_avatar");
+    const hasRealPhoto =
+      teacher.photo &&
+      !teacher.photo.includes("default_avatar") &&
+      !teacher.photo.includes("default-avatar");
 
     return (
       <div

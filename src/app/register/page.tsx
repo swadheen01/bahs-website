@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaUserPlus, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUserPlus, FaLock, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export default function RegisterPage() {
@@ -10,8 +12,39 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { t } = useLanguage();
   const router = useRouter();
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError("");
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (oauthError) {
+        if (oauthError.message?.toLowerCase().includes("provider") || oauthError.message?.toLowerCase().includes("not enabled")) {
+          setError(
+            t(
+              "Google লগইন প্রোভাইডার এখনও Supabase-এ সক্রিয় করা হয়নি। অনুগ্রহ করে Supabase ড্যাশবোর্ডে Google Provider চালু করুন অথবা নিচের ফর্ম পূরণ করে অ্যাকাউন্ট খুলুন।",
+              "Google login is not yet enabled in Supabase. Please enable Google provider in Supabase Dashboard or register below."
+            )
+          );
+        } else {
+          setError(oauthError.message);
+        }
+        setGoogleLoading(false);
+      }
+    } catch (err: any) {
+      setError(t("Google লগইন প্রক্রিয়া শুরু করতে সমস্যা হয়েছে।", "Failed to initiate Google login."));
+      setGoogleLoading(false);
+    }
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +91,35 @@ export default function RegisterPage() {
 
         {/* Register Card */}
         <div className="bg-white rounded-xl shadow-lg p-8 border-t-4 border-[#06874A]">
+          {/* Google Quick Sign-Up */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg shadow-xs transition duration-200 disabled:opacity-60 cursor-pointer mb-6"
+          >
+            {googleLoading ? (
+              <>
+                <FaSpinner className="animate-spin text-gray-600" size={18} />
+                <span>{t("Google-এ সংযোগ করা হচ্ছে...", "Connecting to Google...")}</span>
+              </>
+            ) : (
+              <>
+                <FcGoogle size={22} />
+                <span>{t("Google দিয়ে দ্রুত খুলুন", "Sign up with Google")}</span>
+              </>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="border-t border-gray-200 w-full"></div>
+            <span className="bg-white px-3 text-xs text-gray-400 font-medium whitespace-nowrap">
+              {t("অথবা ফর্ম পূরণ করুন", "Or fill out the form")}
+            </span>
+            <div className="border-t border-gray-200 w-full"></div>
+          </div>
+
           <form onSubmit={handleRegister} className="space-y-4">
             {/* Name */}
             <div>

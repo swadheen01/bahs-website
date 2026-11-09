@@ -23,6 +23,7 @@ export default function TeachersSection() {
     return (initialTeachers.slice(0, 12) as Teacher[]) || [];
   });
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const { t, language } = useLanguage();
 
   useEffect(() => {
@@ -72,12 +73,13 @@ export default function TeachersSection() {
               {/* Photo Frame with Elegant Dual-Layer Navy Border */}
               <div className="relative p-1 rounded-xl bg-gradient-to-b from-[#051939]/15 via-blue-50/40 to-slate-100 border-2 border-[#051939]/20 group-hover:border-[#051939]/80 shadow-sm transition-colors duration-300">
                 <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
-                  {teacher.photo ? (
+                  {teacher.photo && !imageErrors[teacher.id] ? (
                     <Image
                       src={teacher.photo}
                       alt={teacher.nameBengali}
                       fill
-                      quality={90}
+                      quality={85}
+                        onError={() => setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))}
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                       sizes="(max-width: 640px) 160px, 220px"
                     />

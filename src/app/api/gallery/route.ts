@@ -16,6 +16,8 @@ async function readLocalGallery(): Promise<any[]> {
       id: item.id,
       title: item.caption || item.title || "গ্যালারি ছবি",
       image: item.src || item.image,
+      category: item.category || "campus",
+      date: item.date || "২০২৬",
       created_at: item.date || new Date().toISOString(),
     }));
   } catch (e) {
@@ -29,8 +31,8 @@ async function writeLocalGallery(data: any[]) {
       id: item.id,
       src: item.image,
       caption: item.title,
-      category: "event",
-      date: item.created_at || "২০২৬",
+      category: item.category || "campus",
+      date: item.date || item.created_at || "২০২৬",
     }));
     await writeFile(jsonPath, JSON.stringify(formatted, null, 2), "utf-8");
   } catch (e) {
@@ -51,6 +53,8 @@ export async function GET() {
         id: item.id,
         title: item.title || "গ্যালারি ছবি",
         image: item.file_url,
+        category: item.added_by || "campus",
+        date: item.date || "২০২৬",
         created_at: item.date_iso || item.date || new Date().toISOString(),
       }));
       return NextResponse.json(items);

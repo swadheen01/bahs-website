@@ -40,11 +40,10 @@ export default function CalendarClient() {
 
   const isHoliday = (date: Date) => {
     const dateStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
-    return holidays.find(h => {
-      const s = new Date(h.startDate).getTime();
-      const e = new Date(h.endDate).getTime();
-      const d = date.getTime();
-      return d >= s && d <= e;
+    return holidays.find((h) => {
+      const start = h.startDate;
+      const end = h.endDate || h.startDate;
+      return Boolean(start) && dateStr >= start && dateStr <= end;
     });
   };
 

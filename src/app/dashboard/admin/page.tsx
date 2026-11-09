@@ -158,11 +158,11 @@ export default function AdminDashboardPage() {
       color: "border-teal-500 hover:border-teal-600"
     },
     {
-      title: "ইউজার ও একাউন্ট ম্যানেজমেন্ট",
-      desc: "শিক্ষক ও শিক্ষার্থী একাউন্টসমূহ দেখুন ও পরিচালনা করুন",
+      title: "ইউজার ও রোল ম্যানেজমেন্ট",
+      desc: "ব্যবহারকারীদের এডমিন/শিক্ষক/শিক্ষার্থী রোল প্রদান, পাসওয়ার্ড রিসেট ও একাউন্ট পরিচালনা করুন",
       icon: <FaUsers size={28} className="text-purple-600" />,
       href: "/dashboard/admin/users",
-      badge: "ব্যবহারকারী",
+      badge: "রোল ও পারমিশন",
       color: "border-purple-500 hover:border-purple-600"
     },
     {

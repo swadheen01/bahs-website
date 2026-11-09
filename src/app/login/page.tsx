@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { FaLock, FaUser, FaEye, FaEyeSlash, FaChalkboardTeacher, FaGraduationCap, FaCog } from "react-icons/fa";
+import { FaLock, FaUser, FaEye, FaEyeSlash, FaChalkboardTeacher, FaGraduationCap, FaCog, FaSpinner } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { useLanguage } from "@/lib/LanguageContext";
 
 export default function LoginPage() {
@@ -12,6 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { login, user } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
@@ -26,6 +29,36 @@ export default function LoginPage() {
     router.replace("/");
     return null;
   }
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError("");
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (oauthError) {
+        if (oauthError.message?.toLowerCase().includes("provider") || oauthError.message?.toLowerCase().includes("not enabled")) {
+          setError(
+            t(
+              "Google লগইন প্রোভাইডার এখনও Supabase-এ সক্রিয় করা হয়নি। অনুগ্রহ করে Supabase ড্যাশবোর্ডে Google Provider চালু করুন অথবা ইউজারনেম দিয়ে লগইন করুন।",
+              "Google login is not yet enabled in Supabase. Please enable Google provider in Supabase Dashboard or log in with username."
+            )
+          );
+        } else {
+          setError(oauthError.message);
+        }
+        setGoogleLoading(false);
+      }
+    } catch (err: any) {
+      setError(t("Google লগইন প্রক্রিয়া শুরু করতে সমস্যা হয়েছে।", "Failed to initiate Google login."));
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,10 +103,39 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-8 border-t-4 border-[#800505]">
-          <form onSubmit={handleLogin} className="space-y-5">
+          {/* Google Login Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg shadow-xs transition duration-200 disabled:opacity-60 cursor-pointer mb-6"
+          >
+            {googleLoading ? (
+              <>
+                <FaSpinner className="animate-spin text-gray-600" size={18} />
+                <span>{t("Google-এ সংযোগ করা হচ্ছে...", "Connecting to Google...")}</span>
+              </>
+            ) : (
+              <>
+                <FcGoogle size={22} />
+                <span>{t("Google দিয়ে লগইন করুন", "Sign in with Google")}</span>
+              </>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="border-t border-gray-200 w-full"></div>
+            <span className="bg-white px-3 text-xs text-gray-400 font-medium whitespace-nowrap">
+              {t("অথবা ইউজারনেম দিয়ে", "Or with username")}
+            </span>
+            <div className="border-t border-gray-200 w-full"></div>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("ইউজারনেম", "Username")}
+                {t("ইউজারনেম বা ইমেইল", "Username or Email")}
               </label>
               <div className="relative">
                 <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -81,7 +143,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={t("আপনার ইউজারনেম", "Enter your username")}
+                  placeholder={t("আপনার ইউজারনেম বা ইমেইল", "Enter your username or email")}
                   required
                   className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#051939]"
                 />
@@ -89,9 +151,17 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("পাসওয়ার্ড", "Password")}
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("পাসওয়ার্ড", "Password")}
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline transition"
+                >
+                  {t("পাসওয়ার্ড ভুলে গেছেন?", "Forgot password?")}
+                </Link>
+              </div>
               <div className="relative">
                 <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input

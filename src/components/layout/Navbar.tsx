@@ -117,7 +117,7 @@ export default function Navbar() {
             className="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-2.5 md:gap-4.5 group mx-auto min-w-0 px-8 sm:px-12 md:px-0"
           >
             <div className="relative w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-22 lg:h-22 bg-white rounded-full p-2 shadow-xl shrink-0 border-2 border-white/60 group-hover:scale-105 transition-transform duration-300">
-              <Image src="/images/logo/logo.png" alt="BAHS Logo" fill className="object-contain p-1" priority />
+              <Image src="/images/logo/logo.png" alt="BAHS Logo" fill className="object-contain p-1" preload />
             </div>
             <div className="text-white text-center md:text-left min-w-0">
               <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-tight tracking-wide drop-shadow-md group-hover:text-emerald-300 transition-colors uppercase">

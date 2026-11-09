@@ -1,5 +1,14 @@
 [
   {
+    "id": 6,
+    "nameBengali": "হাদিসুজ্জামান খান তানভীর",
+    "nameEnglish": "Hadisuzzaman Khan Tanvir",
+    "institution": "ফরিদপুর মেডিকেল কলেজ, ফরিদপুর",
+    "degree": "এমবিবিএস",
+    "photo": "/images/alumni/tanvir.jpg",
+    "year": "২০২৪"
+  },
+  {
     "id": 5,
     "nameBengali": "ডাঃ সুবিমল চন্দ্র চন্দ",
     "nameEnglish": "Dr. Subimol Chandra Chanda",
@@ -18,4 +27,3 @@
     "year": "2022"
   }
 ]
-

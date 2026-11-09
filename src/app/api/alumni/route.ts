@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     nameEnglish: body.nameEnglish || "",
     institution: body.institution,
     degree: body.degree,
-    photo: body.photo || "/images/alumni/default.jpg",
+    photo: body.photo || "/images/teachers/default-avatar.png",
     year: body.year || null,
   });
   try {

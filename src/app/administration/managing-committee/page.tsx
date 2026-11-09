@@ -206,7 +206,7 @@ export default function ManagingCommitteePage() {
                   <div className="flex items-center gap-4 mb-3">
                     <div className="relative w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
                       <Image
-                        src={member.photo || "/images/teachers/default_avatar.png"}
+                        src={member.photo || "/images/teachers/default-avatar.png"}
                         alt={member.name}
                         fill
                         quality={90}

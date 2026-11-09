@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": 1152828007,
+    "src": "/images/gallery/gallery-3.jpg",
+    "caption": "এসএসসি-২০১৮ ব্যাচের ইফতার মাহফিল",
+    "category": "campus",
+    "date": "১৬/১০/২০২৬"
+  },
+  {
+    "id": 1152796547,
+    "src": "/images/gallery/gallery-2.jpg",
+    "caption": "এসএসসি-২০১৯ ব্যাচের ইফতার মাহফিল",
+    "category": "campus",
+    "date": "১৬/১০/২০২৬"
+  },
+  {
+    "id": 1152698844,
+    "src": "/images/gallery/gallery-1.jpg",
+    "caption": "শরীরচর্চা কালে শিক্ষার্থীরা",
+    "category": "campus",
+    "date": "১৬/১০/২০২৬"
+  }
+]

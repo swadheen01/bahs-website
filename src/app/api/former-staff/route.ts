@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         designation: body.designation,
         designationEn: body.designationEn || body.designation,
         tenure: body.tenure,
-        photo: body.photo || "/images/teachers/default_avatar.png"
+        photo: body.photo || "/images/teachers/default-avatar.png"
       };
       collection.push(newItem);
       await saveData(data);

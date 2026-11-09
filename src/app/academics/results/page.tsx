@@ -1209,7 +1209,7 @@ export default function ResultsPage() {
 
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/academics/testimonial?name=${encodeURIComponent(resultData.name || "")}&roll=${encodeURIComponent(resultData.roll || rollInput)}&class=${encodeURIComponent(resultData.class || selectedClass)}&year=${encodeURIComponent(resultData.year || selectedYear)}&gpa=${encodeURIComponent(resultData.gpa || "")}&group=${encodeURIComponent(resultData.group || "")}&father=${encodeURIComponent(resultData.fatherName || "")}&mother=${encodeURIComponent(resultData.motherName || "")}`}
+                        href={`/academics/testimonial?name=${encodeURIComponent(resultData.studentNameEn || resultData.studentName || resultData.name || "")}&roll=${encodeURIComponent(resultData.roll || rollInput)}&class=${encodeURIComponent(resultData.class || selectedClass)}&year=${encodeURIComponent(resultData.year || selectedYear)}&gpa=${encodeURIComponent(resultData.gpa || "")}&group=${encodeURIComponent(resultData.group || "")}&father=${encodeURIComponent(resultData.fatherName || "")}&mother=${encodeURIComponent(resultData.motherName || "")}`}
                         className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
                       >
                         <FaCertificate size={14} />
@@ -1218,7 +1218,7 @@ export default function ResultsPage() {
 
                       <button
                         type="button"
-                        onClick={() => printElement("printable-marksheet", `Marksheet_${resultData.roll || "Student"}`)}
+                        onClick={() => printElement("printable-internal-card", `Marksheet_${resultData.roll || "Student"}`)}
                         className="px-5 py-2.5 rounded-xl bg-[#06874A] hover:bg-green-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
                       >
                         <FaPrint size={14} />

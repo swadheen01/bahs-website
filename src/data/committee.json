@@ -31,7 +31,7 @@
     "designationEn": "Founder Member",
     "category": "প্রতিষ্ঠাতা সদস্য",
     "phone": "+8801713-456789",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "আজীবন",
     "bio": "১৯৮৫ সালে বিদ্যালয় প্রতিষ্ঠাকালীন অন্যতম উদ্যোক্তা ও আজীবন পৃষ্ঠপোষক।"
   },
@@ -43,7 +43,7 @@
     "designationEn": "Donor Member",
     "category": "দাতা সদস্য",
     "phone": "+8801714-567890",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "বিদ্যালয়ের ভূমি ও উন্নয়ন তহবিলে বিশেষ অবদানকারী বিশিষ্ট দানশীল ব্যক্তিত্ব।"
   },
@@ -55,7 +55,7 @@
     "designationEn": "Guardian Representative",
     "category": "অভিভাবক প্রতিনিধি",
     "phone": "+8801715-678901",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "সাধারণ অভিভাবকদের পক্ষ থেকে নির্বাচিত সদস্য।"
   },
@@ -67,7 +67,7 @@
     "designationEn": "Female Guardian Representative",
     "category": "অভিভাবক প্রতিনিধি",
     "phone": "+8801716-789012",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "অভিভাবকদের মধ্য থেকে নির্বাচিত সংরক্ষিত নারী সদস্য।"
   },
@@ -79,7 +79,7 @@
     "designationEn": "Guardian Representative",
     "category": "অভিভাবক প্রতিনিধি",
     "phone": "+8801717-890123",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "নির্বাচিত অভিভাবক প্রতিনিধি।"
   },
@@ -91,7 +91,7 @@
     "designationEn": "Teacher Representative",
     "category": "শিক্ষক প্রতিনিধি",
     "phone": "+8801718-901234",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "শিক্ষকমণ্ডলীর পক্ষ থেকে নির্বাচিত শিক্ষক প্রতিনিধি।"
   },
@@ -103,7 +103,7 @@
     "designationEn": "Female Teacher Representative",
     "category": "শিক্ষক প্রতিনিধি",
     "phone": "+8801719-012345",
-    "photo": "/images/teachers/default_avatar.png",
+    "photo": "/images/teachers/default-avatar.png",
     "term": "২০২৪ - ২০২৬",
     "bio": "সহকারী শিক্ষক ও পরিচালনা পরিষদের মহিলা শিক্ষক প্রতিনিধি।"
   }

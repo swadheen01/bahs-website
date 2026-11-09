@@ -2,7 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { FaUserCircle, FaSearch, FaTimes } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { FaUserCircle, FaSearch, FaTimes, FaPhoneAlt } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface Teacher {
@@ -14,13 +15,25 @@ interface Teacher {
   subject: string;
   mainSubject?: string;
   photo: string;
+  contactNo?: string;
   category: string;
 }
 
 export default function TeacherListClient({ teachers }: { teachers: Teacher[] }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const { t, language } = useLanguage();
+
+  const handleTeacherClick = (e: React.MouseEvent, id: number) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    setLoadingId(id);
+    setTimeout(() => {
+      router.push(`/administration/all-teachers/${id}`);
+    }, 350);
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -30,7 +43,8 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
       t.nameEnglish?.toLowerCase().includes(q) ||
       t.designation?.toLowerCase().includes(q) ||
       t.designationEn?.toLowerCase().includes(q) ||
-      t.subject?.toLowerCase().includes(q)
+      t.subject?.toLowerCase().includes(q) ||
+      (t.contactNo && t.contactNo.includes(q))
     );
   }, [query, teachers]);
 
@@ -104,7 +118,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
               <Link
                 key={teacher.id}
                 href={`/administration/all-teachers/${teacher.id}`}
-                onClick={() => setLoadingId(teacher.id)}
+                onClick={(e) => handleTeacherClick(e, teacher.id)}
                 className="group relative bg-white rounded-2xl p-3 sm:p-3.5 border-2 border-slate-200/90 hover:border-[#051939] shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between overflow-hidden text-center"
               >
                 {/* Top Accent Navy Blue Border */}
@@ -113,12 +127,13 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
                 {/* Photo Frame with Dual-Layer Regal Navy Border */}
                 <div className="relative p-1.5 rounded-xl bg-gradient-to-b from-[#051939]/15 via-blue-50/40 to-slate-100 border-2 border-[#051939]/20 group-hover:border-[#051939]/80 shadow-sm transition-colors duration-300">
                   <div className="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
-                    {teacher.photo ? (
+                    {teacher.photo && !imageErrors[teacher.id] ? (
                       <Image
                         src={teacher.photo}
                         alt={language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                         fill
-                        quality={90}
+                        quality={85}
+                        onError={() => setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))}
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       />
@@ -129,8 +144,8 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
                     )}
 
                     {loadingId === teacher.id && (
-                      <div className="absolute inset-0 bg-[#051939]/20 backdrop-blur-[2px] z-20 overflow-hidden rounded-lg">
-                        <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-transparent via-white/70 to-transparent opacity-90 animate-shimmer-sweep"></div>
+                      <div className="absolute inset-0 bg-[#051939]/25 backdrop-blur-[1px] z-20 overflow-hidden rounded-lg pointer-events-none">
+                        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/85 to-transparent opacity-95 animate-shimmer-once"></div>
                       </div>
                     )}
 
@@ -154,6 +169,12 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
                       <p className="text-[11px] text-gray-500 mt-1.5 italic line-clamp-1">
                         {teacher.subject}
                       </p>
+                    )}
+                    {teacher.contactNo && (
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 text-[10px] md:text-[11px] font-mono font-medium">
+                        <FaPhoneAlt size={9} className="text-[#06874A]" />
+                        <span>{teacher.contactNo}</span>
+                      </div>
                     )}
                   </div>
 

@@ -17,13 +17,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
 
-  const updates: any = {
-    name: body.name,
-    role: body.role,
-    teacherId: body.teacherId,
-    class: body.class,
-    active: body.active,
-  };
+  const updates: any = {};
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.role !== undefined) updates.role = body.role;
+  if (body.teacherId !== undefined) updates.teacherId = body.teacherId;
+  if (body.class !== undefined) updates.class = body.class;
+  if (body.active !== undefined) updates.active = body.active;
 
   if (body.password) {
     updates.passwordHash = await bcrypt.hash(body.password, 10);

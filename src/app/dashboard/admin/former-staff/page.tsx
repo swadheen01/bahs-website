@@ -342,7 +342,7 @@ export default function AdminFormerStaffPage() {
                       <td className="py-3 px-4">
                         <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
                           <img
-                            src={item.photo || "/images/teachers/default_avatar.png"}
+                            src={item.photo || "/images/teachers/default-avatar.png"}
                             alt={item.name}
                             className="w-full h-full object-cover object-top"
                           />

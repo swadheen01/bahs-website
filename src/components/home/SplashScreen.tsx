@@ -58,7 +58,7 @@ export default function SplashScreen() {
                 src="/images/logo/logo.png"
                 alt="BAHS Logo"
                 fill
-                priority
+                preload
                 className="object-contain"
               />
             </div>

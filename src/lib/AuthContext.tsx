@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type UserRole = "admin" | "teacher" | "student";
 
@@ -49,7 +50,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // 1. If landing on any page with OAuth callback parameters, immediately forward to /auth/callback
+    if (typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+
+      if (
+        pathname !== "/auth/callback" &&
+        (search.includes("code=") || hash.includes("access_token=") || search.includes("error_description="))
+      ) {
+        window.location.replace("/auth/callback" + search + hash);
+        return;
+      }
+    }
+
     refreshUser();
+
+    // 2. Listen to Supabase auth state changes and sync with iron-session if needed
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        const meRes = await fetch("/api/auth/me");
+        if (!meRes.ok) {
+          const email = session.user.email;
+          const name =
+            session.user.user_metadata?.full_name ||
+            session.user.user_metadata?.name ||
+            email?.split("@")[0] ||
+            "ব্যবহারকারী";
+
+          const verifyRes = await fetch("/api/auth/google/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, name }),
+          });
+
+          const data = await verifyRes.json();
+          if (data.exists && data.user) {
+            setUser(data.user);
+          } else if (data.isFirstTime && typeof window !== "undefined" && window.location.pathname !== "/auth/callback") {
+            window.location.replace("/auth/callback");
+          }
+        }
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   const login = async (username: string, password: string) => {

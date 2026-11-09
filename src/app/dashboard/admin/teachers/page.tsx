@@ -342,10 +342,6 @@ export default function AdminTeachersPage() {
                     <input type="text" value={form.contactNo || ""} onChange={(e) => setForm({ ...form, contactNo: e.target.value })} placeholder="01700000000" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Experience</label>
-                    <input type="text" value={form.experience || ""} onChange={(e) => setForm({ ...form, experience: e.target.value })} placeholder="15 Years" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Interest / Subjects</label>
                     <input type="text" value={form.interest || ""} onChange={(e) => setForm({ ...form, interest: e.target.value })} placeholder="BANGLA, ENGLISH, MATH" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-sans" />
                   </div>

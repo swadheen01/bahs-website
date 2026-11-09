@@ -8,6 +8,7 @@
     "subject": "",
     "category": "management",
     "photo": "/images/teachers/headmaster.jpg",
+    "contactNo": "01795522500",
     "order": 1
   },
   {
@@ -19,61 +20,55 @@
     "subject": "",
     "category": "management",
     "photo": "/images/teachers/Shirin.jpg",
+    "contactNo": "01725988837",
     "order": 2
   },
   {
     "id": 3,
-    "nameBengali": "মোহাম্মদ মোফাজ্জল হোসেন",
-    "nameEnglish": "Mohammad Mofazzal Hossain",
-    "designation": "সিনিয়র শিক্ষক",
+    "nameBengali": "দীপক কুমার ঘোষ",
+    "nameEnglish": "Dipok Kumar Ghosh",
+    "designation": "সিনিয়র শিক্ষক",
     "designationEn": "Senior Teacher",
-    "subject": "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)",
+    "subject": "",
     "category": "faculty",
     "photo": "/images/teachers/DIPOK.jpg",
+    "contactNo": "01716295864",
     "order": 3
   },
   {
     "id": 4,
-    "nameBengali": "মোঃ নানু মিয়া",
-    "nameEnglish": "Md. Nanu Miah",
-    "designation": "সিনিয়র শিক্ষক",
+    "nameBengali": "নানু মিয়া",
+    "nameEnglish": "Nanu Mia",
+    "designation": "সিনিয়র শিক্ষক",
     "designationEn": "Senior Teacher",
-    "subject": "ব্যবসায় শিক্ষা (Business Studies)",
+    "subject": "",
     "category": "faculty",
     "photo": "/images/teachers/NANU.jpg",
+    "contactNo": "01716562322",
     "order": 4
   },
   {
     "id": 5,
-    "nameBengali": "দীপক কুমার ঘোষ",
-    "nameEnglish": "Dipak Kumar Ghosh",
-    "designation": "সিনিয়র শিক্ষক",
+    "nameBengali": "মোঃ গোলাম রব্বানী",
+    "nameEnglish": "Md. Golam Rabbani",
+    "designation": "সিনিয়র শিক্ষক",
     "designationEn": "Senior Teacher",
-    "subject": "হিন্দু ধর্ম (Hindu Religion)",
+    "subject": "",
     "category": "faculty",
     "photo": "/images/teachers/RABBANI.jpg",
+    "contactNo": "01718672281",
     "order": 5
   },
   {
-    "id": 6,
-    "nameBengali": "মোহাম্মদ কাজল মিয়া",
-    "nameEnglish": "Mohammad Kajol Miah",
-    "designation": "সিনিয়র শিক্ষক",
+    "id": 10,
+    "nameBengali": "মোহাম্মদ মোফাজ্জল হোসেন",
+    "nameEnglish": "Mohammad Mofazzal Hossain",
+    "designation": "সিনিয়র শিক্ষক",
     "designationEn": "Senior Teacher",
-    "subject": "জীব বিজ্ঞান (Biology)",
+    "subject": "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)",
     "category": "faculty",
-    "photo": "/images/teachers/kajol-miah.jpg",
-    "order": 6
-  },
-  {
-    "id": 7,
-    "nameBengali": "মোঃ গোলাম রব্বানী",
-    "nameEnglish": "Md. Golam Rabbani",
-    "designation": "সিনিয়র শিক্ষক",
-    "designationEn": "Senior Teacher",
-    "subject": "বাংলা (Bengali)",
-    "category": "faculty",
-    "photo": "/images/teachers/jahidul.jpg",
-    "order": 7
+    "photo": "/images/teachers/mofazzal.jpg",
+    "contactNo": "01722917918",
+    "order": 10
   }
 ]

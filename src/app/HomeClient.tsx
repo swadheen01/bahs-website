@@ -43,18 +43,21 @@ const classStyles: Record<number, { gradient: string; shadow: string; accent: st
 
 export default function HomeClient({ initialSliders }: { initialSliders: any[] }) {
   const { t, language } = useLanguage();
-  const [classes, setClasses] = useState<any[]>(schoolInfo.classes || []);
+  const [info, setInfo] = useState<any>(schoolInfo);
 
   useEffect(() => {
     fetch("/api/school-info")
       .then((res) => res.json())
       .then((data) => {
-        if (data && data.classes && Array.isArray(data.classes)) {
-          setClasses(data.classes);
+        if (data && !data.error) {
+          setInfo((prev: any) => ({ ...prev, ...data }));
         }
       })
       .catch(() => {});
   }, []);
+
+  const classes: any[] = Array.isArray(info?.classes) ? info.classes : [];
+  const officialLinks: any[] = Array.isArray(info?.officialLinks) ? info.officialLinks : [];
 
   return (
     <div className={language === "bn" ? "font-bengali" : "font-sans"}>
@@ -89,7 +92,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                 </div>
                 <div className="p-6 bg-white/80">
                   <p className="text-sm md:text-[15px] text-gray-700 leading-relaxed text-justify">
-                    {language === "en" ? schoolInfo.history.english : schoolInfo.history.bengali}
+                    {language === "en" ? info?.history?.english : info?.history?.bengali}
                   </p>
                   <div className="mt-5 flex justify-end">
                     <Link
@@ -116,7 +119,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 group">
                         <Image
-                          src="/images/teachers/headmaster.jpg"
+                          src={info?.headmasterMessage?.photo || "/images/teachers/headmaster.jpg"}
                           alt="Headmaster"
                           fill
                           quality={90}
@@ -126,14 +129,14 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                       </div>
                     </div>
                     <p className="text-xs md:text-sm text-gray-700 leading-relaxed line-clamp-5 flex-1 text-justify">
-                      {language === "en" ? schoolInfo.headmasterMessage.messageEn : schoolInfo.headmasterMessage.message}
+                      {language === "en" ? info?.headmasterMessage?.messageEn : info?.headmasterMessage?.message}
                     </p>
                     <div className="mt-5 pt-3 border-t border-gray-100 text-center">
                       <p className="text-sm font-bold text-[#06874A]">
-                        — {language === "en" ? schoolInfo.headmasterMessage.nameEn : schoolInfo.headmasterMessage.name}
+                        — {language === "en" ? info?.headmasterMessage?.nameEn : info?.headmasterMessage?.name}
                       </p>
                       <p className="text-xs text-gray-500 font-medium">
-                        {language === "en" ? schoolInfo.headmasterMessage.designationEn : schoolInfo.headmasterMessage.designation}
+                        {language === "en" ? info?.headmasterMessage?.designationEn : info?.headmasterMessage?.designation}
                       </p>
                     </div>
                   </div>
@@ -151,7 +154,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100">
                         <Image
-                          src="/images/president/president.jpg"
+                          src={info?.presidentMessage?.photo || "/images/president/president.jpg"}
                           alt="President"
                           fill
                           quality={90}
@@ -161,16 +164,16 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                       </div>
                     </div>
                     <p className="text-xs md:text-sm text-gray-700 leading-relaxed line-clamp-5 flex-1 text-justify">
-                      {language === "en" ? schoolInfo.presidentMessage.messageEn : schoolInfo.presidentMessage.message}
+                      {language === "en" ? info?.presidentMessage?.messageEn : info?.presidentMessage?.message}
                     </p>
                     <div className="mt-5 pt-3 border-t border-gray-100 text-center">
                       <p className="text-sm font-bold text-[#A53146]">
-                        — {language === "en" ? schoolInfo.presidentMessage.nameEn : schoolInfo.presidentMessage.name}
+                        — {language === "en" ? info?.presidentMessage?.nameEn : info?.presidentMessage?.name}
                       </p>
                       <p className="text-xs text-gray-500 font-medium">
                         {language === "en"
-                          ? (schoolInfo.presidentMessage.designationEn || "Upazila Rural Development Officer, Baniyachong & President, Managing Committee")
-                          : (schoolInfo.presidentMessage.designation || "উপজেলা পল্লী উন্নয়ন কর্মকর্তা, বানিয়াচং, হবিগঞ্জ ও সভাপতি, পরিচালনা পরিষদ")}
+                          ? (info?.presidentMessage?.designationEn || "Upazila Rural Development Officer, Baniyachong & President, Managing Committee")
+                          : (info?.presidentMessage?.designation || "উপজেলা পল্লী উন্নয়ন কর্মকর্তা, বানিয়াচং, হবিগঞ্জ ও সভাপতি, পরিচালনা পরিষদ")}
                       </p>
                     </div>
                   </div>
@@ -231,11 +234,11 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                     {t("অফিসিয়াল লিংক", "Official Links")}
                   </h2>
                   <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full border border-white/20">
-                    {schoolInfo.officialLinks.length} {t("টি পোর্টাল", "Portals")}
+                    {officialLinks.length} {t("টি পোর্টাল", "Portals")}
                   </span>
                 </div>
                 <ul className="divide-y divide-gray-100">
-                  {schoolInfo.officialLinks.map((link) => (
+                  {officialLinks.map((link) => (
                     <li key={link.url}>
                       <a
                         href={link.url}

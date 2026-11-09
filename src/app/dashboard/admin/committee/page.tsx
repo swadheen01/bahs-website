@@ -219,7 +219,7 @@ export default function AdminCommitteePage() {
                   <div className="flex items-center gap-4 mb-3">
                     <div className="w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
                       <img
-                        src={m.photo || "/images/teachers/default_avatar.png"}
+                        src={m.photo || "/images/teachers/default-avatar.png"}
                         alt={m.name}
                         className="w-full h-full object-cover"
                       />
@@ -359,7 +359,7 @@ export default function AdminCommitteePage() {
               <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
                 <div className="w-12 h-14 rounded-lg overflow-hidden border bg-gray-200 shrink-0">
                   <img
-                    src={formData.photo || "/images/teachers/default_avatar.png"}
+                    src={formData.photo || "/images/teachers/default-avatar.png"}
                     alt="Preview"
                     className="w-full h-full object-cover"
                   />

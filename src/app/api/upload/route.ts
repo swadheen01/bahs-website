@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
 
     let publicUrl = "";
 
-    // On Vercel / read-only production: convert to Data URL so files are immediately accessible and persistent
-    if (process.env.VERCEL) {
+    // On Vercel / Cloudflare / read-only production: convert to Data URL so files are immediately accessible and persistent
+    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
       publicUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
     } else {
       // In local development: write to public/uploads

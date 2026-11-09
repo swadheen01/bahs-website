@@ -48,7 +48,7 @@ export async function GET() {
                 designationEn: extra.designationEn || item.date,
                 category: extra.category || "অভিভাবক প্রতিনিধি",
                 phone: item.date_iso || "",
-                photo: item.file_url || "/images/teachers/default_avatar.png",
+                photo: item.file_url || "/images/teachers/default-avatar.png",
                 term: extra.term || "২০২৪ - ২০২৬",
                 bio: extra.bio || "",
               };
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
       designationEn: body.designationEn || body.designation,
       category: body.category || "অভিভাবক প্রতিনিধি",
       phone: body.phone || "",
-      photo: body.photo || "/images/teachers/default_avatar.png",
+      photo: body.photo || "/images/teachers/default-avatar.png",
       term: body.term || "২০২৪ - ২০২৬",
       bio: body.bio || "",
     };

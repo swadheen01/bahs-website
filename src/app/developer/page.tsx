@@ -109,7 +109,7 @@ export default function DeveloperPage() {
                   alt={dev.name}
                   fill
                   className="object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
-                  priority
+                  preload
                   sizes="(max-width: 768px) 150px, 180px"
                 />
               </div>

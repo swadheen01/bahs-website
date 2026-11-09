@@ -466,28 +466,110 @@ export interface User {
   teacherId?: number;
   class?: string;
   active: boolean;
+  email?: string;
 }
 
 export const usersDB = {
   getAll: async (): Promise<User[]> => {
     const { data } = await supabase.from('users').select('*').order('id', { ascending: true });
     return (data || []).map(u => ({
-      id: u.id, name: u.name, username: u.username, passwordHash: u.password_hash, role: u.role, teacherId: u.teacher_id, class: u.class, active: u.active
+      id: u.id,
+      name: u.name,
+      username: u.username,
+      passwordHash: u.password_hash,
+      role: u.role,
+      teacherId: u.teacher_id,
+      class: u.class,
+      active: u.active,
+      email: (u as any).email || (u.username.includes('@') ? u.username : undefined),
     }));
   },
   findByUsername: async (username: string): Promise<User | null> => {
-    const { data } = await supabase.from('users').select('*').eq('username', username).eq('active', true).maybeSingle();
-    if (!data) return null;
-    return {
-      id: data.id, name: data.name, username: data.username, passwordHash: data.password_hash, role: data.role, teacherId: data.teacher_id, class: data.class, active: data.active
-    };
+    const norm = username.trim().toLowerCase();
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .ilike('username', norm)
+      .eq('active', true)
+      .maybeSingle();
+
+    if (data) {
+      return {
+        id: data.id,
+        name: data.name,
+        username: data.username,
+        passwordHash: data.password_hash,
+        role: data.role,
+        teacherId: data.teacher_id,
+        class: data.class,
+        active: data.active,
+        email: (data as any).email || (data.username.includes('@') ? data.username : undefined),
+      };
+    }
+
+    // Try finding by email column if user entered an email
+    if (norm.includes('@')) {
+      try {
+        const { data: byEmail } = await supabase
+          .from('users')
+          .select('*')
+          .ilike('email', norm)
+          .eq('active', true)
+          .maybeSingle();
+
+        if (byEmail) {
+          return {
+            id: byEmail.id,
+            name: byEmail.name,
+            username: byEmail.username,
+            passwordHash: byEmail.password_hash,
+            role: byEmail.role,
+            teacherId: byEmail.teacher_id,
+            class: byEmail.class,
+            active: byEmail.active,
+            email: (byEmail as any).email || byEmail.username,
+          };
+        }
+      } catch (e) {
+        // email column might not exist yet in schema
+      }
+    }
+
+    return null;
   },
   add: async (user: Omit<User, "id">) => {
-    const { data, error } = await supabase.from('users').insert({
-      name: user.name, username: user.username, password_hash: user.passwordHash, role: user.role, teacher_id: user.teacherId, class: user.class, active: user.active
-    }).select().single();
-    if (error) throw error;
-    return { ...data, passwordHash: data.password_hash, teacherId: data.teacher_id, class: data.class };
+    const insertPayload: any = {
+      name: user.name,
+      username: user.username,
+      password_hash: user.passwordHash,
+      role: user.role,
+      teacher_id: user.teacherId,
+      class: user.class,
+      active: user.active ?? true,
+    };
+
+    // If email is explicitly provided and differs from username, try writing it
+    if (user.email) {
+      insertPayload.email = user.email;
+    }
+
+    let result = await supabase.from('users').insert(insertPayload).select().single();
+
+    // If insert failed due to column 'email' not existing, retry without it
+    if (result.error && result.error.code === '42703') {
+      delete insertPayload.email;
+      result = await supabase.from('users').insert(insertPayload).select().single();
+    }
+
+    if (result.error) throw result.error;
+    const data = result.data;
+    return {
+      ...data,
+      passwordHash: data.password_hash,
+      teacherId: data.teacher_id,
+      class: data.class,
+      email: (data as any).email || (data.username.includes('@') ? data.username : undefined),
+    };
   },
   update: async (id: number, data: Partial<User>) => {
     const updateData: any = {};
@@ -497,7 +579,17 @@ export const usersDB = {
     if (data.class !== undefined) updateData.class = data.class;
     if (data.active !== undefined) updateData.active = data.active;
     if (data.passwordHash !== undefined) updateData.password_hash = data.passwordHash;
-    await supabase.from('users').update(updateData).eq('id', id);
+    if (data.email !== undefined) updateData.email = data.email;
+
+    let res = await supabase.from('users').update(updateData).eq('id', id);
+    if (res.error && res.error.code === '42703') {
+      delete updateData.email;
+      await supabase.from('users').update(updateData).eq('id', id);
+    }
+  },
+  updateRole: async (id: number, role: "admin" | "teacher" | "student") => {
+    const { error } = await supabase.from('users').update({ role }).eq('id', id);
+    if (error) throw error;
   },
   delete: async (id: number) => {
     await supabase.from('users').update({ active: false }).eq('id', id);
