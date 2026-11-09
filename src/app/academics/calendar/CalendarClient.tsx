@@ -22,7 +22,7 @@ export default function CalendarClient() {
   const [selectedHoliday, setSelectedHoliday] = useState<Holiday | null>(null);
 
   useEffect(() => {
-    fetch("/api/holidays")
+    fetch("/api/holidays", { cache: "no-store" })
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data.holidays)) {
@@ -38,11 +38,14 @@ export default function CalendarClient() {
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
+  const toAsciiDigits = (str: string) =>
+    str.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+
   const isHoliday = (date: Date) => {
     const dateStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
     return holidays.find((h) => {
-      const start = h.startDate;
-      const end = h.endDate || h.startDate;
+      const start = toAsciiDigits((h.startDate || "").trim());
+      const end = toAsciiDigits((h.endDate || h.startDate || "").trim());
       return Boolean(start) && dateStr >= start && dateStr <= end;
     });
   };

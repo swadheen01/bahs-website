@@ -48,7 +48,7 @@ export default function AdminFormerStaffPage() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/former-staff");
+      const res = await fetch("/api/former-staff", { cache: "no-store" });
       const data = await res.json();
       setHeadmasters(data.headmasters || []);
       setTeachers(data.teachers || []);
@@ -108,11 +108,12 @@ export default function AdminFormerStaffPage() {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
+      const resData = await res.json().catch(() => ({}));
+      if (res.ok && resData.success !== false) {
         setIsFormOpen(false);
         fetchData();
       } else {
-        alert(t("ব্যর্থ হয়েছে", "Failed"));
+        alert(resData.error || t("সংরক্ষণ করতে ব্যর্থ হয়েছে", "Failed to save"));
       }
     } catch (error) {
       console.error(error);
@@ -131,11 +132,15 @@ export default function AdminFormerStaffPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete", id, category: activeTab }),
       });
-      if (res.ok) {
+      const resData = await res.json().catch(() => ({}));
+      if (res.ok && resData.success !== false) {
         fetchData();
+      } else {
+        alert(resData.error || t("মুছে ফেলতে ব্যর্থ হয়েছে", "Failed to delete"));
       }
     } catch (error) {
       console.error(error);
+      alert(t("ত্রুটি হয়েছে", "An error occurred"));
     }
   };
 

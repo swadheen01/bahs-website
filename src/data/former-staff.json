@@ -1,7 +1,7 @@
 {
   "headmasters": [
     {
-      "id": "fh-1",
+      "id": "1800000001",
       "name": "মোঃ আমির হোসেন",
       "nameEn": "Md. Amir Hossain",
       "designation": "প্রাক্তন প্রধান শিক্ষক",
@@ -10,7 +10,7 @@
       "photo": "/images/former-staff/amir_hossain.jpg"
     },
     {
-      "id": "fh-2",
+      "id": "1800000002",
       "name": "বিপুল ভুষণ রায়",
       "nameEn": "Bipul Bhushan Roy",
       "designation": "প্রাক্তন প্রধান শিক্ষক",
@@ -19,7 +19,7 @@
       "photo": "/images/former-staff/bipul_bhushan.jpg"
     },
     {
-      "id": "fh-3",
+      "id": "1800000003",
       "name": "আঃ শহিদ",
       "nameEn": "A. Shahid",
       "designation": "প্রাক্তন প্রধান শিক্ষক",
@@ -30,7 +30,7 @@
   ],
   "teachers": [
     {
-      "id": "ft-1",
+      "id": "1800000004",
       "name": "মোঃ আব্দুল হামিদ",
       "nameEn": "Md. Abdul Hamid",
       "designation": "প্রাক্তন সহকারী শিক্ষক",
@@ -39,7 +39,7 @@
       "photo": "/images/former-staff/abdul_hamid.jpeg"
     },
     {
-      "id": "ft-2",
+      "id": "1800000005",
       "name": "মোঃ আহমদ আলী",
       "nameEn": "Md. Ahmad Ali",
       "designation": "প্রাক্তন সহকারী শিক্ষক",
@@ -48,7 +48,7 @@
       "photo": "/images/former-staff/ahmad_ali.jpg"
     },
     {
-      "id": "ft-3",
+      "id": "1800000006",
       "name": "খেলা চক্রবর্তী",
       "nameEn": "Khela Chakraborty",
       "designation": "প্রাক্তন সহকারী শিক্ষক",

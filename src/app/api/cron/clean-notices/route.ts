@@ -27,11 +27,12 @@ export async function GET(req: Request) {
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     const dateLimit = threeMonthsAgo.toISOString();
 
-    // 1. Fetch notices older than 3 months that have a file_url
+    // 1. Fetch notices older than 3 months that have a file_url (never touch non-notice records)
     const { data: notices, error: fetchError } = await supabase
       .from("notices")
       .select("id, file_url")
       .not("file_url", "is", null)
+      .not("type", "in", '("routine","slider","gallery","staff","calendar","holiday","result","committee","school_info","testimonial_counter","former_staff")')
       .lt("date_iso", dateLimit);
 
     if (fetchError) {

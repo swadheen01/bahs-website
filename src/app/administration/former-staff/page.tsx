@@ -28,14 +28,16 @@ export default function FormerStaffPage() {
   const [loading, setLoading] = useState(true);
   const [filterMode, setFilterMode] = useState<"all" | "headmaster" | "teacher">("all");
   const [query, setQuery] = useState("");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/former-staff")
+    fetch("/api/former-staff", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         setHeadmasters(data.headmasters || []);
         setTeachers(data.teachers || []);
+        setImageErrors({});
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -68,9 +70,10 @@ export default function FormerStaffPage() {
 
   const renderCard = (teacher: FormerStaff) => {
     const hasRealPhoto =
-      teacher.photo &&
+      Boolean(teacher.photo) &&
       !teacher.photo.includes("default_avatar") &&
-      !teacher.photo.includes("default-avatar");
+      !teacher.photo.includes("default-avatar") &&
+      !imageErrors[teacher.id];
 
     return (
       <div
@@ -88,8 +91,12 @@ export default function FormerStaffPage() {
                 src={teacher.photo}
                 alt={language === "en" && teacher.nameEn ? teacher.nameEn : teacher.name}
                 fill
+                unoptimized={Boolean(teacher.photo?.startsWith("data:"))}
                 quality={90}
                 sizes="(max-width: 640px) 160px, 220px"
+                onError={() =>
+                  setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))
+                }
                 className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
               />
             ) : null}

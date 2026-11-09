@@ -23,7 +23,7 @@ export default function HolidaysPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetch("/api/holidays")
+    fetch("/api/holidays", { cache: "no-store" })
       .then((res) => res.json())
       .then((resData) => {
         if (resData && resData.holidays) {

@@ -60,7 +60,7 @@ export default function AdminHolidaysPage() {
   const loadData = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/holidays");
+      const res = await fetch("/api/holidays", { cache: "no-store" });
       const data = await res.json();
       if (data && data.holidays) {
         setHolidaysData(data);
