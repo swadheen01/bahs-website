@@ -14,12 +14,12 @@ import {
   FaSearch,
   FaGraduationCap,
   FaCheckCircle,
-  FaTimesCircle,
   FaFileAlt,
   FaUpload,
   FaFilter,
   FaEdit,
   FaTimes,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
@@ -32,6 +32,8 @@ export default function AdminResultsPage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [modalError, setModalError] = useState("");
 
   // Filters
   const [filterClass, setFilterClass] = useState("all");
@@ -78,13 +80,16 @@ export default function AdminResultsPage() {
   const loadResults = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/results");
-      const data = await res.json();
-      if (data.results) {
+      const res = await fetch("/api/results", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "ফলাফল লোড করা যায়নি");
+      } else if (Array.isArray(data.results)) {
         setResults(data.results);
       }
     } catch (err) {
       console.error(err);
+      setErrorMsg("সার্ভার থেকে ফলাফল লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -96,8 +101,9 @@ export default function AdminResultsPage() {
   // Handle Single Add
   const handleSingleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newResult.studentName || !newResult.roll) {
-      alert("নাম ও রোল নম্বর আবশ্যক");
+    setModalError("");
+    if (!newResult.studentName.trim() || !newResult.roll.trim()) {
+      setModalError("নাম ও রোল নম্বর আবশ্যক");
       return;
     }
     setSaving(true);
@@ -139,23 +145,25 @@ export default function AdminResultsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(isEditing ? { ...payload, id: editResultId } : payload),
       });
+      const resData = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg(isEditing ? "ফলাফল সফলভাবে আপডেট করা হয়েছে!" : "নতুন ফলাফল সফলভাবে যোগ করা হয়েছে!");
         setShowAddModal(false);
         setEditResultId(null);
-        loadResults();
+        await loadResults();
         setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert("সংরক্ষণ ব্যর্থ হয়েছে");
+        setModalError(resData.error || "সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি দেখা দিয়েছে");
+    } catch {
+      setModalError("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setSaving(false);
   };
 
   const handleEdit = (r: any) => {
+    setModalError("");
     setEditResultId(r.id);
     setNewResult({
       studentName: r.studentName || "",
@@ -274,8 +282,9 @@ export default function AdminResultsPage() {
   };
 
   const handleBulkUploadSubmit = async () => {
+    setModalError("");
     if (csvPreview.length === 0) {
-      alert("আপলোড করার মতো কোনো তথ্য নেই");
+      setModalError("প্রথমে একটি এক্সেল (.xlsx/.xls) বা CSV ফাইল নির্বাচন করুন");
       return;
     }
     setSaving(true);
@@ -285,18 +294,19 @@ export default function AdminResultsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(csvPreview),
       });
+      const resData = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccessMsg(`একসাথে ${csvPreview.length} টি শিক্ষার্থীর ফলাফল সফলভাবে যোগ করা হয়েছে!`);
         setShowBulkModal(false);
         setCsvPreview([]);
         setCsvFileName("");
-        loadResults();
+        await loadResults();
         setTimeout(() => setSuccessMsg(""), 4000);
       } else {
-        alert("বাল্ক আপলোড ব্যর্থ হয়েছে");
+        setModalError(resData.error || "বাল্ক আপলোড ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setModalError("সার্ভার সংযোগে ত্রুটি হয়েছে");
     }
     setSaving(false);
   };
@@ -460,15 +470,19 @@ export default function AdminResultsPage() {
   // Delete Result
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`আপনি কি নিশ্চিত যে "${name}"-এর ফলাফল মুছে ফেলতে চান?`)) return;
+    setErrorMsg("");
     try {
-      const res = await fetch(`/api/results?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/results?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
       if (res.ok) {
         setResults((prev) => prev.filter((r) => r.id !== id));
+        setSuccessMsg("ফলাফলটি সফলভাবে মুছে ফেলা হয়েছে!");
+        setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert("মুছে ফেলা সম্ভব হয়নি");
+        setErrorMsg(resData.error || "মুছে ফেলা সম্ভব হয়নি");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি হয়েছে");
     }
   };
 
@@ -525,7 +539,8 @@ export default function AdminResultsPage() {
 
           <div className="flex flex-wrap items-center gap-2.5">
             <button
-              onClick={() => setShowBulkModal(true)}
+              type="button"
+              onClick={() => { setModalError(""); setShowBulkModal(true); }}
               className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
             >
               <FaFileExcel size={16} />
@@ -533,7 +548,9 @@ export default function AdminResultsPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => {
+                setModalError("");
                 setEditResultId(null);
                 setShowAddModal(true);
               }}
@@ -547,9 +564,16 @@ export default function AdminResultsPage() {
 
         {/* Success Alert */}
         {successMsg && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600" />
             <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -574,6 +598,7 @@ export default function AdminResultsPage() {
               <FaFileExcel className="text-emerald-600" /> নমুনা এক্সেল টেমপ্লেট
             </span>
             <button
+              type="button"
               onClick={handleDownloadSampleExcel}
               className="text-xs font-bold text-[#06874A] hover:underline flex items-center gap-1 mt-1 cursor-pointer"
             >
@@ -677,6 +702,7 @@ export default function AdminResultsPage() {
                       <td className="py-2.5 px-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
+                            type="button"
                             onClick={() => handleEdit(r)}
                             className="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg hover:bg-blue-50 transition cursor-pointer"
                             title="এডিট করুন"
@@ -684,6 +710,7 @@ export default function AdminResultsPage() {
                             <FaEdit size={12} />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDelete(r.id, r.studentName)}
                             className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer"
                             title="মুছে ফেলুন"
@@ -711,7 +738,8 @@ export default function AdminResultsPage() {
                 {editResultId ? "শিক্ষার্থীর ফলাফল আপডেট করুন" : "একক শিক্ষার্থীর পরীক্ষার ফলাফল যোগ করুন"}
               </h3>
               <button
-                onClick={() => { setShowAddModal(false); setEditResultId(null); }}
+                type="button"
+                onClick={() => { setShowAddModal(false); setEditResultId(null); setModalError(""); }}
                 className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
               >
                 ✕
@@ -719,6 +747,12 @@ export default function AdminResultsPage() {
             </div>
 
             <form onSubmit={handleSingleSubmit} className="space-y-4">
+              {modalError && (
+                <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-2">
+                  <FaExclamationTriangle className="shrink-0" />
+                  <span>{modalError}</span>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">শিক্ষার্থীর নাম (বাংলা)</label>
@@ -922,12 +956,20 @@ export default function AdminResultsPage() {
                 এক্সেল (.xlsx / .xls) ও CSV বাল্ক আপলোড
               </h3>
               <button
-                onClick={() => setShowBulkModal(false)}
+                type="button"
+                onClick={() => { setShowBulkModal(false); setModalError(""); }}
                 className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
               >
                 ✕
               </button>
             </div>
+
+            {modalError && (
+              <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-2">
+                <FaExclamationTriangle className="shrink-0" />
+                <span>{modalError}</span>
+              </div>
+            )}
 
             <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2 text-xs text-emerald-950">
               <p className="font-bold flex items-center gap-1.5 text-emerald-900">
@@ -935,12 +977,14 @@ export default function AdminResultsPage() {
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
+                  type="button"
                   onClick={handleDownloadSampleExcel}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer text-xs"
                 >
                   <FaFileExcel size={13} /> ডেমো এক্সেল (.xlsx) ডাউনলোড
                 </button>
                 <button
+                  type="button"
                   onClick={handleDownloadSampleCsv}
                   className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold px-3 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer text-xs"
                 >
@@ -1028,7 +1072,7 @@ export default function AdminResultsPage() {
               <button
                 type="button"
                 onClick={handleBulkUploadSubmit}
-                disabled={csvPreview.length === 0 || saving}
+                disabled={saving}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-xl shadow disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 <FaUpload size={12} />

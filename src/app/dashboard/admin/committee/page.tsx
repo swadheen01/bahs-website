@@ -11,10 +11,9 @@ import {
   FaEdit,
   FaCheckCircle,
   FaLandmark,
-  FaUsers,
-  FaUpload,
-  FaPhoneAlt,
+  FaExclamationTriangle,
 } from "react-icons/fa";
+import FileUpload from "@/components/admin/FileUpload";
 
 export default function AdminCommitteePage() {
   const { user, loading } = useAuth();
@@ -25,6 +24,8 @@ export default function AdminCommitteePage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [modalError, setModalError] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -49,14 +50,18 @@ export default function AdminCommitteePage() {
 
   const loadMembers = async () => {
     setFetching(true);
+    setErrorMsg("");
     try {
-      const res = await fetch("/api/committee");
-      const data = await res.json();
-      if (data && data.members) {
+      const res = await fetch("/api/committee", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "কমিটির তথ্য লোড করা যায়নি");
+      } else if (data && Array.isArray(data.members)) {
         setMembers(data.members);
       }
     } catch (err) {
       console.error(err);
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -65,18 +70,9 @@ export default function AdminCommitteePage() {
     if (user?.role === "admin") loadMembers();
   }, [user]);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, photo: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleOpenAdd = () => {
     setEditId(null);
+    setModalError("");
     setFormData({
       name: "",
       nameEn: "",
@@ -93,6 +89,7 @@ export default function AdminCommitteePage() {
 
   const handleOpenEdit = (m: any) => {
     setEditId(m.id);
+    setModalError("");
     setFormData({
       name: m.name || "",
       nameEn: m.nameEn || "",
@@ -109,8 +106,9 @@ export default function AdminCommitteePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.designation) {
-      alert("নাম ও পদবী আবশ্যক");
+    setModalError("");
+    if (!formData.name.trim() || !formData.designation.trim()) {
+      setModalError("নাম ও পদবী আবশ্যক");
       return;
     }
     setSaving(true);
@@ -121,32 +119,37 @@ export default function AdminCommitteePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg(editId ? "সদস্যের তথ্য সফলভাবে হালনাগাদ করা হয়েছে!" : "নতুন সদস্য সফলভাবে যুক্ত করা হয়েছে!");
         setShowModal(false);
-        loadMembers();
+        await loadMembers();
         setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert("সংরক্ষণ ব্যর্থ হয়েছে");
+        setModalError(data.error || "সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setModalError("সার্ভার সংযোগে ত্রুটি হয়েছে");
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`আপনি কি "${name}"-কে কমিটি তালিকা থেকে মুছে ফেলতে চান?`)) return;
+    setErrorMsg("");
     try {
-      const res = await fetch(`/api/committee?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/committee?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setMembers((prev) => prev.filter((m) => m.id !== id));
+        setSuccessMsg("সদস্যকে সফলভাবে মুছে ফেলা হয়েছে!");
+        setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert("মুছে ফেলা সম্ভব হয়নি");
+        setErrorMsg(data.error || "মুছে ফেলা সম্ভব হয়নি");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setErrorMsg("ত্রুটি হয়েছে");
     }
   };
 
@@ -189,6 +192,7 @@ export default function AdminCommitteePage() {
           </div>
 
           <button
+            type="button"
             onClick={handleOpenAdd}
             className="flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
           >
@@ -199,9 +203,16 @@ export default function AdminCommitteePage() {
 
         {/* Success Alert */}
         {successMsg && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600" />
             <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -221,6 +232,7 @@ export default function AdminCommitteePage() {
                       <img
                         src={m.photo || "/images/teachers/default-avatar.png"}
                         alt={m.name}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/teachers/default-avatar.png"; }}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -240,6 +252,7 @@ export default function AdminCommitteePage() {
                   <span className="text-xs text-gray-500 font-mono">{m.term}</span>
                   <div className="flex items-center gap-1">
                     <button
+                      type="button"
                       onClick={() => handleOpenEdit(m)}
                       className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
                       title="সম্পাদনা করুন"
@@ -247,6 +260,7 @@ export default function AdminCommitteePage() {
                       <FaEdit size={14} />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(m.id, m.name)}
                       className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                       title="মুছে ফেলুন"
@@ -270,6 +284,7 @@ export default function AdminCommitteePage() {
                 {editId ? "সদস্যের তথ্য সম্পাদনা করুন" : "কমিটিতে নতুন সদস্য যুক্ত করুন"}
               </h3>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
                 className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
               >
@@ -278,6 +293,12 @@ export default function AdminCommitteePage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {modalError && (
+                <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center gap-2">
+                  <FaExclamationTriangle className="shrink-0" />
+                  <span>{modalError}</span>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">নাম (বাংলা)</label>
@@ -356,28 +377,21 @@ export default function AdminCommitteePage() {
               </div>
 
               {/* Photo Input */}
-              <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
-                <div className="w-12 h-14 rounded-lg overflow-hidden border bg-gray-200 shrink-0">
-                  <img
-                    src={formData.photo || "/images/teachers/default-avatar.png"}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <label className="block text-[11px] font-bold text-gray-700">ছবি আপলোড অথবা URL</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="text-[11px] text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:bg-[#051939] file:text-white"
-                  />
+              <div className="space-y-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
+                <FileUpload
+                  label="সদস্যের ছবি আপলোড"
+                  value={formData.photo}
+                  onChange={(url) => setFormData({ ...formData, photo: url })}
+                  helpText="কম্প্রেসড JPG/PNG আপলোড হবে"
+                />
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-600 mb-1">অথবা ছবির লিঙ্ক (ঐচ্ছিক)</label>
                   <input
                     type="text"
-                    placeholder="বা ছবির URL দিন"
+                    placeholder="/images/teachers/default-avatar.png"
                     value={formData.photo}
                     onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
-                    className="w-full border rounded p-1 text-[11px] bg-white font-mono mt-1"
+                    className="w-full border rounded-lg p-1.5 text-[11px] bg-white font-mono"
                   />
                 </div>
               </div>

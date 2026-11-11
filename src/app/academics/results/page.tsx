@@ -91,7 +91,7 @@ export default function ResultsPage() {
       setBoardError(null);
     }
     try {
-      const res = await fetch("/api/board-results");
+      const res = await fetch("/api/board-results", { cache: "no-store" });
       const data = await res.json();
       if (data.success && data.captcha) {
         setBoardCaptchaImg(data.captcha);
@@ -115,11 +115,11 @@ export default function ResultsPage() {
   const handleBoardSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!boardRoll.trim()) {
-      alert("অনুগ্রহ করে রোল নম্বর প্রদান করুন");
+      setBoardError("অনুগ্রহ করে রোল নম্বর প্রদান করুন");
       return;
     }
     if (!boardCaptchaInput.trim()) {
-      alert("অনুগ্রহ করে ৪-সংখ্যার সিকিউরিটি ক্যাপচা কোডটি পূরণ করুন");
+      setBoardError("অনুগ্রহ করে ৪-সংখ্যার সিকিউরিটি ক্যাপচা কোডটি পূরণ করুন");
       return;
     }
 
@@ -176,14 +176,16 @@ export default function ResultsPage() {
 
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [internalError, setInternalError] = useState<string | null>(null);
   const [resultData, setResultData] = useState<any | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rollInput.trim()) {
-      alert("অনুগ্রহ করে রোল নম্বর দিন");
+      setInternalError("অনুগ্রহ করে রোল নম্বর দিন");
       return;
     }
+    setInternalError(null);
     setSearching(true);
     setSearched(true);
     try {
@@ -193,16 +195,20 @@ export default function ResultsPage() {
         exam: selectedExam,
         year: selectedYear,
       });
-      const res = await fetch(`/api/results?${query.toString()}`);
+      const res = await fetch(`/api/results?${query.toString()}`, { cache: "no-store" });
       const data = await res.json();
-      if (data.results && data.results.length > 0) {
+      if (res.ok && data.results && data.results.length > 0) {
         setResultData(data.results[0]);
       } else {
         setResultData(null);
+        if (!res.ok) {
+          setInternalError(data.error || "ফলাফল লোড করা যায়নি, অনুগ্রহ করে আবার চেষ্টা করুন");
+        }
       }
     } catch (err) {
       console.error(err);
       setResultData(null);
+      setInternalError("সার্ভারের সাথে সংযোগ করতে সমস্যা হয়েছে");
     }
     setSearching(false);
   };
@@ -352,6 +358,7 @@ export default function ResultsPage() {
         {/* Navigation Tabs */}
         <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-100 flex flex-col md:flex-row gap-2">
           <button
+            type="button"
             onClick={() => setActiveTab("board")}
             className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
               activeTab === "board"
@@ -364,6 +371,7 @@ export default function ResultsPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab("internal")}
             className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
               activeTab === "internal"
@@ -650,7 +658,7 @@ export default function ResultsPage() {
 
                   <form onSubmit={handleBoardSearch} className="p-6 sm:p-8 space-y-6">
                     {boardError && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
+                      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
                         <FaTimesCircle className="shrink-0 text-red-500" size={16} />
                         <span>{boardError}</span>
                       </div>
@@ -914,7 +922,14 @@ export default function ResultsPage() {
                 </a>
               </div>
 
-              <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <form onSubmit={handleSearch} className="space-y-4">
+                {internalError && (
+                  <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-3.5 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
+                    <FaTimesCircle className="shrink-0 text-red-500" size={16} />
+                    <span>{internalError}</span>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Select Class */}
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">
@@ -989,6 +1004,7 @@ export default function ResultsPage() {
                     </button>
                   </div>
                 </div>
+                </div>
               </form>
             </div>
 
@@ -1040,6 +1056,7 @@ export default function ResultsPage() {
 
                   {/* Print Button (Hidden during print) */}
                   <button
+                    type="button"
                     onClick={() => printElement("printable-internal-card", `Result_${resultData.roll || "Marksheet"}`)}
                     className="no-print absolute top-6 right-6 bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border border-white/30"
                   >

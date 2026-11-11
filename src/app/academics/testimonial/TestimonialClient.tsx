@@ -116,8 +116,8 @@ export default function TestimonialClient() {
 
   // Fetch initial serial number from counter API (padded to 0001)
   useEffect(() => {
-    fetch("/api/testimonial-counter")
-      .then((res) => res.json())
+    fetch("/api/testimonial-counter", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((resData) => {
         if (resData && typeof resData.count === "number") {
           const formatted = String(resData.count).padStart(4, "0");
@@ -198,7 +198,7 @@ export default function TestimonialClient() {
     setSearchMessage(null);
 
     try {
-      const res = await fetch(`/api/results?class=${encodeURIComponent(searchClass)}&roll=${encodeURIComponent(searchRoll.trim())}`);
+      const res = await fetch(`/api/results?class=${encodeURIComponent(searchClass)}&roll=${encodeURIComponent(searchRoll.trim())}`, { cache: "no-store" });
       const json = await res.json();
 
       if (json.results && json.results.length > 0) {
@@ -463,6 +463,7 @@ export default function TestimonialClient() {
 
             <div className="flex flex-wrap items-center gap-2.5">
               <button
+                type="button"
                 onClick={handleDownloadJpg}
                 disabled={downloadingJpg}
                 className="glossy-btn flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer disabled:opacity-50"
@@ -472,6 +473,7 @@ export default function TestimonialClient() {
               </button>
 
               <button
+                type="button"
                 onClick={handlePrint}
                 className="glossy-btn flex items-center gap-2 bg-[#06874A] hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
               >
@@ -1285,6 +1287,7 @@ export default function TestimonialClient() {
             {/* Print & Image Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
               <button
+                type="button"
                 onClick={handleDownloadJpg}
                 disabled={downloadingJpg}
                 className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm cursor-pointer disabled:opacity-50"
@@ -1294,6 +1297,7 @@ export default function TestimonialClient() {
               </button>
 
               <button
+                type="button"
                 onClick={handlePrint}
                 className="bg-[#06874A] hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm cursor-pointer"
               >

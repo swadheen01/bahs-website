@@ -27,11 +27,12 @@ export default function TeachersSection() {
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/teachers")
-      .then((res) => res.json())
+    fetch("/api/teachers", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setTeachers(data.slice(0, 12));
+          setImageErrors({});
         }
       })
       .catch(() => {});
@@ -79,7 +80,8 @@ export default function TeachersSection() {
                       alt={teacher.nameBengali}
                       fill
                       quality={85}
-                        onError={() => setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))}
+                      unoptimized={teacher.photo.startsWith("data:") || teacher.photo.startsWith("http")}
+                      onError={() => setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))}
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                       sizes="(max-width: 640px) 160px, 220px"
                     />

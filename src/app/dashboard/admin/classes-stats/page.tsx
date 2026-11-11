@@ -19,6 +19,7 @@ import {
   FaPlus,
   FaTrashAlt,
   FaLayerGroup,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
 export default function AdminClassesStatsPage() {
@@ -33,6 +34,7 @@ export default function AdminClassesStatsPage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [expandedClass, setExpandedClass] = useState<number | null>(6);
 
   useEffect(() => {
@@ -41,15 +43,21 @@ export default function AdminClassesStatsPage() {
 
   const loadData = async () => {
     setFetching(true);
+    setErrorMsg("");
     try {
-      const res = await fetch("/api/school-info");
-      const data = await res.json();
-      if (data.classes) setClasses(data.classes);
-      if (data.stats) setStats(data.stats);
-      if (data.vocational) setVocational(data.vocational);
-      if (data.totalClasses) setTotalClasses(data.totalClasses);
+      const res = await fetch("/api/school-info", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "তথ্য লোড করা যায়নি");
+      } else {
+        if (data.classes) setClasses(data.classes);
+        if (data.stats) setStats(data.stats);
+        if (data.vocational) setVocational(data.vocational);
+        if (data.totalClasses) setTotalClasses(data.totalClasses);
+      }
     } catch (e) {
       console.error(e);
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -115,21 +123,25 @@ export default function AdminClassesStatsPage() {
     setClasses(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.SyntheticEvent) => {
+    if (e && "preventDefault" in e) e.preventDefault();
     setSaving(true);
+    setErrorMsg("");
     try {
       const res = await fetch("/api/school-info", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classes, stats, vocational, totalClasses }),
       });
+      const resData = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccessMsg(true);
         setTimeout(() => setSuccessMsg(false), 3000);
+      } else {
+        setErrorMsg(resData.error || "তথ্য সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("তথ্য সংরক্ষণ ব্যর্থ হয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setSaving(false);
   };
@@ -165,19 +177,22 @@ export default function AdminClassesStatsPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={saving || fetching}
-            className="flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition disabled:opacity-60 cursor-pointer"
-          >
-            <FaSave />
-            <span>{saving ? t("সংরক্ষণ হচ্ছে...", "Saving...") : t("সকল পরিবর্তন সংরক্ষণ করুন", "Save Changes")}</span>
-          </button>
+          {!fetching && (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition disabled:opacity-60 cursor-pointer"
+            >
+              <FaSave />
+              <span>{saving ? t("সংরক্ষণ হচ্ছে...", "Saving...") : t("সকল পরিবর্তন সংরক্ষণ করুন", "Save Changes")}</span>
+            </button>
+          )}
         </div>
 
         {/* Prominent Floating Toast Alert (Visible anywhere on screen) */}
         {successMsg && (
-          <div className="fixed top-6 right-6 z-[9999] bg-[#06874A] text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-300 flex items-center gap-3 animate-in slide-in-from-top duration-300">
+          <div role="status" className="fixed top-6 right-6 z-[9999] bg-[#06874A] text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-300 flex items-center gap-3 animate-in slide-in-from-top duration-300">
             <FaCheckCircle className="text-yellow-300 text-2xl shrink-0" />
             <div>
               <p className="text-sm font-bold">{t("সফলভাবে সংরক্ষিত হয়েছে!", "Saved successfully!")}</p>
@@ -187,9 +202,16 @@ export default function AdminClassesStatsPage() {
         )}
 
         {successMsg && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600" />
             <span>{t("তথ্য সফলভাবে হালনাগাদ করা হয়েছে!", "Successfully updated class & stats information!")}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 

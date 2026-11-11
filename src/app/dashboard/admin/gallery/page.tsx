@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaImages, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaTimes } from "react-icons/fa";
+import { FaImages, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface GalleryItem {
@@ -24,6 +24,8 @@ export default function AdminGalleryPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
@@ -33,12 +35,15 @@ export default function AdminGalleryPage() {
     setFetching(true);
     try {
       const res = await fetch("/api/gallery", { cache: "no-store" });
-      const data = await res.json();
-      if (Array.isArray(data)) {
+      const data = await res.json().catch(() => []);
+      if (!res.ok) {
+        setErrorMsg((data as any)?.error || "গ্যালারি লোড করা যায়নি");
+      } else if (Array.isArray(data)) {
         setPhotos(data);
       }
     } catch (e) {
       console.error(e);
+      setErrorMsg("সার্ভার থেকে গ্যালারি লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -49,8 +54,9 @@ export default function AdminGalleryPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     if (!form.image && !editId) {
-      alert("দয়া করে একটি ছবি আপলোড করুন");
+      setErrorMsg("দয়া করে একটি ছবি আপলোড করুন");
       return;
     }
     setSaving(true);
@@ -59,33 +65,38 @@ export default function AdminGalleryPage() {
         ...form,
         title: form.title?.trim() || "গ্যালারি ছবি",
       };
-      if (editId !== null) {
-        const res = await fetch(`/api/gallery/${editId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) alert("ছবি আপডেট করা যায়নি");
-        setEditId(null);
-      } else {
-        const res = await fetch("/api/gallery", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) alert("ছবি পোস্ট করা যায়নি");
+      const res = editId !== null
+        ? await fetch(`/api/gallery/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch("/api/gallery", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || (editId !== null ? "ছবি আপডেট করা যায়নি" : "ছবি পোস্ট করা যায়নি"));
+        return;
       }
+
+      setSuccessMsg(editId !== null ? "ছবির তথ্য সফলভাবে আপডেট হয়েছে!" : "নতুন ছবি গ্যালারিতে প্রকাশিত হয়েছে!");
+      setEditId(null);
       setForm(emptyForm);
       setShowForm(false);
       await loadGallery();
-    } catch (err) {
-      alert("সার্ভার এরর! ছবি সংরক্ষণ করা যায়নি।");
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার এরর! ছবি সংরক্ষণ করা যায়নি।");
     } finally {
       setSaving(false);
     }
   };
 
   const handleEdit = (p: GalleryItem) => {
+    setErrorMsg("");
     setForm({ title: p.title, image: p.image });
     setEditId(p.id);
     setShowForm(true);
@@ -94,16 +105,24 @@ export default function AdminGalleryPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("আপনি কি নিশ্চিতভাবে এই ছবিটি মুছে ফেলতে চান?")) return;
+    setErrorMsg("");
     try {
       const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-      if (!res.ok) alert("ছবি মুছে ফেলা সম্ভব হয়নি");
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "ছবি মুছে ফেলা সম্ভব হয়নি");
+        return;
+      }
+      setSuccessMsg("ছবি গ্যালারি থেকে মুছে ফেলা হয়েছে!");
       await loadGallery();
-    } catch (err) {
-      alert("মুছে ফেলার সময় ত্রুটি হয়েছে");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("মুছে ফেলার সময় ত্রুটি হয়েছে");
     }
   };
 
   const handleCancel = () => {
+    setErrorMsg("");
     setShowForm(false);
     setEditId(null);
     setForm(emptyForm);
@@ -132,12 +151,27 @@ export default function AdminGalleryPage() {
             <p className="text-xs text-gray-500 mt-0.5">এখানে থাকা ছবিগুলো ওয়েবসাইটের &apos;গ্যালারী&apos; পেজে দেখা যাবে।</p>
           </div>
           <button
+            type="button"
             onClick={() => { handleCancel(); setShowForm(!showForm); }}
             className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow"
           >
             <FaPlus /> নতুন ছবি পোস্ট করুন
           </button>
         </div>
+
+        {successMsg && (
+          <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         {showForm && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-8 border-t-4 border-pink-600">
@@ -170,7 +204,7 @@ export default function AdminGalleryPage() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  disabled={saving || (!form.image && !editId)}
+                  disabled={saving}
                   className="bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm disabled:opacity-60 shadow"
                 >
                   {saving ? "সংরক্ষণ হচ্ছে..." : editId ? "আপডেট করুন" : "ছবি পোস্ট করুন"}
@@ -195,16 +229,24 @@ export default function AdminGalleryPage() {
                 className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition"
               >
                 <div className="relative aspect-[16/10] w-full bg-gray-100">
-                  <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                  <img
+                    src={p.image}
+                    alt={p.title}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/gallery/hero-campus.jpg"; }}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <h4 className="font-bold text-gray-800 text-sm leading-snug line-clamp-2 mb-3">{p.title}</h4>
 
                   <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
-                    <span className="text-[10px] text-gray-400 font-mono truncate max-w-[100px]">{p.image?.split("/").pop()}</span>
+                    <span className="text-[10px] text-gray-400 font-mono truncate max-w-[100px]">
+                      {p.image?.startsWith("data:") ? "সংযুক্ত ছবি" : p.image?.split("/").pop()}
+                    </span>
                     <div className="flex items-center gap-1.5">
                       <button
+                        type="button"
                         onClick={() => handleEdit(p)}
                         className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded transition"
                         title="এডিট করুন"
@@ -212,6 +254,7 @@ export default function AdminGalleryPage() {
                         <FaEdit size={11} /> এডিট
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDelete(p.id)}
                         className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 font-bold bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded transition"
                         title="মুছে ফেলুন"

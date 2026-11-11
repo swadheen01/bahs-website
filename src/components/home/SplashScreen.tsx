@@ -1,22 +1,58 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+
+const FILL_DURATION_MS = 1400;
+const COMPLETE_HOLD_MS = 250;
+const EXIT_DURATION_MS = 350;
 
 export default function SplashScreen() {
   const [show, setShow] = useState<boolean>(true);
   const [fadeOut, setFadeOut] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
-  const handleDismiss = () => {
+  const dismissedRef = useRef<boolean>(false);
+  const rafRef = useRef<number | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const failsafeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAllTimers = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (holdTimerRef.current !== null) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (hideTimerRef.current !== null) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (failsafeTimerRef.current !== null) {
+      clearTimeout(failsafeTimerRef.current);
+      failsafeTimerRef.current = null;
+    }
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    if (dismissedRef.current) return;
+    dismissedRef.current = true;
+    clearAllTimers();
     setFadeOut(true);
+
     try {
       sessionStorage.setItem("bahs_splash_v2", "true");
-      document.documentElement.classList.add("splash-hidden");
-    } catch (e) {}
+    } catch {}
 
-    setTimeout(() => {
+    hideTimerRef.current = setTimeout(() => {
+      try {
+        document.documentElement.classList.add("splash-hidden");
+      } catch {}
       setShow(false);
-    }, 400);
-  };
+    }, EXIT_DURATION_MS);
+  }, [clearAllTimers]);
 
   useEffect(() => {
     try {
@@ -24,29 +60,84 @@ export default function SplashScreen() {
         setShow(false);
         return;
       }
-    } catch (e) {}
+    } catch {}
 
-    // Failsafe auto-dismiss from React in case inline script was interrupted
-    const timeout = setTimeout(() => {
-      handleDismiss();
-    }, 1800);
+    dismissedRef.current = false;
 
-    return () => clearTimeout(timeout);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleDismiss();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setProgress(100);
+      holdTimerRef.current = setTimeout(() => {
+        handleDismiss();
+      }, 1600);
+    } else {
+      let startTime: number | null = null;
+
+      const tick = (now: number) => {
+        if (dismissedRef.current) return;
+        if (startTime === null) {
+          startTime = now;
+        }
+
+        const elapsed = now - startTime;
+        const linearRatio = Math.min(1, elapsed / FILL_DURATION_MS);
+        const easedRatio = 1 - Math.pow(1 - linearRatio, 2);
+        const blendedRatio = 0.8 * linearRatio + 0.2 * easedRatio;
+        const nextProgress = Math.min(100, Math.round(blendedRatio * 100));
+
+        setProgress(nextProgress);
+
+        if (linearRatio < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          setProgress(100);
+          holdTimerRef.current = setTimeout(() => {
+            handleDismiss();
+          }, COMPLETE_HOLD_MS);
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+
+      // Generous fallback only if requestAnimationFrame is suspended for an extended period
+      failsafeTimerRef.current = setTimeout(() => {
+        setProgress(100);
+        holdTimerRef.current = setTimeout(() => {
+          handleDismiss();
+        }, COMPLETE_HOLD_MS);
+      }, 4000);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      clearAllTimers();
+    };
+  }, [handleDismiss, clearAllTimers]);
 
   if (!show) return null;
 
   return (
     <div
       id="bahs-splash-screen"
-      onClick={handleDismiss}
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none cursor-pointer transition-all duration-400 ${
-        fadeOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#051939] via-[#092b5e] to-[#030e20] text-white select-none transition-[opacity,transform] duration-[350ms] ease-out ${
+        fadeOut
+          ? "opacity-0 motion-safe:scale-105 pointer-events-none"
+          : "opacity-100 scale-100"
       }`}
     >
       {/* Background ambient decorative glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-blue-500/15 blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none motion-safe:animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-blue-500/15 blur-3xl pointer-events-none motion-safe:animate-pulse" />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-lg">
         {/* Animated Central Logo */}
@@ -88,104 +179,36 @@ export default function SplashScreen() {
 
         {/* Progress bar loader & Quick Enter prompt */}
         <div className="mt-8 flex flex-col items-center gap-2.5 w-full">
-          {/* Progress bar container */}
-          <div className="w-64 sm:w-80 h-2.5 bg-white/20 rounded-full overflow-hidden p-0.5 border border-white/25 backdrop-blur-md shadow-inner">
-            <div
+          <div className="w-64 sm:w-80 p-0.5 rounded-full border border-white/25 backdrop-blur-md shadow-inner bg-white/10 flex items-center">
+            <progress
               id="bahs-splash-bar"
-              className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-yellow-300 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-              style={{ width: "0%" }}
+              aria-label="ওয়েবসাইট লোডিং অগ্রগতি"
+              max={100}
+              value={progress}
+              className="bahs-splash-progress w-full h-2 block"
             />
           </div>
 
           {/* Status info & Percentage */}
           <div className="flex items-center justify-between w-64 sm:w-80 text-[11px] text-gray-300 font-sans px-1">
-            <span className="font-bengali text-gray-300">ওয়েবসাইট প্রস্তুত হচ্ছে...</span>
-            <span id="bahs-splash-pct" className="font-mono font-bold text-yellow-300">0%</span>
+            <span role="status" aria-live="polite" className="font-bengali text-gray-300">
+              {progress >= 100 ? "স্বাগতম! ওয়েবসাইট প্রস্তুত..." : "ওয়েবসাইট প্রস্তুত হচ্ছে..."}
+            </span>
+            <span id="bahs-splash-pct" className="font-mono font-bold text-yellow-300">
+              {progress}%
+            </span>
           </div>
 
           <button
             type="button"
             id="bahs-splash-skip-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDismiss();
-            }}
-            className="mt-3 text-xs text-gray-300/80 hover:text-white transition-colors underline decoration-dotted underline-offset-4 cursor-pointer font-bengali"
+            onClick={handleDismiss}
+            className="mt-3 text-xs text-gray-300/90 hover:text-white transition-colors underline decoration-dotted underline-offset-4 cursor-pointer font-bengali"
           >
             সরাসরি প্রবেশ করতে এখানে ক্লিক করুন →
           </button>
         </div>
       </div>
-
-      {/* Immediate Native Script for Instant Animation and Guaranteed Dismissal (zero hydration delay) */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function(){
-              try {
-                if (sessionStorage.getItem('bahs_splash_v2') === 'true') {
-                  var splash = document.getElementById('bahs-splash-screen');
-                  if (splash) splash.style.display = 'none';
-                  return;
-                }
-              } catch(e){}
-
-              function dismiss() {
-                var el = document.getElementById('bahs-splash-screen');
-                if (!el || el.dataset.dismissed) return;
-                el.dataset.dismissed = 'true';
-                el.style.transition = 'all 0.4s ease';
-                el.style.opacity = '0';
-                el.style.transform = 'scale(1.05)';
-                el.style.pointerEvents = 'none';
-                try {
-                  sessionStorage.setItem('bahs_splash_v2', 'true');
-                  document.documentElement.classList.add('splash-hidden');
-                } catch(e){}
-                setTimeout(function(){
-                  if (el) el.style.display = 'none';
-                }, 400);
-              }
-
-              // Bind immediate native clicks even before React hydrates
-              var el = document.getElementById('bahs-splash-screen');
-              if (el) {
-                el.addEventListener('click', dismiss);
-              }
-              var btn = document.getElementById('bahs-splash-skip-btn');
-              if (btn) {
-                btn.addEventListener('click', function(e){
-                  e.stopPropagation();
-                  dismiss();
-                });
-              }
-
-              // Ultra-smooth native progress animation (~1.3s)
-              var bar = document.getElementById('bahs-splash-bar');
-              var pct = document.getElementById('bahs-splash-pct');
-              var start = Date.now();
-              var duration = 1300;
-
-              function tick() {
-                var elapsed = Date.now() - start;
-                var progress = Math.min(100, Math.round((elapsed / duration) * 100));
-                if (bar) bar.style.width = progress + '%';
-                if (pct) pct.textContent = progress + '%';
-                if (progress < 100) {
-                  requestAnimationFrame(tick);
-                } else {
-                  setTimeout(dismiss, 120);
-                }
-              }
-
-              requestAnimationFrame(tick);
-
-              // Absolute failsafe maximum timer
-              setTimeout(dismiss, 2200);
-            })();
-          `,
-        }}
-      />
     </div>
   );
 }

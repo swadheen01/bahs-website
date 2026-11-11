@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaUserTie, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaSave, FaTimes } from "react-icons/fa";
+import { FaUserTie, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaSave, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface FormerStaff {
@@ -18,7 +18,7 @@ interface FormerStaff {
 }
 
 export default function AdminFormerStaffPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { t, language } = useLanguage();
   const router = useRouter();
 
@@ -39,31 +39,39 @@ export default function AdminFormerStaffPage() {
     photo: "",
   });
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (user && user.role !== "admin") {
-      router.push("/");
+    if (!authLoading && (!user || user.role !== "admin")) {
+      router.replace("/login");
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const fetchData = async () => {
     try {
       const res = await fetch("/api/former-staff", { cache: "no-store" });
-      const data = await res.json();
-      setHeadmasters(data.headmasters || []);
-      setTeachers(data.teachers || []);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || t("তথ্য লোড করা যায়নি", "Failed to load"));
+      } else {
+        setHeadmasters(data.headmasters || []);
+        setTeachers(data.teachers || []);
+      }
     } catch (e) {
       console.error(e);
+      setErrorMsg(t("সার্ভার থেকে তথ্য লোড করা যায়নি", "Failed to load from server"));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user?.role === "admin") fetchData();
+  }, [user]);
 
   const openAddForm = () => {
+    setErrorMsg("");
     setEditId(null);
     setForm({
       name: "",
@@ -77,6 +85,7 @@ export default function AdminFormerStaffPage() {
   };
 
   const openEditForm = (item: FormerStaff) => {
+    setErrorMsg("");
     setEditId(item.id);
     setForm({
       name: item.name,
@@ -91,7 +100,11 @@ export default function AdminFormerStaffPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.tenure) return alert(t("দয়া করে নাম এবং কর্মকাল লিখুন", "Please enter name and tenure"));
+    setErrorMsg("");
+    if (!form.name.trim() || !form.tenure.trim()) {
+      setErrorMsg(t("দয়া করে নাম এবং কর্মকাল লিখুন", "Please enter name and tenure"));
+      return;
+    }
 
     setSaving(true);
     try {
@@ -110,14 +123,16 @@ export default function AdminFormerStaffPage() {
 
       const resData = await res.json().catch(() => ({}));
       if (res.ok && resData.success !== false) {
+        setSuccessMsg(editId ? t("তথ্য সফলভাবে আপডেট হয়েছে!", "Updated successfully!") : t("নতুন তথ্য যুক্ত হয়েছে!", "Added successfully!"));
         setIsFormOpen(false);
-        fetchData();
+        await fetchData();
+        setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert(resData.error || t("সংরক্ষণ করতে ব্যর্থ হয়েছে", "Failed to save"));
+        setErrorMsg(resData.error || t("সংরক্ষণ করতে ব্যর্থ হয়েছে", "Failed to save"));
       }
     } catch (error) {
       console.error(error);
-      alert(t("ত্রুটি হয়েছে", "An error occurred"));
+      setErrorMsg(t("সার্ভার সংযোগে ত্রুটি হয়েছে", "An error occurred"));
     } finally {
       setSaving(false);
     }
@@ -125,6 +140,7 @@ export default function AdminFormerStaffPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm(t("আপনি কি নিশ্চিত?", "Are you sure?"))) return;
+    setErrorMsg("");
 
     try {
       const res = await fetch("/api/former-staff", {
@@ -134,17 +150,19 @@ export default function AdminFormerStaffPage() {
       });
       const resData = await res.json().catch(() => ({}));
       if (res.ok && resData.success !== false) {
-        fetchData();
+        setSuccessMsg(t("সফলভাবে মুছে ফেলা হয়েছে!", "Deleted successfully!"));
+        await fetchData();
+        setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert(resData.error || t("মুছে ফেলতে ব্যর্থ হয়েছে", "Failed to delete"));
+        setErrorMsg(resData.error || t("মুছে ফেলতে ব্যর্থ হয়েছে", "Failed to delete"));
       }
     } catch (error) {
       console.error(error);
-      alert(t("ত্রুটি হয়েছে", "An error occurred"));
+      setErrorMsg(t("সার্ভার সংযোগে ত্রুটি হয়েছে", "An error occurred"));
     }
   };
 
-  if (!user || user.role !== "admin") return null;
+  if (authLoading || !user || user.role !== "admin") return null;
 
   const currentList = activeTab === "headmaster" ? headmasters : teachers;
 
@@ -170,6 +188,7 @@ export default function AdminFormerStaffPage() {
         </div>
         {!isFormOpen && (
           <button
+            type="button"
             onClick={openAddForm}
             className="flex items-center gap-2 bg-[#06874A] hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-md transition"
           >
@@ -179,14 +198,30 @@ export default function AdminFormerStaffPage() {
         )}
       </div>
 
+      {successMsg && (
+        <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+          <FaCheckCircle className="text-emerald-600 shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+          <FaExclamationTriangle className="text-red-600 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
       <div className="flex gap-4 mb-6">
         <button
+          type="button"
           onClick={() => { setActiveTab("headmaster"); setIsFormOpen(false); }}
           className={`px-4 py-2 rounded-lg font-semibold transition ${activeTab === "headmaster" ? "bg-[#051939] text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
         >
           {t("প্রাক্তন প্রধান শিক্ষক", "Former Headmasters")}
         </button>
         <button
+          type="button"
           onClick={() => { setActiveTab("teacher"); setIsFormOpen(false); }}
           className={`px-4 py-2 rounded-lg font-semibold transition ${activeTab === "teacher" ? "bg-[#051939] text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"}`}
         >
@@ -201,6 +236,7 @@ export default function AdminFormerStaffPage() {
               {editId ? t("তথ্য আপডেট করুন", "Update Info") : t("নতুন তথ্য যুক্ত করুন", "Add New Info")}
             </h2>
             <button
+              type="button"
               onClick={() => setIsFormOpen(false)}
               className="text-gray-400 hover:text-red-500 transition"
             >
@@ -349,6 +385,7 @@ export default function AdminFormerStaffPage() {
                           <img
                             src={item.photo || "/images/teachers/default-avatar.png"}
                             alt={item.name}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/teachers/default-avatar.png"; }}
                             className="w-full h-full object-cover object-top"
                           />
                         </div>
@@ -365,6 +402,7 @@ export default function AdminFormerStaffPage() {
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => openEditForm(item)}
                             className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center transition"
                             title={t("এডিট করুন", "Edit")}
@@ -372,6 +410,7 @@ export default function AdminFormerStaffPage() {
                             <FaEdit size={14} />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDelete(item.id)}
                             className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition"
                             title={t("ডিলিট করুন", "Delete")}

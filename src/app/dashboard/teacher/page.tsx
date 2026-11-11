@@ -15,6 +15,7 @@ export default function TeacherDashboardPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [showManagement, setShowManagement] = useState(false);
 
   useEffect(() => {
@@ -24,10 +25,16 @@ export default function TeacherDashboardPage() {
   }, [user, loading, router]);
 
   const fetchProfile = async () => {
-    const res = await fetch(`/api/teachers`);
-    if (res.ok) {
-      const data = await res.json();
-      setTeachers(data);
+    try {
+      const res = await fetch("/api/teachers", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setTeachers(data);
+      } else {
+        setErrorMsg("শিক্ষকদের তালিকা লোড করা যায়নি।");
+      }
+    } catch {
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি।");
     }
   };
 
@@ -61,24 +68,31 @@ export default function TeacherDashboardPage() {
     });
     setIsEditing(true);
     setSuccessMsg("");
+    setErrorMsg("");
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const res = await fetch(`/api/teachers/${profile.id}/pending-edit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
-    });
-    setIsSubmitting(false);
-    if (res.ok) {
-      setSuccessMsg("পরিবর্তনের আবেদন এডমিনের কাছে পাঠানো হয়েছে। অনুমোদনের পর পরিবর্তন দেখা যাবে।");
-      setIsEditing(false);
-      fetchProfile();
-    } else {
-      alert("Submission failed. Please try again.");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/teachers/${profile.id}/pending-edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setSuccessMsg("পরিবর্তনের আবেদন এডমিনের কাছে পাঠানো হয়েছে। অনুমোদনের পর পরিবর্তন দেখা যাবে।");
+        setIsEditing(false);
+        await fetchProfile();
+      } else {
+        setErrorMsg(data.error || "আবেদন পাঠানো ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+      }
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে।");
     }
+    setIsSubmitting(false);
   };
 
   if (loading || !user) return null;
@@ -99,6 +113,7 @@ export default function TeacherDashboardPage() {
             <FaHome /> হোমপেজ
           </Link>
           <button
+            type="button"
             onClick={() => { logout(); router.push("/login"); }}
             className="bg-red-600 hover:bg-red-700 text-xs px-3 py-2 rounded-lg flex items-center gap-1"
           >
@@ -114,15 +129,22 @@ export default function TeacherDashboardPage() {
         </div>
         
         {successMsg && (
-          <div className="bg-green-50 border border-green-300 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <div role="status" className="bg-green-50 border border-green-300 rounded-xl p-4 mb-6 flex items-start gap-3">
             <FaCheckCircle className="text-green-600 mt-0.5 shrink-0" size={18} />
             <p className="font-bold text-green-900 text-sm">{successMsg}</p>
           </div>
         )}
 
+        {errorMsg && (
+          <div role="alert" className="bg-red-50 border border-red-300 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <FaExclamationTriangle className="text-red-600 mt-0.5 shrink-0" size={18} />
+            <p className="font-bold text-red-900 text-sm">{errorMsg}</p>
+          </div>
+        )}
+
         {!showManagement ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onClick={() => setShowManagement(true)} className="block bg-white p-6 rounded-xl shadow border-l-4 border-green-500 hover:shadow-md transition text-left">
+            <button type="button" onClick={() => setShowManagement(true)} className="block bg-white p-6 rounded-xl shadow border-l-4 border-green-500 hover:shadow-md transition text-left">
               <FaUserEdit size={28} className="text-green-500 mb-3" />
               <h3 className="font-bold text-gray-800 text-lg">শিক্ষক ব্যবস্থাপনা</h3>
               <p className="text-sm text-gray-500 mt-1">যেকোনো শিক্ষকের প্রোফাইলের তথ্য আপডেট করুন</p>
@@ -147,11 +169,11 @@ export default function TeacherDashboardPage() {
               </div>
               <div className="flex items-center gap-3">
                 {isEditing && (
-                  <button onClick={() => setIsEditing(false)} className="text-sm text-blue-600 hover:underline font-semibold border-r pr-3">
+                  <button type="button" onClick={() => setIsEditing(false)} className="text-sm text-blue-600 hover:underline font-semibold border-r pr-3">
                     তালিকায় ফিরে যান
                   </button>
                 )}
-                <button onClick={() => { setShowManagement(false); setIsEditing(false); }} className="text-sm text-red-600 hover:underline font-semibold">
+                <button type="button" onClick={() => { setShowManagement(false); setIsEditing(false); }} className="text-sm text-red-600 hover:underline font-semibold">
                   বন্ধ করুন
                 </button>
               </div>
@@ -229,7 +251,7 @@ export default function TeacherDashboardPage() {
                         <p className="text-xs text-gray-500">{t.designation}{t.mainSubject ? ` (${t.mainSubject})` : ''}</p>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button onClick={() => handleEditClick(t)} className="flex items-center justify-end w-full gap-1 text-blue-600 hover:text-blue-800">
+                        <button type="button" onClick={() => handleEditClick(t)} className="flex items-center justify-end w-full gap-1 text-blue-600 hover:text-blue-800">
                           <FaUserEdit /> এডিট
                         </button>
                       </td>

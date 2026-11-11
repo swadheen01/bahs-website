@@ -134,7 +134,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, ...data },
-      { headers: { "Cache-Control": "no-store" } }
+      { headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" } }
     );
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

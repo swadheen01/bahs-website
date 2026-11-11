@@ -14,7 +14,7 @@ interface Slider {
 
 export default function HeroSlider({ initialSlides: propSlides }: { initialSlides?: Slider[] }) {
   const [slides, setSlides] = useState<Slider[]>(() => {
-    if (propSlides && propSlides.length > 0) return propSlides;
+    if (propSlides !== undefined) return propSlides;
     return (initialSlides as Slider[]) || [];
   });
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -23,10 +23,10 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
   const { language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/sliders")
-      .then((res) => res.json())
+    fetch("/api/sliders", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
           setSlides(sorted);
           setImageErrors({});
@@ -82,8 +82,11 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
       <section className="w-full bg-gradient-to-b from-[#465b6a]/10 via-gray-100 to-gray-50 py-3 sm:py-5 px-3 sm:px-6">
         <div className="container mx-auto max-w-5xl">
           <div className="relative p-1.5 sm:p-3 bg-gradient-to-b from-white via-slate-50 to-gray-200 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-300/80 ring-1 ring-black/5">
-            <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-[#051939] select-none shadow-inner flex items-center justify-center">
-              <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] max-h-[460px] rounded-xl sm:rounded-2xl overflow-hidden bg-[#051939] select-none shadow-inner flex flex-col items-center justify-center text-gray-300 px-6 text-center">
+              <FaImage size={44} className="mb-2 opacity-40" />
+              <p className="text-xs sm:text-sm text-gray-400">
+                {language === "en" ? "No slider photos available" : "স্লাইডারে কোনো ছবি নেই"}
+              </p>
             </div>
           </div>
         </div>
@@ -109,7 +112,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
                   index === currentSlide ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
               >
-                {!imageErrors[`slide-${slide.id}-${index}`] ? (
+                {slide.image && !imageErrors[`slide-${slide.id}-${index}`] ? (
                   <Image
                     src={slide.image}
                     alt={slide.title || "BAHS Slider"}
@@ -117,6 +120,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
                     loading={index === 0 ? "eager" : "lazy"}
                     fetchPriority={index === 0 ? "high" : "low"}
                     quality={85}
+                    unoptimized={slide.image.startsWith("data:") || slide.image.startsWith("http")}
                     onError={() =>
                       setImageErrors((prev) => ({
                         ...prev,
@@ -156,6 +160,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             {slides.length > 1 && (
               <>
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
@@ -166,6 +171,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
                   <FaChevronLeft size={12} className="sm:text-sm" />
                 </button>
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -183,6 +189,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
               <div className="absolute bottom-1.5 sm:bottom-2.5 left-0 right-0 z-20 flex justify-center gap-1.5 sm:gap-2">
                 {slides.map((_, i) => (
                   <button
+                    type="button"
                     key={i}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -212,6 +219,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             </span>
 
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightboxIndex(null);
@@ -227,6 +235,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
           {/* Previous Button inside Lightbox */}
           {slides.length > 1 && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 const nextIdx = (lightboxIndex - 1 + slides.length) % slides.length;
@@ -243,6 +252,7 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
           {/* Next Button inside Lightbox */}
           {slides.length > 1 && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 const nextIdx = (lightboxIndex + 1) % slides.length;
@@ -262,12 +272,13 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative w-[90vw] max-w-5xl h-[65vh] sm:h-[75vh]">
-              {!imageErrors[`lb-${slides[lightboxIndex].id}-${lightboxIndex}`] ? (
+              {slides[lightboxIndex].image && !imageErrors[`lb-${slides[lightboxIndex].id}-${lightboxIndex}`] ? (
                 <Image
                   src={slides[lightboxIndex].image}
                   alt={slides[lightboxIndex].title || "BAHS Gallery Photo"}
                   fill
                   quality={90}
+                  unoptimized={slides[lightboxIndex].image.startsWith("data:") || slides[lightboxIndex].image.startsWith("http")}
                   onError={() =>
                     setImageErrors((prev) => ({
                       ...prev,

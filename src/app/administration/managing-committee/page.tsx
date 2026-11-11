@@ -17,13 +17,15 @@ import { useLanguage } from "@/lib/LanguageContext";
 export default function ManagingCommitteePage() {
   const { t, language } = useLanguage();
   const [members, setMembers] = useState<any[]>(initialCommittee);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/committee")
-      .then((res) => res.json())
+    fetch("/api/committee", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.members) {
+        if (data && Array.isArray(data.members)) {
           setMembers(data.members);
+          setImgErrors({});
         }
       })
       .catch(() => {});
@@ -78,14 +80,17 @@ export default function ManagingCommitteePage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-5 mb-5">
-                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100 shrink-0">
+                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100 shrink-0 flex items-center justify-center text-gray-300">
+                    <FaUserTie size={40} className="absolute" />
                     <Image
-                      src={president.photo || "/images/president/president.jpg"}
+                      src={imgErrors["pres"] ? "/images/president/president.jpg" : (president.photo || "/images/president/president.jpg")}
                       alt={president.name}
                       fill
                       quality={90}
                       sizes="112px"
-                      className="object-cover object-top"
+                      unoptimized={Boolean(!imgErrors["pres"] && president.photo && (president.photo.startsWith("data:") || president.photo.startsWith("http")))}
+                      onError={() => setImgErrors((prev) => ({ ...prev, pres: true }))}
+                      className="object-cover object-top relative z-10"
                     />
                   </div>
                   <div className="text-center sm:text-left">
@@ -136,14 +141,17 @@ export default function ManagingCommitteePage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-5 mb-5">
-                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 shrink-0">
+                  <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 shrink-0 flex items-center justify-center text-gray-300">
+                    <FaUserTie size={40} className="absolute" />
                     <Image
-                      src={secretary.photo || "/images/teachers/headmaster.jpg"}
+                      src={imgErrors["sec"] ? "/images/teachers/headmaster.jpg" : (secretary.photo || "/images/teachers/headmaster.jpg")}
                       alt={secretary.name}
                       fill
                       quality={90}
                       sizes="112px"
-                      className="object-cover object-top"
+                      unoptimized={Boolean(!imgErrors["sec"] && secretary.photo && (secretary.photo.startsWith("data:") || secretary.photo.startsWith("http")))}
+                      onError={() => setImgErrors((prev) => ({ ...prev, sec: true }))}
+                      className="object-cover object-top relative z-10"
                     />
                   </div>
                   <div className="text-center sm:text-left">
@@ -204,15 +212,20 @@ export default function ManagingCommitteePage() {
               >
                 <div>
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="relative w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0">
-                      <Image
-                        src={member.photo || "/images/teachers/default-avatar.png"}
-                        alt={member.name}
-                        fill
-                        quality={90}
-                        sizes="56px"
-                        className="object-cover"
-                      />
+                    <div className="relative w-14 h-16 rounded-xl overflow-hidden bg-gray-200 border border-gray-300 shrink-0 flex items-center justify-center text-gray-400">
+                      <FaUserTie size={24} className="absolute" />
+                      {member.photo && !imgErrors[`m-${member.id}`] && (
+                        <Image
+                          src={member.photo}
+                          alt={member.name}
+                          fill
+                          quality={90}
+                          sizes="56px"
+                          unoptimized={member.photo.startsWith("data:") || member.photo.startsWith("http")}
+                          onError={() => setImgErrors((prev) => ({ ...prev, [`m-${member.id}`]: true }))}
+                          className="object-cover relative z-10"
+                        />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mb-1">

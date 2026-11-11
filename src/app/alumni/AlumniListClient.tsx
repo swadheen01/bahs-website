@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import { FaGraduationCap, FaAward } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -15,6 +16,7 @@ interface Alumni {
 
 export default function AlumniListClient({ alumni }: { alumni: Alumni[] }) {
   const { t, language } = useLanguage();
+  const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -73,11 +75,13 @@ export default function AlumniListClient({ alumni }: { alumni: Alumni[] }) {
                         <div className="absolute inset-0 bg-slate-100 flex items-center justify-center text-slate-300">
                           <FaGraduationCap size={44} />
                         </div>
-                        {person.photo && (
+                        {person.photo && !imgErrors[person.id] && (
                           <Image
                             src={person.photo}
                             alt={language === "en" && person.nameEnglish ? person.nameEnglish : person.nameBengali}
                             fill
+                            unoptimized={person.photo.startsWith("data:") || person.photo.startsWith("http")}
+                            onError={() => setImgErrors((prev) => ({ ...prev, [person.id]: true }))}
                             className="object-cover relative z-10 group-hover:scale-110 transition-transform duration-500 ease-out"
                             sizes="120px"
                           />

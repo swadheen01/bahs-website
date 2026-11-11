@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaBullhorn, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaFilePdf } from "react-icons/fa";
+import { FaBullhorn, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface Notice {
@@ -24,6 +24,8 @@ export default function AdminNoticesPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ title: "", type: "general", fileUrl: "" });
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
@@ -32,10 +34,16 @@ export default function AdminNoticesPage() {
   const loadNotices = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/notices");
-      if (res.ok) setNotices(await res.json());
+      const res = await fetch("/api/notices", { cache: "no-store" });
+      if (res.ok) {
+        setNotices(await res.json());
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "নোটিশ লোড করা যায়নি");
+      }
     } catch (e) {
       console.error(e);
+      setErrorMsg("সার্ভার থেকে নোটিশ লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -47,28 +55,53 @@ export default function AdminNoticesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMsg("");
     const dateNow = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
     const payload = { ...form, date: dateNow, dateISO: new Date().toISOString().split("T")[0], isNew: true };
 
-    if (editId !== null) {
-      await fetch(`/api/notices/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    try {
+      const res = editId !== null
+        ? await fetch(`/api/notices/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        : await fetch("/api/notices", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "নোটিশ সংরক্ষণ ব্যর্থ হয়েছে");
+        setSaving(false);
+        return;
+      }
+
+      setSuccessMsg(editId !== null ? "নোটিশ সফলভাবে আপডেট করা হয়েছে!" : "নতুন নোটিশ সফলভাবে প্রকাশিত হয়েছে!");
       setEditId(null);
-    } else {
-      await fetch("/api/notices", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      setForm({ title: "", type: "general", fileUrl: "" });
+      setShowForm(false);
+      await loadNotices();
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
-    setForm({ title: "", type: "general", fileUrl: "" });
-    setShowForm(false);
     setSaving(false);
-    await loadNotices();
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("এই নোটিশটি মুছে ফেলবেন?")) return;
-    await fetch(`/api/notices/${id}`, { method: "DELETE" });
-    await loadNotices();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/notices/${id}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "নোটিশ মুছে ফেলা সম্ভব হয়নি");
+        return;
+      }
+      setSuccessMsg("নোটিশটি সফলভাবে মুছে ফেলা হয়েছে!");
+      await loadNotices();
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleEdit = (n: Notice) => {
+    setErrorMsg("");
     setForm({ title: n.title, type: n.type, fileUrl: n.fileUrl || "" });
     setEditId(n.id);
     setShowForm(true);
@@ -94,7 +127,9 @@ export default function AdminNoticesPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-[#051939]">সকল নোটিশ ({notices.length}টি)</h2>
           <button
+            type="button"
             onClick={() => {
+              setErrorMsg("");
               setShowForm(!showForm);
               setEditId(null);
               setForm({ title: "", type: "general", fileUrl: "" });
@@ -104,6 +139,20 @@ export default function AdminNoticesPage() {
             <FaPlus /> নতুন নোটিশ প্রকাশ করুন
           </button>
         </div>
+
+        {successMsg && (
+          <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         {showForm && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-8 border-t-4 border-[#06874A]">
@@ -190,12 +239,14 @@ export default function AdminNoticesPage() {
 
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => handleEdit(n)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded"
                     >
                       <FaEdit size={16} />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(n.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded"
                     >

@@ -12,8 +12,9 @@ import {
   FaAward,
   FaHistory,
   FaInfoCircle,
-  FaUpload,
+  FaExclamationTriangle,
 } from "react-icons/fa";
+import FileUpload from "@/components/admin/FileUpload";
 
 export default function AdminMessagesHistoryPage() {
   const { user, loading } = useAuth();
@@ -23,6 +24,7 @@ export default function AdminMessagesHistoryPage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [headmaster, setHeadmaster] = useState({
     name: "",
@@ -66,22 +68,28 @@ export default function AdminMessagesHistoryPage() {
 
   const loadData = async () => {
     setFetching(true);
+    setErrorMsg("");
     try {
-      const res = await fetch("/api/school-info");
-      const data = await res.json();
-      if (data.headmasterMessage) setHeadmaster(data.headmasterMessage);
-      if (data.presidentMessage) setPresident(data.presidentMessage);
-      if (data.history) setHistory(data.history);
-      setBasicInfo({
-        totalArea: data.totalArea || "",
-        established: data.established || "",
-        phone: data.phone || "",
-        email: data.email || "",
-        eiin: data.eiin || "",
-        schoolCode: data.schoolCode || "",
-      });
+      const res = await fetch("/api/school-info", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "তথ্য লোড করা যায়নি");
+      } else {
+        if (data.headmasterMessage) setHeadmaster(data.headmasterMessage);
+        if (data.presidentMessage) setPresident(data.presidentMessage);
+        if (data.history) setHistory(data.history);
+        setBasicInfo({
+          totalArea: data.totalArea || "",
+          established: data.established || "",
+          phone: data.phone || "",
+          email: data.email || "",
+          eiin: data.eiin || "",
+          schoolCode: data.schoolCode || "",
+        });
+      }
     } catch (e) {
       console.error(e);
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -90,24 +98,10 @@ export default function AdminMessagesHistoryPage() {
     if (user?.role === "admin") loadData();
   }, [user]);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, target: "headmaster" | "president") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      if (target === "headmaster") {
-        setHeadmaster((prev) => ({ ...prev, photo: base64 }));
-      } else {
-        setPresident((prev) => ({ ...prev, photo: base64 }));
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.SyntheticEvent) => {
+    if (e && "preventDefault" in e) e.preventDefault();
     setSaving(true);
+    setErrorMsg("");
     try {
       const res = await fetch("/api/school-info", {
         method: "PUT",
@@ -124,15 +118,16 @@ export default function AdminMessagesHistoryPage() {
           schoolCode: basicInfo.schoolCode,
         }),
       });
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg(true);
         setTimeout(() => setSuccessMsg(false), 3500);
       } else {
-        alert("সংরক্ষণ ব্যর্থ হয়েছে");
+        setErrorMsg(data.error || "সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি দেখা দিয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setSaving(false);
   };
@@ -168,24 +163,27 @@ export default function AdminMessagesHistoryPage() {
 
           <div className="flex items-center gap-3">
             {successMsg && (
-              <span className="text-[#06874A] font-bold text-xs flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-lg animate-in fade-in">
+              <span role="status" className="text-[#06874A] font-bold text-xs flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-lg animate-in fade-in">
                 <FaCheckCircle className="text-emerald-600" /> সংরক্ষিত হয়েছে!
               </span>
             )}
-            <button
-              onClick={handleSubmit}
-              disabled={saving || fetching}
-              className="flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition disabled:opacity-60 cursor-pointer"
-            >
-              <FaSave />
-              <span>{saving ? "সংরক্ষণ হচ্ছে..." : "সকল পরিবর্তন সংরক্ষণ করুন"}</span>
-            </button>
+            {!fetching && (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={saving}
+                className="flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition disabled:opacity-60 cursor-pointer"
+              >
+                <FaSave />
+                <span>{saving ? "সংরক্ষণ হচ্ছে..." : "সকল পরিবর্তন সংরক্ষণ করুন"}</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Prominent Floating Toast Alert (Visible anywhere on screen) */}
         {successMsg && (
-          <div className="fixed top-6 right-6 z-[9999] bg-[#06874A] text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-300 flex items-center gap-3 animate-in slide-in-from-top duration-300">
+          <div role="status" className="fixed top-6 right-6 z-[9999] bg-[#06874A] text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-300 flex items-center gap-3 animate-in slide-in-from-top duration-300">
             <FaCheckCircle className="text-yellow-300 text-2xl shrink-0" />
             <div>
               <p className="text-sm font-bold">সফলভাবে সংরক্ষিত হয়েছে!</p>
@@ -196,9 +194,16 @@ export default function AdminMessagesHistoryPage() {
 
         {/* Inline Banner */}
         {successMsg && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600 text-base" />
             <span>বক্তব্য ও ইতিহাসের তথ্য সফলভাবে হালনাগাদ করা হয়েছে!</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -258,31 +263,22 @@ export default function AdminMessagesHistoryPage() {
               </div>
 
               {/* Photo Input and Preview */}
-              <div className="mb-5 p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row items-center gap-5">
-                <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-emerald-500 bg-gray-200 shrink-0">
-                  <img
-                    src={headmaster.photo || "/images/teachers/headmaster.jpg"}
-                    alt="Headmaster"
-                    className="w-full h-full object-cover"
+              <div className="mb-5 p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
+                <FileUpload
+                  label="প্রধান শিক্ষকের ছবি আপলোড"
+                  value={headmaster.photo}
+                  onChange={(url) => setHeadmaster((prev) => ({ ...prev, photo: url }))}
+                  helpText="কম্প্রেসড JPG/PNG আপলোড হবে"
+                />
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">অথবা ছবির URL দিন (/images/...)</label>
+                  <input
+                    type="text"
+                    placeholder="/images/teachers/headmaster.jpg"
+                    value={headmaster.photo}
+                    onChange={(e) => setHeadmaster({ ...headmaster, photo: e.target.value })}
+                    className="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white font-mono"
                   />
-                </div>
-                <div className="flex-1 w-full space-y-2">
-                  <label className="block text-xs font-bold text-gray-700">ছবি পরিবর্তন (ফাইল আপলোড অথবা লিঙ্ক)</label>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handlePhotoUpload(e, "headmaster")}
-                      className="text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200"
-                    />
-                    <input
-                      type="text"
-                      placeholder="বা ছবির URL দিন (/images/...)"
-                      value={headmaster.photo}
-                      onChange={(e) => setHeadmaster({ ...headmaster, photo: e.target.value })}
-                      className="flex-1 border rounded-lg px-2.5 py-1 text-xs bg-white font-mono"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -361,31 +357,22 @@ export default function AdminMessagesHistoryPage() {
               </div>
 
               {/* President Photo Input */}
-              <div className="mb-5 p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row items-center gap-5">
-                <div className="w-20 h-24 rounded-lg overflow-hidden border-2 border-rose-500 bg-gray-200 shrink-0">
-                  <img
-                    src={president.photo || "/images/president/president.jpg"}
-                    alt="President"
-                    className="w-full h-full object-cover"
+              <div className="mb-5 p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
+                <FileUpload
+                  label="সভাপতির ছবি আপলোড"
+                  value={president.photo}
+                  onChange={(url) => setPresident((prev) => ({ ...prev, photo: url }))}
+                  helpText="কম্প্রেসড JPG/PNG আপলোড হবে"
+                />
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1">অথবা ছবির URL দিন (/images/...)</label>
+                  <input
+                    type="text"
+                    placeholder="/images/president/president.jpg"
+                    value={president.photo}
+                    onChange={(e) => setPresident({ ...president, photo: e.target.value })}
+                    className="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white font-mono"
                   />
-                </div>
-                <div className="flex-1 w-full space-y-2">
-                  <label className="block text-xs font-bold text-gray-700">ছবি পরিবর্তন (ফাইল আপলোড অথবা লিঙ্ক)</label>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handlePhotoUpload(e, "president")}
-                      className="text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-100 file:text-rose-800 hover:file:bg-rose-200"
-                    />
-                    <input
-                      type="text"
-                      placeholder="বা ছবির URL দিন (/images/...)"
-                      value={president.photo}
-                      onChange={(e) => setPresident({ ...president, photo: e.target.value })}
-                      className="flex-1 border rounded-lg px-2.5 py-1 text-xs bg-white font-mono"
-                    />
-                  </div>
                 </div>
               </div>
 

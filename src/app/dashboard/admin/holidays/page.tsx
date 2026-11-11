@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useRouter } from "next/navigation";
@@ -12,16 +12,18 @@ import {
   FaSave,
   FaCheckCircle,
   FaCalendarAlt,
-  FaUpload,
   FaSearch,
   FaEdit,
   FaTimes,
+  FaExclamationTriangle,
 } from "react-icons/fa";
+import { prepareUploadFile } from "@/lib/clientUpload";
 
 export default function AdminHolidaysPage() {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const [holidaysData, setHolidaysData] = useState<any>({
     academicYear: "2025",
@@ -33,6 +35,7 @@ export default function AdminHolidaysPage() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [savingHoliday, setSavingHoliday] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   // New Holiday Form
   const [editHolidayId, setEditHolidayId] = useState<string | null>(null);
@@ -61,14 +64,17 @@ export default function AdminHolidaysPage() {
     setFetching(true);
     try {
       const res = await fetch("/api/holidays", { cache: "no-store" });
-      const data = await res.json();
-      if (data && data.holidays) {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "ছুটির তালিকা লোড করা যায়নি");
+      } else if (data && Array.isArray(data.holidays)) {
         setHolidaysData(data);
         setPdfTitle(data.calendarPdfTitle || "");
         setAcademicYear(data.academicYear || "2025");
       }
     } catch (err) {
       console.error(err);
+      setErrorMsg("সার্ভার থেকে ছুটির তালিকা লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -80,8 +86,9 @@ export default function AdminHolidaysPage() {
   // Handle Calendar PDF Upload
   const handleCalendarPdfUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     if (!pdfFile && !holidaysData.calendarPdfUrl) {
-      alert("অনুগ্রহ করে একটি PDF ফাইল নির্বাচন করুন");
+      setErrorMsg("অনুগ্রহ করে একটি PDF বা ছবি ফাইল নির্বাচন করুন");
       return;
     }
     setUploadingPdf(true);
@@ -89,17 +96,23 @@ export default function AdminHolidaysPage() {
       let fileUrl = holidaysData.calendarPdfUrl;
 
       if (pdfFile) {
+        const prepared = await prepareUploadFile(pdfFile);
+        if (prepared.error || !prepared.file) {
+          setErrorMsg(prepared.error || "ফাইল প্রক্রিয়াকরণ ব্যর্থ হয়েছে");
+          setUploadingPdf(false);
+          return;
+        }
         const formData = new FormData();
-        formData.append("file", pdfFile);
+        formData.append("file", prepared.file);
         const upRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
-        const upData = await upRes.json();
+        const upData = await upRes.json().catch(() => ({}));
         if (upRes.ok && upData.url) {
           fileUrl = upData.url;
         } else {
-          alert("ফাইল আপলোড ব্যর্থ হয়েছে");
+          setErrorMsg(upData.error || "ফাইল আপলোড ব্যর্থ হয়েছে");
           setUploadingPdf(false);
           return;
         }
@@ -115,14 +128,19 @@ export default function AdminHolidaysPage() {
           academicYear,
         }),
       });
+      const resData = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg("বার্ষিক শিক্ষাপঞ্জি PDF সফলভাবে সংরক্ষিত হয়েছে!");
-        loadData();
+        setPdfFile(null);
+        if (pdfInputRef.current) pdfInputRef.current.value = "";
+        await loadData();
         setTimeout(() => setSuccessMsg(""), 3500);
+      } else {
+        setErrorMsg(resData.error || "বার্ষিক শিক্ষাপঞ্জি সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি দেখা দিয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setUploadingPdf(false);
   };
@@ -130,8 +148,9 @@ export default function AdminHolidaysPage() {
   // Handle Add or Edit Holiday
   const handleAddHoliday = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle || !newStartDate) {
-      alert("ছুটির নাম এবং শুরুর তারিখ আবশ্যক");
+    setErrorMsg("");
+    if (!newTitle.trim() || !newStartDate.trim()) {
+      setErrorMsg("ছুটির নাম এবং শুরুর তারিখ আবশ্যক");
       return;
     }
     setSavingHoliday(true);
@@ -151,6 +170,7 @@ export default function AdminHolidaysPage() {
           description: newDescription,
         }),
       });
+      const resData = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg(isEditing ? "ছুটি সফলভাবে আপডেট হয়েছে!" : "নতুন ছুটি সফলভাবে তালিকায় যুক্ত হয়েছে!");
@@ -159,18 +179,19 @@ export default function AdminHolidaysPage() {
         setNewEndDate("");
         setNewDescription("");
         setEditHolidayId(null);
-        loadData();
+        await loadData();
         setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert(isEditing ? "ছুটি আপডেট ব্যর্থ হয়েছে" : "ছুটি যোগ ব্যর্থ হয়েছে");
+        setErrorMsg(resData.error || (isEditing ? "ছুটি আপডেট ব্যর্থ হয়েছে" : "ছুটি যোগ ব্যর্থ হয়েছে"));
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি হয়েছে");
     }
     setSavingHoliday(false);
   };
 
   const handleEditHoliday = (h: any) => {
+    setErrorMsg("");
     setEditHolidayId(h.id);
     setNewTitle(h.title || "");
     setNewStartDate(h.startDate || "");
@@ -192,18 +213,22 @@ export default function AdminHolidaysPage() {
   // Handle Delete Holiday
   const handleDeleteHoliday = async (id: string, title: string) => {
     if (!confirm(`আপনি কি "${title}" ছুটির তালিকা থেকে মুছে ফেলতে চান?`)) return;
+    setErrorMsg("");
     try {
-      const res = await fetch(`/api/holidays?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/holidays?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
       if (res.ok) {
         setHolidaysData((prev: any) => ({
           ...prev,
           holidays: prev.holidays.filter((h: any) => h.id !== id),
         }));
+        setSuccessMsg("ছুটি তালিকা থেকে মুছে ফেলা হয়েছে!");
+        setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert("মুছে ফেলা সম্ভব হয়নি");
+        setErrorMsg(resData.error || "মুছে ফেলা সম্ভব হয়নি");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setErrorMsg("ত্রুটি হয়েছে");
     }
   };
 
@@ -242,9 +267,16 @@ export default function AdminHolidaysPage() {
       <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
         {/* Success Alert */}
         {successMsg && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600" />
             <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -292,6 +324,7 @@ export default function AdminHolidaysPage() {
               <label className="block text-xs font-bold text-gray-700 mb-1">নতুন PDF ফাইল নির্বাচন করুন</label>
               <div className="flex gap-2">
                 <input
+                  ref={pdfInputRef}
                   type="file"
                   accept=".pdf,image/*"
                   onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
@@ -476,6 +509,7 @@ export default function AdminHolidaysPage() {
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          type="button"
                           onClick={() => handleEditHoliday(h)}
                           className="text-blue-600 hover:text-blue-800 p-1.5 rounded-lg hover:bg-blue-50 transition cursor-pointer"
                           title="এডিট করুন"
@@ -483,6 +517,7 @@ export default function AdminHolidaysPage() {
                           <FaEdit size={13} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteHoliday(h.id, h.title)}
                           className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer"
                           title="মুছে ফেলুন"

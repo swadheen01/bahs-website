@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaTrophy, FaSignOutAlt, FaPlus, FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrophy, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface Alumni {
@@ -25,6 +25,8 @@ export default function AdminAlumniPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" });
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [showSection, setShowSection] = useState<boolean>(true);
   const [savingSection, setSavingSection] = useState(false);
@@ -36,8 +38,17 @@ export default function AdminAlumniPage() {
 
   const loadAlumni = async () => {
     setFetching(true);
-    const res = await fetch("/api/alumni");
-    setAlumni(await res.json());
+    try {
+      const res = await fetch("/api/alumni", { cache: "no-store" });
+      if (res.ok) {
+        setAlumni(await res.json());
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "কৃতি শিক্ষার্থীদের তথ্য লোড করা যায়নি");
+      }
+    } catch {
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি");
+    }
     setFetching(false);
   };
 
@@ -48,7 +59,7 @@ export default function AdminAlumniPage() {
       if (typeof data.showAlumniSection !== "undefined") {
         setShowSection(data.showAlumniSection);
       }
-    } catch (e) {
+    } catch {
     } finally {
       setInitialLoaded(true);
     }
@@ -66,6 +77,7 @@ export default function AdminAlumniPage() {
     const newValue = !showSection;
     setShowSection(newValue);
     setSavingSection(true);
+    setErrorMsg("");
     try {
       const res = await fetch("/api/school-info", {
         method: "PUT",
@@ -75,8 +87,10 @@ export default function AdminAlumniPage() {
       if (!res.ok) {
         throw new Error("Failed to save");
       }
-    } catch (e) {
-      alert("Failed to update setting. Please try again.");
+      setSuccessMsg(newValue ? "হোমপেজে কৃতি শিক্ষার্থী সেকশন চালু করা হয়েছে।" : "হোমপেজে কৃতি শিক্ষার্থী সেকশন লুকানো হয়েছে।");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সেটিংস সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।");
       setShowSection(!newValue); // Revert back
     } finally {
       setSavingSection(false);
@@ -86,25 +100,50 @@ export default function AdminAlumniPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    if (editId !== null) {
-      await fetch(`/api/alumni/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    setErrorMsg("");
+    try {
+      const res = editId !== null
+        ? await fetch(`/api/alumni/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) })
+        : await fetch("/api/alumni", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "সংরক্ষণ ব্যর্থ হয়েছে");
+        setSaving(false);
+        return;
+      }
+
+      setSuccessMsg(editId !== null ? "তথ্য সফলভাবে আপডেট করা হয়েছে!" : "নতুন কৃতি শিক্ষার্থী যুক্ত হয়েছে!");
       setEditId(null);
-    } else {
-      await fetch("/api/alumni", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" });
+      setShowForm(false);
+      await loadAlumni();
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
-    setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" });
-    setShowForm(false);
     setSaving(false);
-    await loadAlumni();
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("এই কৃতি শিক্ষার্থীকে তালিকা থেকে সরাবেন?")) return;
-    await fetch(`/api/alumni/${id}`, { method: "DELETE" });
-    await loadAlumni();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/alumni/${id}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "মুছে ফেলা সম্ভব হয়নি");
+        return;
+      }
+      setSuccessMsg("তালিকা থেকে সরানো হয়েছে!");
+      await loadAlumni();
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleEdit = (a: Alumni) => {
+    setErrorMsg("");
     setForm({ nameBengali: a.nameBengali, nameEnglish: a.nameEnglish, institution: a.institution, degree: a.degree, year: a.year || "", photo: a.photo || "" });
     setEditId(a.id);
     setShowForm(true);
@@ -120,12 +159,24 @@ export default function AdminAlumniPage() {
           <span className="text-gray-600">|</span>
           <h1 className="text-lg font-bold font-bengali flex items-center gap-2"><FaTrophy className="text-yellow-300" /> কৃতি শিক্ষার্থী ব্যবস্থাপনা</h1>
         </div>
-        <button onClick={() => { logout(); router.push("/"); }} className="flex items-center gap-2 bg-[#800505] px-3 py-1.5 rounded text-sm font-bengali hover:bg-red-700">
+        <button type="button" onClick={() => { logout(); router.push("/"); }} className="flex items-center gap-2 bg-[#800505] px-3 py-1.5 rounded text-sm font-bengali hover:bg-red-700">
           <FaSignOutAlt /> লগআউট
         </button>
       </header>
 
       <div className="container mx-auto px-4 py-6">
+        {successMsg && (
+          <div role="status" className="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm font-bengali shadow-sm">
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+        {errorMsg && (
+          <div role="alert" className="mb-4 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm font-bengali shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         {/* Settings Bar */}
         <div className="bg-white rounded-xl shadow p-4 mb-6 flex justify-between items-center border-l-4 border-emerald-600">
           <div>
@@ -133,6 +184,7 @@ export default function AdminAlumniPage() {
             <p className="text-xs text-gray-500 font-bengali mt-0.5">হোমপেজে এই সেকশনটি দেখানো বা লুকানোর জন্য নিচের সুইচটি ব্যবহার করুন। ডেটা মুছে যাবে না।</p>
           </div>
           <button 
+            type="button"
             onClick={toggleSection} 
             disabled={savingSection}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${showSection ? 'bg-emerald-500' : 'bg-gray-300'} ${savingSection ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
@@ -143,7 +195,7 @@ export default function AdminAlumniPage() {
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-[#051939] font-bengali">কৃতি শিক্ষার্থী তালিকা ({alumni.length}জন)</h2>
-          <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" }); }}
+          <button type="button" onClick={() => { setErrorMsg(""); setShowForm(!showForm); setEditId(null); setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" }); }}
             className="flex items-center gap-2 bg-[#965D03] text-white px-4 py-2 rounded-lg text-sm font-bengali hover:bg-yellow-700 transition-colors">
             <FaPlus /> নতুন যোগ করুন
           </button>
@@ -216,10 +268,10 @@ export default function AdminAlumniPage() {
                       <td className="px-4 py-3 text-gray-600">{a.degree}</td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => { handleEdit(a); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-blue-600 hover:text-blue-800 p-1.5 rounded hover:bg-blue-50">
+                          <button type="button" onClick={() => { handleEdit(a); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-blue-600 hover:text-blue-800 p-1.5 rounded hover:bg-blue-50">
                             <FaEdit size={14} />
                           </button>
-                          <button onClick={() => handleDelete(a.id)} className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50">
+                          <button type="button" onClick={() => handleDelete(a.id)} className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50">
                             <FaTrash size={14} />
                           </button>
                         </div>

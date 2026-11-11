@@ -177,6 +177,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
               <FaSearch className="absolute left-3 top-3 text-gray-400 text-xs" />
               {search && (
                 <button
+                  type="button"
                   onClick={() => setSearch("")}
                   className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
                 >
@@ -247,6 +248,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                         {notice.fileUrl ? (
                           <div className="flex items-center justify-center gap-2">
                             <button
+                              type="button"
                               onClick={() => setPreviewNotice(notice)}
                               className="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
                               title={t("নোটিশ দেখুন", "View Notice")}
@@ -256,6 +258,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                             </button>
 
                             <button
+                              type="button"
                               onClick={(e) => handleDownload(e, notice)}
                               className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium shadow-sm transition cursor-pointer"
                               title={t("ফাইল ডাউনলোড করুন", "Download File")}
@@ -302,6 +305,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={closeModal}
                 className="text-gray-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition shrink-0"
               >
@@ -338,6 +342,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={() => setPdfFullscreen((v) => !v)}
                         className="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 text-xs px-2 py-1 rounded hover:bg-gray-200 transition"
                         title={pdfFullscreen ? t("ছোট করুন", "Exit Fullscreen") : t("ফুলস্ক্রিন", "Fullscreen")}
@@ -348,6 +353,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                         </span>
                       </button>
                       <button
+                        type="button"
                         onClick={(e) => handleDownload(e, previewNotice)}
                         className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm transition"
                       >
@@ -367,6 +373,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <button
+                            type="button"
                             onClick={(e) => handleDownload(e, previewNotice)}
                             className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition"
                           >
@@ -374,6 +381,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                             {t("ডাউনলোড", "Download")}
                           </button>
                           <button
+                            type="button"
                             onClick={() => setPdfFullscreen(false)}
                             className="text-gray-300 hover:text-white p-1.5 rounded hover:bg-white/10 transition"
                           >
@@ -416,6 +424,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                         {t("ব্রাউজার সরাসরি দেখাতে পারছে না, ডাউনলোড করে দেখুন।", "Your browser cannot display it inline. Please download.")}
                       </p>
                       <button
+                        type="button"
                         onClick={(e) => handleDownload(e, previewNotice)}
                         className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm shadow transition"
                       >
@@ -445,6 +454,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
               <div className="flex items-center gap-2 ml-auto">
                 {previewNotice.fileUrl && (
                   <button
+                    type="button"
                     onClick={(e) => handleDownload(e, previewNotice)}
                     className="inline-flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition"
                   >
@@ -453,6 +463,7 @@ export default function NoticeTable({ notices }: NoticeTableProps) {
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={closeModal}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-xl text-xs transition"
                 >

@@ -33,11 +33,13 @@ export default function FormerStaffPage() {
 
   useEffect(() => {
     fetch("/api/former-staff", { cache: "no-store" })
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        setHeadmasters(data.headmasters || []);
-        setTeachers(data.teachers || []);
-        setImageErrors({});
+        if (data) {
+          setHeadmasters(data.headmasters || []);
+          setTeachers(data.teachers || []);
+          setImageErrors({});
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -91,7 +93,7 @@ export default function FormerStaffPage() {
                 src={teacher.photo}
                 alt={language === "en" && teacher.nameEn ? teacher.nameEn : teacher.name}
                 fill
-                unoptimized={Boolean(teacher.photo?.startsWith("data:"))}
+                unoptimized={Boolean(teacher.photo && (teacher.photo.startsWith("data:") || teacher.photo.startsWith("http")))}
                 quality={90}
                 sizes="(max-width: 640px) 160px, 220px"
                 onError={() =>
@@ -157,6 +159,7 @@ export default function FormerStaffPage() {
           {/* Filter Pills */}
           <div className="mt-6 flex flex-wrap justify-center gap-2.5 sm:gap-3">
             <button
+              type="button"
               onClick={() => {
                 setFilterMode("all");
                 setQuery("");
@@ -170,6 +173,7 @@ export default function FormerStaffPage() {
               {t("সকল প্রাক্তন শিক্ষক", "All Former Teachers")} ({headmasters.length + teachers.length})
             </button>
             <button
+              type="button"
               onClick={() => {
                 setFilterMode("headmaster");
                 setQuery("");
@@ -183,6 +187,7 @@ export default function FormerStaffPage() {
               🎓 {t("প্রাক্তন প্রধান শিক্ষক", "Former Headmasters")} ({headmasters.length})
             </button>
             <button
+              type="button"
               onClick={() => {
                 setFilterMode("teacher");
                 setQuery("");
@@ -212,6 +217,7 @@ export default function FormerStaffPage() {
           />
           {query && (
             <button
+              type="button"
               onClick={() => setQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
               aria-label="Clear search"
@@ -261,6 +267,7 @@ export default function FormerStaffPage() {
             </p>
             {query && (
               <button
+                type="button"
                 onClick={() => setQuery("")}
                 className="mt-4 text-[#06874A] text-sm hover:underline font-bold"
               >

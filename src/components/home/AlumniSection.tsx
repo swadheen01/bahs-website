@@ -16,52 +16,32 @@ interface Alumni {
 }
 
 export default function AlumniSection() {
-  const [alumni, setAlumni] = useState<Alumni[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("bahs_cached_alumni");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {}
-    }
-    return (initialAlumni as Alumni[]) || [];
-  });
-
-  const [showSection, setShowSection] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("bahs_show_alumni");
-        if (cached !== null) return cached === "true";
-      } catch (e) {}
-    }
-    return schoolInfo.showAlumniSection ?? true;
-  });
-
+  const [alumni, setAlumni] = useState<Alumni[]>((initialAlumni as Alumni[]) || []);
+  const [showSection, setShowSection] = useState<boolean>(schoolInfo.showAlumniSection ?? true);
+  const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/school-info")
-      .then((res) => res.json())
+    try {
+      sessionStorage.removeItem("bahs_cached_alumni");
+      sessionStorage.removeItem("bahs_show_alumni");
+    } catch (e) {}
+
+    fetch("/api/school-info", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && typeof data.showAlumniSection !== "undefined") {
           setShowSection(data.showAlumniSection);
-          try {
-            sessionStorage.setItem("bahs_show_alumni", String(data.showAlumniSection));
-          } catch (e) {}
         }
       })
       .catch(() => {});
 
-    fetch("/api/alumni")
-      .then((res) => res.json())
+    fetch("/api/alumni", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setAlumni(data);
-          try {
-            sessionStorage.setItem("bahs_cached_alumni", JSON.stringify(data));
-          } catch (e) {}
+          setImgErrors({});
         }
       })
       .catch(() => {});
@@ -117,11 +97,13 @@ export default function AlumniSection() {
                       <div className="absolute inset-0 bg-slate-100 flex items-center justify-center text-slate-300">
                         <FaGraduationCap size={44} />
                       </div>
-                      {person.photo && (
+                      {person.photo && !imgErrors[person.id] && (
                         <Image
                           src={person.photo}
                           alt={person.nameBengali}
                           fill
+                          unoptimized={person.photo.startsWith("data:") || person.photo.startsWith("http")}
+                          onError={() => setImgErrors((prev) => ({ ...prev, [person.id]: true }))}
                           className="object-cover relative z-10 group-hover:scale-110 transition-transform duration-500 ease-out"
                           sizes="120px"
                         />

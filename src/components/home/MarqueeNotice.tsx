@@ -8,7 +8,7 @@ export default function MarqueeNotice() {
 
   useEffect(() => {
     fetch("/api/notices", { cache: "no-store" })
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {
           setNotices(data);

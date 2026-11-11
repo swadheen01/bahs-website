@@ -44,17 +44,26 @@ const classStyles: Record<number, { gradient: string; shadow: string; accent: st
 export default function HomeClient({ initialSliders }: { initialSliders: any[] }) {
   const { t, language } = useLanguage();
   const [info, setInfo] = useState<any>(schoolInfo);
+  const [hmImgErr, setHmImgErr] = useState(false);
+  const [presImgErr, setPresImgErr] = useState(false);
 
   useEffect(() => {
-    fetch("/api/school-info")
-      .then((res) => res.json())
+    fetch("/api/school-info", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && !data.error) {
           setInfo((prev: any) => ({ ...prev, ...data }));
+          setHmImgErr(false);
+          setPresImgErr(false);
         }
       })
       .catch(() => {});
   }, []);
+
+  const hmRawPhoto = info?.headmasterMessage?.photo || "/images/teachers/headmaster.jpg";
+  const hmPhotoSrc = hmImgErr ? "/images/teachers/headmaster.jpg" : hmRawPhoto;
+  const presRawPhoto = info?.presidentMessage?.photo || "/images/president/president.jpg";
+  const presPhotoSrc = presImgErr ? "/images/president/president.jpg" : presRawPhoto;
 
   const classes: any[] = Array.isArray(info?.classes) ? info.classes : [];
   const officialLinks: any[] = Array.isArray(info?.officialLinks) ? info.officialLinks : [];
@@ -119,11 +128,15 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-emerald-100 shadow-md bg-gray-100 group">
                         <Image
-                          src={info?.headmasterMessage?.photo || "/images/teachers/headmaster.jpg"}
+                          src={hmPhotoSrc}
                           alt="Headmaster"
                           fill
                           quality={90}
                           sizes="96px"
+                          unoptimized={hmPhotoSrc.startsWith("data:") || hmPhotoSrc.startsWith("http")}
+                          onError={() => {
+                            if (hmRawPhoto !== "/images/teachers/headmaster.jpg") setHmImgErr(true);
+                          }}
                           className="object-cover"
                         />
                       </div>
@@ -154,11 +167,15 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-rose-100 shadow-md bg-gray-100">
                         <Image
-                          src={info?.presidentMessage?.photo || "/images/president/president.jpg"}
+                          src={presPhotoSrc}
                           alt="President"
                           fill
                           quality={90}
                           sizes="96px"
+                          unoptimized={presPhotoSrc.startsWith("data:") || presPhotoSrc.startsWith("http")}
+                          onError={() => {
+                            if (presRawPhoto !== "/images/president/president.jpg") setPresImgErr(true);
+                          }}
                           className="object-cover"
                         />
                       </div>

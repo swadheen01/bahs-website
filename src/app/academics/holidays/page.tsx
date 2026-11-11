@@ -9,24 +9,40 @@ import {
   FaFilePdf,
   FaCheckCircle,
   FaSun,
-  FaMosque,
-  FaFlag,
   FaSearch,
 } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 import { safeDownloadFile } from "@/lib/downloadFile";
 
+interface HolidayItem {
+  id: string;
+  title: string;
+  titleEn?: string;
+  startDate: string;
+  endDate?: string;
+  totalDays?: string;
+  type: string;
+  description?: string;
+}
+
+interface HolidaysPayload {
+  academicYear?: string;
+  calendarPdfUrl?: string;
+  calendarPdfTitle?: string;
+  holidays: HolidayItem[];
+}
+
 export default function HolidaysPage() {
   const { t, language } = useLanguage();
-  const [data, setData] = useState<any>(initialHolidays);
+  const [data, setData] = useState<HolidaysPayload>(initialHolidays);
   const [filterType, setFilterType] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetch("/api/holidays", { cache: "no-store" })
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((resData) => {
-        if (resData && resData.holidays) {
+        if (resData && Array.isArray(resData.holidays)) {
           setData(resData);
         }
       })
@@ -35,7 +51,7 @@ export default function HolidaysPage() {
 
   const holidays = data?.holidays || initialHolidays.holidays || [];
 
-  const filteredHolidays = holidays.filter((h: any) => {
+  const filteredHolidays = holidays.filter((h: HolidayItem) => {
     if (filterType !== "all" && !h.type?.includes(filterType)) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -103,7 +119,7 @@ export default function HolidaysPage() {
             </div>
             <div>
               <span className="text-xs text-gray-500 font-bold block">{t("চলতি শিক্ষাবর্ষ", "Academic Session")}</span>
-              <strong className="text-2xl font-black text-[#051939] font-mono">{data.academicYear || "2025"}</strong>
+              <strong className="text-2xl font-black text-[#051939] font-mono">{data.academicYear || "2026"}</strong>
             </div>
           </div>
         </div>
@@ -127,7 +143,7 @@ export default function HolidaysPage() {
 
             <button
               type="button"
-              onClick={() => safeDownloadFile(data.calendarPdfUrl, data.calendarPdfTitle || "Academic_Calendar")}
+              onClick={() => safeDownloadFile(data.calendarPdfUrl || "", data.calendarPdfTitle || "Academic_Calendar")}
               className="inline-flex items-center gap-2 bg-[#06874A] hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs shadow-md transition cursor-pointer shrink-0"
             >
               <FaDownload />
@@ -150,6 +166,7 @@ export default function HolidaysPage() {
 
             <div className="no-print flex items-center gap-3">
               <button
+                type="button"
                 onClick={handlePrint}
                 className="bg-white/20 hover:bg-white/30 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 border border-white/30 transition cursor-pointer"
               >
@@ -164,11 +181,13 @@ export default function HolidaysPage() {
             <div className="flex flex-wrap items-center gap-2">
               {[
                 { id: "all", labelBn: "সকল ছুটি", labelEn: "All Holidays" },
+                { id: "সরকারি", labelBn: "সরকারি ছুটি", labelEn: "Govt Holidays" },
                 { id: "জাতীয়", labelBn: "জাতীয় দিবস", labelEn: "National Days" },
                 { id: "ধর্মীয়", labelBn: "ধর্মীয় উৎসব", labelEn: "Religious" },
                 { id: "অবকাশ", labelBn: "দীর্ঘ অবকাশ", labelEn: "Vacations" },
               ].map((btn) => (
                 <button
+                  type="button"
                   key={btn.id}
                   onClick={() => setFilterType(btn.id)}
                   className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition cursor-pointer ${
@@ -207,7 +226,7 @@ export default function HolidaysPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {filteredHolidays.map((holiday: any, idx: number) => (
+                {filteredHolidays.map((holiday: HolidayItem, idx: number) => (
                   <tr key={holiday.id} className="hover:bg-gray-50 transition">
                     <td className="py-3 px-4 font-mono text-gray-400">{idx + 1}</td>
                     <td className="py-3 px-4">

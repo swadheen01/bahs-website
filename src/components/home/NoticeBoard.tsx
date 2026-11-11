@@ -11,26 +11,15 @@ export default function NoticeBoard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Quick cache check to avoid layout shift
     try {
-      const cached = localStorage.getItem("bahs_cached_notices");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setNoticeList(parsed);
-          setLoading(false);
-        }
-      }
+      localStorage.removeItem("bahs_cached_notices");
     } catch (e) {}
 
-    fetch("/api/notices")
-      .then((res) => res.json())
+    fetch("/api/notices", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {
           setNoticeList(data);
-          try {
-            localStorage.setItem("bahs_cached_notices", JSON.stringify(data));
-          } catch (e) {}
         }
       })
       .catch((e) => console.error("NoticeBoard fetch error:", e))

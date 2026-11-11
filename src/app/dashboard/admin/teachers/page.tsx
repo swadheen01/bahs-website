@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaChalkboardTeacher, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaBell, FaCheck, FaTimes } from "react-icons/fa";
+import { FaChalkboardTeacher, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaArrowLeft, FaBell, FaCheck, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
 interface Teacher {
@@ -46,6 +46,8 @@ export default function AdminTeachersPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Teacher>>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
@@ -53,8 +55,17 @@ export default function AdminTeachersPage() {
 
   const loadTeachers = async () => {
     setFetching(true);
-    const res = await fetch("/api/teachers");
-    if (res.ok) setTeachers(await res.json());
+    try {
+      const res = await fetch("/api/teachers", { cache: "no-store" });
+      if (res.ok) {
+        setTeachers(await res.json());
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "শিক্ষকদের তথ্য লোড করা যায়নি");
+      }
+    } catch {
+      setErrorMsg("সার্ভার থেকে শিক্ষকদের তথ্য লোড করা যায়নি");
+    }
     setFetching(false);
   };
 
@@ -73,41 +84,89 @@ export default function AdminTeachersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    if (editId !== null) {
-      await fetch(`/api/teachers/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+    setErrorMsg("");
+    try {
+      const res = editId !== null
+        ? await fetch(`/api/teachers/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          })
+        : await fetch("/api/teachers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "শিক্ষকের তথ্য সংরক্ষণ ব্যর্থ হয়েছে");
+        setSaving(false);
+        return;
+      }
+
+      setSuccessMsg(editId !== null ? "শিক্ষকের তথ্য সফলভাবে আপডেট হয়েছে!" : "নতুন শিক্ষক সফলভাবে যুক্ত হয়েছেন!");
       setEditId(null);
-    } else {
-      await fetch("/api/teachers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      setForm(emptyForm);
+      setShowForm(false);
+      await loadTeachers();
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
-    setForm(emptyForm);
-    setShowForm(false);
     setSaving(false);
-    await loadTeachers();
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("এই শিক্ষককে তালিকা থেকে সরাবেন?")) return;
-    await fetch(`/api/teachers/${id}`, { method: "DELETE" });
-    await loadTeachers();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/teachers/${id}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "শিক্ষক মুছে ফেলা সম্ভব হয়নি");
+        return;
+      }
+      setSuccessMsg("শিক্ষক তালিকা থেকে সরানো হয়েছে!");
+      await loadTeachers();
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleApprove = async (id: number) => {
-    await fetch(`/api/teachers/${id}/approve`, { method: "POST" });
-    await loadTeachers();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/teachers/${id}/approve`, { method: "POST" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "আবেদন অনুমোদন ব্যর্থ হয়েছে");
+        return;
+      }
+      setSuccessMsg("তথ্য পরিবর্তনের আবেদন অনুমোদিত ও প্রকাশিত হয়েছে!");
+      await loadTeachers();
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleReject = async (id: number) => {
     if (!confirm("এই পরিবর্তন প্রত্যাখ্যান করবেন?")) return;
-    await fetch(`/api/teachers/${id}/reject`, { method: "POST" });
-    await loadTeachers();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/teachers/${id}/reject`, { method: "POST" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "আবেদন প্রত্যাখ্যান ব্যর্থ হয়েছে");
+        return;
+      }
+      setSuccessMsg("পরিবর্তনের আবেদন প্রত্যাখ্যান করা হয়েছে!");
+      await loadTeachers();
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleEdit = (t: Teacher) => {
@@ -132,6 +191,7 @@ export default function AdminTeachersPage() {
           </h1>
         </div>
         <button
+          type="button"
           onClick={() => {
             logout();
             router.push("/login");
@@ -143,6 +203,19 @@ export default function AdminTeachersPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-5xl">
+        {successMsg && (
+          <div role="status" className="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-4 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         {teachers.some(t => t.hasPendingEdit) && (
           <div className="bg-amber-50 border border-amber-300 rounded-xl p-5 mb-6">
             <div className="flex items-start gap-3 mb-4">
@@ -184,9 +257,21 @@ export default function AdminTeachersPage() {
                         {Object.entries(pendingData).map(([key, val]) => {
                           if (!val && !(t as any)[key]) return null;
                           return (
-                            <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-xs">
+                            <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-xs items-center">
                               <span className="text-gray-500 font-medium">{fieldMap[key] || key}:</span>
-                              <span className="sm:col-span-2 text-blue-700 font-semibold break-words">{String(val)}</span>
+                              {key === "photo" && val ? (
+                                <div className="sm:col-span-2 flex items-center gap-2">
+                                  <img
+                                    src={String(val)}
+                                    alt="প্রস্তাবিত ছবি"
+                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/teachers/default-avatar.png"; }}
+                                    className="w-16 h-16 object-cover rounded-lg border border-gray-300 bg-white"
+                                  />
+                                  <span className="text-[11px] text-blue-700 font-semibold">নতুন ছবি সংযুক্ত</span>
+                                </div>
+                              ) : (
+                                <span className="sm:col-span-2 text-blue-700 font-semibold break-words">{String(val)}</span>
+                              )}
                             </div>
                           );
                         })}
@@ -194,10 +279,10 @@ export default function AdminTeachersPage() {
                     </div>
                     
                     <div className="flex sm:flex-col gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
-                      <button onClick={() => handleApprove(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
+                      <button type="button" onClick={() => handleApprove(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
                         <FaCheck size={12} /> অ্যাপ্রুভ
                       </button>
-                      <button onClick={() => handleReject(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
+                      <button type="button" onClick={() => handleReject(t.id)} className="flex-1 flex justify-center items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-xs font-bold transition shadow-sm">
                         <FaTimes size={12} /> রিজেক্ট
                       </button>
                     </div>
@@ -211,7 +296,9 @@ export default function AdminTeachersPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-[#051939]">সকল শিক্ষকবৃন্দের তালিকা ({teachers.length} জন)</h2>
           <button
+            type="button"
             onClick={() => {
+              setErrorMsg("");
               setShowForm(!showForm);
               setEditId(null);
               setForm({ ...emptyForm, order: teachers.length + 1 });
@@ -400,7 +487,12 @@ export default function AdminTeachersPage() {
                     <td className="px-4 py-3">
                       <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden border border-gray-200 relative">
                         {t.photo ? (
-                          <img src={t.photo} className="w-full h-full object-cover" alt={t.nameBengali} />
+                          <img
+                            src={t.photo}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/teachers/default-avatar.png"; }}
+                            className="w-full h-full object-cover"
+                            alt={t.nameBengali}
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">ছবি নেই</div>
                         )}
@@ -425,6 +517,7 @@ export default function AdminTeachersPage() {
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
+                          type="button"
                           onClick={() => handleEdit(t)}
                           className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
                           title="এডিট করুন"
@@ -432,6 +525,7 @@ export default function AdminTeachersPage() {
                           <FaEdit size={16} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(t.id)}
                           className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50"
                           title="মুছে ফেলুন"

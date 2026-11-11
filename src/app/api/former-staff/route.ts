@@ -161,12 +161,14 @@ export async function GET() {
     const { headmasters, teachers } = await fetchFromSupabase();
     return NextResponse.json(
       { headmasters, teachers },
-      { headers: { "Cache-Control": "no-store" } }
+      { headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" } }
     );
   } catch (err) {
     console.error("Supabase former-staff fetch error, falling back to local JSON:", err);
     const fallback = await getLocalData();
-    return NextResponse.json(fallback, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json(fallback, {
+      headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" },
+    });
   }
 }
 

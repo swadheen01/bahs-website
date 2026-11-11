@@ -1,10 +1,11 @@
 import { supabase } from "@/lib/supabase";
+import defaultSliders from "@/data/sliders.json";
 import HomeClient from "./HomeClient";
 
-export const revalidate = 86400; // 24h ISR, revalidated on-demand when content changes
+export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("notices")
     .select("*")
     .eq("type", "slider")
@@ -12,13 +13,15 @@ export default async function Page() {
   
   let sliders: any[] = [];
   
-  if (data && Array.isArray(data)) {
+  if (!error && Array.isArray(data)) {
     sliders = data.map((s: any) => ({
       id: s.id,
       title: s.title || "",
       image: s.file_url,
       sort_order: Number(s.added_by) || 0,
     })).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  } else {
+    sliders = defaultSliders;
   }
 
   return <HomeClient initialSliders={sliders} />;

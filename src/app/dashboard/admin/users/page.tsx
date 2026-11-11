@@ -47,12 +47,16 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/users");
+      const res = await fetch("/api/users", { cache: "no-store" });
       if (res.ok) {
         setUsers(await res.json());
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setStatusMsg({ type: "error", text: data.error || "ব্যবহারকারীদের তথ্য লোড করা যায়নি।" });
       }
     } catch (e) {
       console.error(e);
+      setStatusMsg({ type: "error", text: "সার্ভার থেকে তথ্য লোড করা যায়নি।" });
     }
     setFetching(false);
   };
@@ -145,7 +149,7 @@ export default function AdminUsersPage() {
 
   const handleDeleteUser = async (u: any) => {
     if (u.id === currentUser?.id) {
-      alert("আপনি নিজের অ্যাকাউন্ট ডিলিট করতে পারবেন না।");
+      setStatusMsg({ type: "error", text: "আপনি নিজের অ্যাকাউন্ট ডিলিট করতে পারবেন না।" });
       return;
     }
     if (!confirm(`আপনি কি নিশ্চিত যে "${u.name}" এর অ্যাকাউন্ট নিষ্ক্রিয় করতে চান?`)) {
@@ -154,14 +158,15 @@ export default function AdminUsersPage() {
 
     try {
       const res = await fetch(`/api/users/${u.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setStatusMsg({ type: "success", text: `"${u.name}" এর অ্যাকাউন্ট সফলভাবে সরানো হয়েছে।` });
         await loadUsers();
       } else {
-        alert("অ্যাকাউন্ট সরানো যায়নি।");
+        setStatusMsg({ type: "error", text: data.error || "অ্যাকাউন্ট সরানো যায়নি।" });
       }
-    } catch (e) {
-      alert("সার্ভার এরর।");
+    } catch {
+      setStatusMsg({ type: "error", text: "সার্ভার এরর।" });
     }
   };
 
@@ -186,6 +191,7 @@ export default function AdminUsersPage() {
         {/* Status Toast */}
         {statusMsg && (
           <div
+            role={statusMsg.type === "error" ? "alert" : "status"}
             className={`mb-6 p-4 rounded-xl flex items-center justify-between shadow-sm animate-fadeIn ${
               statusMsg.type === "success"
                 ? "bg-emerald-50 border border-emerald-300 text-emerald-900"
@@ -197,6 +203,7 @@ export default function AdminUsersPage() {
               {statusMsg.text}
             </div>
             <button
+              type="button"
               onClick={() => setStatusMsg(null)}
               className="text-xs opacity-60 hover:opacity-100 transition p-1"
             >
@@ -254,6 +261,7 @@ export default function AdminUsersPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setRoleFilter(tab.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                   roleFilter === tab.id
@@ -354,6 +362,7 @@ export default function AdminUsersPage() {
                               {/* Quick Make Admin Button */}
                               {u.role !== "admin" ? (
                                 <button
+                                  type="button"
                                   onClick={() => {
                                     setRoleModalUser(u);
                                     setTargetRole("admin");
@@ -387,6 +396,7 @@ export default function AdminUsersPage() {
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
+                              type="button"
                               onClick={() => {
                                 setResetModalUser(u);
                                 setNewPassword("123456");
@@ -398,6 +408,7 @@ export default function AdminUsersPage() {
                             </button>
                             {!isSelf && (
                               <button
+                                type="button"
                                 onClick={() => handleDeleteUser(u)}
                                 className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition"
                                 title="অ্যাকাউন্ট সরান"

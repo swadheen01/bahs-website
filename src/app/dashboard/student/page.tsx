@@ -33,6 +33,7 @@ export default function StudentDashboardPage() {
             <FaHome /> হোমপেজ
           </Link>
           <button
+            type="button"
             onClick={() => { logout(); router.push("/login"); }}
             className="bg-red-600 hover:bg-red-700 text-xs px-3 py-2 rounded-lg flex items-center gap-1"
           >

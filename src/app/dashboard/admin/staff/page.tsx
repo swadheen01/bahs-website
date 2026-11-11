@@ -13,6 +13,8 @@ import {
   FaPhoneAlt,
   FaSave,
   FaTimes,
+  FaCheckCircle,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
 
@@ -36,6 +38,8 @@ export default function AdminStaffPage() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [form, setForm] = useState<Partial<Staff>>({
     nameBengali: "",
@@ -54,10 +58,16 @@ export default function AdminStaffPage() {
   const loadStaff = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/staff");
-      if (res.ok) setStaffList(await res.json());
+      const res = await fetch("/api/staff", { cache: "no-store" });
+      if (res.ok) {
+        setStaffList(await res.json());
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "কর্মচারীদের তথ্য লোড করা যায়নি");
+      }
     } catch (e) {
       console.error(e);
+      setErrorMsg("সার্ভার থেকে তথ্য লোড করা যায়নি");
     }
     setFetching(false);
   };
@@ -68,28 +78,34 @@ export default function AdminStaffPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nameBengali || !form.designation) {
-      alert("নাম ও পদবি অবশ্যই প্রদান করতে হবে");
+    setErrorMsg("");
+    if (!form.nameBengali?.trim() || !form.designation?.trim()) {
+      setErrorMsg("নাম ও পদবি অবশ্যই প্রদান করতে হবে");
       return;
     }
 
     setSaving(true);
     try {
-      if (editId !== null) {
-        await fetch(`/api/staff/${editId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
-        setEditId(null);
-      } else {
-        await fetch("/api/staff", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
+      const res = editId !== null
+        ? await fetch(`/api/staff/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          })
+        : await fetch("/api/staff", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "সংরক্ষণ ব্যর্থ হয়েছে");
+        setSaving(false);
+        return;
       }
 
+      setSuccessMsg(editId !== null ? "কর্মচারীর তথ্য সফলভাবে আপডেট হয়েছে!" : "নতুন কর্মচারী সফলভাবে যুক্ত হয়েছেন!");
+      setEditId(null);
       setForm({
         nameBengali: "",
         nameEnglish: "",
@@ -101,19 +117,33 @@ export default function AdminStaffPage() {
       });
       setShowForm(false);
       await loadStaff();
-    } catch (err) {
-      alert("সংরক্ষণ ব্যর্থ হয়েছে");
+      setTimeout(() => setSuccessMsg(""), 3500);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("আপনি কি নিশ্চিতভাবে এই কর্মচারীকে সরাতে চান?")) return;
-    await fetch(`/api/staff/${id}`, { method: "DELETE" });
-    await loadStaff();
+    setErrorMsg("");
+    try {
+      const res = await fetch(`/api/staff/${id}`, { method: "DELETE" });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(resData.error || "মুছে ফেলা সম্ভব হয়নি");
+        return;
+      }
+      setSuccessMsg("কর্মচারীকে তালিকা থেকে সরানো হয়েছে!");
+      await loadStaff();
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
+    }
   };
 
   const handleEdit = (s: Staff) => {
+    setErrorMsg("");
     setForm(s);
     setEditId(s.id);
     setShowForm(true);
@@ -141,7 +171,9 @@ export default function AdminStaffPage() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
+            setErrorMsg("");
             setForm({
               nameBengali: "",
               nameEnglish: "",
@@ -162,6 +194,18 @@ export default function AdminStaffPage() {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {successMsg && (
+          <div role="status" className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+        {errorMsg && (
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         {/* Form Modal / Accordion */}
         {showForm && (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-t-4 border-[#06874A] animate-in fade-in duration-200">
@@ -315,6 +359,7 @@ export default function AdminStaffPage() {
                         <img
                           src={s.photo}
                           alt={s.nameBengali}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/teachers/default-avatar.png"; }}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -347,6 +392,7 @@ export default function AdminStaffPage() {
 
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <button
+                      type="button"
                       onClick={() => handleEdit(s)}
                       className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition border border-blue-200"
                       title="Edit"
@@ -354,6 +400,7 @@ export default function AdminStaffPage() {
                       <FaEdit size={14} />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(s.id)}
                       className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition border border-red-200"
                       title="Delete"

@@ -20,13 +20,17 @@ import { useLanguage } from "@/lib/LanguageContext";
 export default function AboutPage() {
   const { t, language } = useLanguage();
   const [schoolInfo, setSchoolInfo] = useState<any>(initialSchoolInfo);
+  const [hmImgErr, setHmImgErr] = useState(false);
+  const [presImgErr, setPresImgErr] = useState(false);
 
   useEffect(() => {
-    fetch("/api/school-info")
-      .then((res) => res.json())
+    fetch("/api/school-info", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.history) {
           setSchoolInfo(data);
+          setHmImgErr(false);
+          setPresImgErr(false);
         }
       })
       .catch(() => {});
@@ -39,6 +43,10 @@ export default function AboutPage() {
 
   const headmaster = schoolInfo?.headmasterMessage || initialSchoolInfo.headmasterMessage;
   const president = schoolInfo?.presidentMessage || initialSchoolInfo.presidentMessage;
+  const hmRawPhoto = headmaster.photo || "/images/teachers/headmaster.jpg";
+  const hmPhotoSrc = hmImgErr ? "/images/teachers/headmaster.jpg" : hmRawPhoto;
+  const presRawPhoto = president.photo || "/images/president/president.jpg";
+  const presPhotoSrc = presImgErr ? "/images/president/president.jpg" : presRawPhoto;
 
   const infoTable = [
     {
@@ -180,11 +188,15 @@ export default function AboutPage() {
               <div className="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-gray-100">
                 <div className="relative w-28 h-32 rounded-2xl overflow-hidden bg-gray-100 border-4 border-emerald-100 shadow-md shrink-0">
                   <Image
-                    src={headmaster.photo || "/images/teachers/headmaster.jpg"}
+                    src={hmPhotoSrc}
                     alt={headmaster.name}
                     fill
                     quality={90}
                     sizes="112px"
+                    unoptimized={hmPhotoSrc.startsWith("data:") || hmPhotoSrc.startsWith("http")}
+                    onError={() => {
+                      if (hmRawPhoto !== "/images/teachers/headmaster.jpg") setHmImgErr(true);
+                    }}
                     className="object-cover object-top"
                   />
                 </div>
@@ -234,11 +246,15 @@ export default function AboutPage() {
               <div className="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-gray-100">
                 <div className="relative w-28 h-32 rounded-2xl overflow-hidden bg-gray-100 border-4 border-rose-100 shadow-md shrink-0">
                   <Image
-                    src={president.photo || "/images/president/president.jpg"}
+                    src={presPhotoSrc}
                     alt={president.name}
                     fill
                     quality={90}
                     sizes="112px"
+                    unoptimized={presPhotoSrc.startsWith("data:") || presPhotoSrc.startsWith("http")}
+                    onError={() => {
+                      if (presRawPhoto !== "/images/president/president.jpg") setPresImgErr(true);
+                    }}
                     className="object-cover object-top"
                   />
                 </div>

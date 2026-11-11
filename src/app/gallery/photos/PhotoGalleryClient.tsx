@@ -11,10 +11,10 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
   const [imageErrors, setImageErrors] = useState<Record<string | number, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/gallery")
-      .then((res) => res.json())
+    fetch("/api/gallery", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const normalized = data.map((item: any) => ({
             id: item.id,
             src: item.src || item.image || "",
@@ -102,12 +102,13 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
                 }}
               >
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100">
-                  {!imageErrors[photo.id || index] ? (
+                  {photo.src && !imageErrors[photo.id || index] ? (
                     <Image
                       src={photo.src}
                       alt={photo.caption}
                       fill
                       quality={85}
+                      unoptimized={photo.src.startsWith("data:") || photo.src.startsWith("http")}
                       onError={() => setImageErrors(prev => ({ ...prev, [photo.id || index]: true }))}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -159,6 +160,7 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
               {selectedIndex! + 1} / {photos.length}
             </span>
             <button
+              type="button"
               onClick={handleClose}
               className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               aria-label="Close"
@@ -175,6 +177,7 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
             {/* Prev Button */}
             {photos.length > 1 && (
               <button
+                type="button"
                 onClick={handlePrev}
                 className="absolute left-2 sm:left-4 z-10 p-3 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
                 aria-label="Previous Photo"
@@ -185,7 +188,7 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
 
             {/* Enlarged Image */}
             <div className="relative w-full max-h-[75vh] flex items-center justify-center">
-              {!imageErrors[`lb-${selectedPhoto.id || selectedIndex}`] ? (
+              {selectedPhoto.src && !imageErrors[`lb-${selectedPhoto.id || selectedIndex}`] ? (
                 <img
                   src={selectedPhoto.src}
                   alt={selectedPhoto.caption}
@@ -210,6 +213,7 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
             {/* Next Button */}
             {photos.length > 1 && (
               <button
+                type="button"
                 onClick={handleNext}
                 className="absolute right-2 sm:right-4 z-10 p-3 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
                 aria-label="Next Photo"

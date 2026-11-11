@@ -69,8 +69,8 @@ export default function ClassDetailView({ classNum }: Props) {
   const [selectedSectionIdx, setSelectedSectionIdx] = useState<number>(0);
 
   useEffect(() => {
-    fetch("/api/school-info")
-      .then((res) => res.json())
+    fetch("/api/school-info", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.classes && Array.isArray(data.classes)) {
           setClassesData(data.classes);

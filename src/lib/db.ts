@@ -19,7 +19,7 @@ export const noticesDB = {
       const { data, error } = await supabase
         .from('notices')
         .select('id, title, date, date_iso, type, file_url, is_new, added_by')
-        .not('type', 'in', '("routine","slider","gallery","staff","calendar","holiday","result","committee","school_info","testimonial_counter","former_staff")')
+        .not('type', 'in', '("routine","routine_weekly","slider","gallery","staff","calendar","holiday","result","committee","school_info","testimonial_counter","former_staff")')
         .order('date_iso', { ascending: false, nullsFirst: false })
         .order('id', { ascending: false });
 
@@ -84,12 +84,12 @@ export const noticesDB = {
     const { data, error } = await supabase.from('notices').insert({
       id: noticeId,
       title: notice.title,
-      date: notice.date,
+      date: String(notice.date || "").slice(0, 50),
       date_iso: notice.dateISO,
       type: notice.type,
       file_url: notice.fileUrl,
       is_new: notice.isNew,
-      added_by: notice.addedBy
+      added_by: notice.addedBy ? String(notice.addedBy).slice(0, 250) : notice.addedBy
     }).select().single();
     if (error) throw error;
     return { ...data, dateISO: data.date_iso, fileUrl: data.file_url, isNew: data.is_new, addedBy: data.added_by };
@@ -100,10 +100,12 @@ export const noticesDB = {
     if (data.type !== undefined) updateData.type = data.type;
     if (data.fileUrl !== undefined) updateData.file_url = data.fileUrl;
     if (data.isNew !== undefined) updateData.is_new = data.isNew;
-    await supabase.from('notices').update(updateData).eq('id', id);
+    const { error } = await supabase.from('notices').update(updateData).eq('id', id);
+    if (error) throw error;
   },
   delete: async (id: number) => {
-    await supabase.from('notices').delete().eq('id', id);
+    const { error } = await supabase.from('notices').delete().eq('id', id);
+    if (error) throw error;
   },
 };
 
@@ -139,7 +141,8 @@ export interface Teacher {
 
 export const teachersDB = {
   getAll: async (): Promise<Teacher[]> => {
-    const { data } = await supabase.from('teachers').select('*').order('sort_order', { ascending: true });
+    const { data, error } = await supabase.from('teachers').select('*').order('sort_order', { ascending: true });
+    if (error) throw error;
     return (data || []).map(t => ({
       id: t.id, nameBengali: t.name_bengali, nameEnglish: t.name_english, designation: t.designation, designationEn: t.designation_en, subject: t.subject, category: t.category, photo: t.photo, order: t.sort_order,
       mpoIndex: t.mpo_index, joiningDate: t.joining_date, birthDate: t.birth_date, email: t.email, contactNo: t.contact_no, qualification: t.qualification, experience: t.experience, interest: t.interest, presentAddress: t.present_address, permanentAddress: t.permanent_address,
@@ -181,22 +184,26 @@ export const teachersDB = {
     if (data.pendingEditData !== undefined) updateData.pending_edit_data = data.pendingEditData;
     if (data.pendingEditSubmittedBy !== undefined) updateData.pending_edit_submitted_by = data.pendingEditSubmittedBy;
     if (data.pendingEditSubmittedAt !== undefined) updateData.pending_edit_submitted_at = data.pendingEditSubmittedAt;
-    await supabase.from('teachers').update(updateData).eq('id', id);
+    const { error } = await supabase.from('teachers').update(updateData).eq('id', id);
+    if (error) throw error;
   },
   delete: async (id: number) => {
-    await supabase.from('teachers').delete().eq('id', id);
+    const { error } = await supabase.from('teachers').delete().eq('id', id);
+    if (error) throw error;
   },
 };
 
 export const pendingTeacherEditsDB = {
   // Get count of teachers with pending edits
   getCount: async (): Promise<number> => {
-    const { count } = await supabase.from('teachers').select('id', { count: 'exact', head: true }).eq('has_pending_edit', true);
+    const { count, error } = await supabase.from('teachers').select('id', { count: 'exact', head: true }).eq('has_pending_edit', true);
+    if (error) throw error;
     return count || 0;
   },
   // Approve: apply pending_edit_data to teacher, clear pending
   approve: async (teacherId: number) => {
-    const { data: teacher } = await supabase.from('teachers').select('pending_edit_data').eq('id', teacherId).single();
+    const { data: teacher, error: fetchError } = await supabase.from('teachers').select('pending_edit_data').eq('id', teacherId).single();
+    if (fetchError) throw fetchError;
     if (!teacher?.pending_edit_data) throw new Error('No pending edit');
     const edit = teacher.pending_edit_data;
     const updateData: any = { has_pending_edit: false, pending_edit_data: null, pending_edit_submitted_by: null, pending_edit_submitted_at: null };
@@ -213,20 +220,23 @@ export const pendingTeacherEditsDB = {
     if (edit.courses !== undefined) updateData.courses = edit.courses;
     if (edit.presentAddress !== undefined) updateData.present_address = edit.presentAddress;
     if (edit.permanentAddress !== undefined) updateData.permanent_address = edit.permanentAddress;
-    await supabase.from('teachers').update(updateData).eq('id', teacherId);
+    const { error: updateError } = await supabase.from('teachers').update(updateData).eq('id', teacherId);
+    if (updateError) throw updateError;
   },
   // Reject: clear pending data without applying
   reject: async (teacherId: number) => {
-    await supabase.from('teachers').update({ has_pending_edit: false, pending_edit_data: null, pending_edit_submitted_by: null, pending_edit_submitted_at: null }).eq('id', teacherId);
+    const { error } = await supabase.from('teachers').update({ has_pending_edit: false, pending_edit_data: null, pending_edit_submitted_by: null, pending_edit_submitted_at: null }).eq('id', teacherId);
+    if (error) throw error;
   },
   // Submit edit (from teacher account)
   submit: async (teacherId: number, editData: any, submittedBy: string) => {
-    await supabase.from('teachers').update({
+    const { error } = await supabase.from('teachers').update({
       has_pending_edit: true,
       pending_edit_data: editData,
       pending_edit_submitted_by: submittedBy,
       pending_edit_submitted_at: new Date().toISOString(),
     }).eq('id', teacherId);
+    if (error) throw error;
   },
 };
 
@@ -264,6 +274,36 @@ async function writeLocalStaff(data: Staff[]) {
   }
 }
 
+function parseStaffRow(s: any): Staff {
+  let titlePayload: any = null;
+  try {
+    if (typeof s.title === "string" && s.title.trim().startsWith("{")) {
+      titlePayload = JSON.parse(s.title);
+    }
+  } catch {}
+
+  let extra: any = {};
+  if (titlePayload) {
+    extra = titlePayload;
+  } else {
+    try {
+      extra = JSON.parse(s.added_by || "{}");
+    } catch {}
+  }
+
+  const legacyPhone = s.date_iso && !/^\d{4}-\d{2}-\d{2}$/.test(String(s.date_iso)) ? String(s.date_iso) : "";
+  return {
+    id: s.id,
+    nameBengali: String(titlePayload?.nameBengali ?? s.title ?? ""),
+    nameEnglish: String(extra.nameEnglish || ""),
+    designation: String(titlePayload?.designation ?? s.date ?? ""),
+    designationEn: String(extra.designationEn || ""),
+    phone: extra.phone !== undefined ? String(extra.phone) : legacyPhone,
+    photo: s.file_url || "",
+    order: typeof extra.order === "number" ? extra.order : 0
+  };
+}
+
 export const staffDB = {
   getAll: async (): Promise<Staff[]> => {
     try {
@@ -272,77 +312,104 @@ export const staffDB = {
         .select('*')
         .eq('type', 'staff')
         .order('id', { ascending: true });
-      if (!error && Array.isArray(data) && data.length > 0) {
-        return data.map((s: any) => {
-          let extra: any = {};
-          try { extra = JSON.parse(s.added_by || "{}"); } catch (e) {}
-          return {
-            id: s.id,
-            nameBengali: s.title,
-            nameEnglish: extra.nameEnglish || "",
-            designation: s.date,
-            designationEn: extra.designationEn || "",
-            phone: s.date_iso || "",
-            photo: s.file_url || "",
-            order: typeof extra.order === "number" ? extra.order : 0
-          };
-        }).sort((a, b) => a.order - b.order);
+      if (error) throw error;
+      if (Array.isArray(data)) {
+        return data.map(parseStaffRow).sort((a, b) => a.order - b.order);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("Supabase staff fetch error, falling back to local JSON:", e);
+    }
     const local = await readLocalStaff();
     return local.sort((a, b) => a.order - b.order);
   },
   add: async (item: Omit<Staff, "id">): Promise<Staff> => {
     const local = await readLocalStaff();
-    const newId = (Date.now() % 2147483647);
+    const todayISO = new Date().toISOString().split("T")[0];
+    let newId = (Date.now() % 2000000000) + 1000000;
+    const { data: existingRows } = await supabase.from('notices').select('id').eq('id', newId).limit(1);
+    if (existingRows && existingRows.length > 0) {
+      newId = newId >= 2147483646 ? 1850000100 : newId + 1;
+    }
     const newStaff: Staff = {
       id: newId,
       nameBengali: item.nameBengali,
       nameEnglish: item.nameEnglish || "",
-      designation: item.designation,
+      designation: item.designation || "",
       designationEn: item.designationEn || "",
       phone: item.phone || "",
       photo: item.photo || "",
-      order: item.order || local.length + 1
+      order: typeof item.order === "number" ? item.order : local.length + 1
     };
 
-    try {
-      await supabase.from('notices').insert({
-        id: newId,
-        title: item.nameBengali,
-        date: item.designation,
-        date_iso: item.phone || "",
-        file_url: item.photo || "",
-        type: 'staff',
-        added_by: JSON.stringify({
-          nameEnglish: item.nameEnglish,
-          designationEn: item.designationEn,
-          order: newStaff.order
-        }),
-        is_new: false
-      });
-    } catch (e) {}
+    const payload = {
+      nameBengali: newStaff.nameBengali,
+      nameEnglish: newStaff.nameEnglish,
+      designation: newStaff.designation,
+      designationEn: newStaff.designationEn,
+      phone: newStaff.phone,
+      order: newStaff.order
+    };
+
+    const { error } = await supabase.from('notices').insert({
+      id: newId,
+      title: JSON.stringify(payload),
+      date: String(newStaff.designation || "").slice(0, 50),
+      date_iso: todayISO,
+      file_url: newStaff.photo || "",
+      type: 'staff',
+      added_by: String(newStaff.nameEnglish || newStaff.nameBengali || "staff").slice(0, 250),
+      is_new: false
+    });
+    if (error) throw error;
 
     local.push(newStaff);
     await writeLocalStaff(local);
     return newStaff;
   },
   update: async (id: number, data: Partial<Staff>) => {
-    try {
-      const updateData: any = {};
-      if (data.nameBengali !== undefined) updateData.title = data.nameBengali;
-      if (data.designation !== undefined) updateData.date = data.designation;
-      if (data.phone !== undefined) updateData.date_iso = data.phone;
-      if (data.photo !== undefined) updateData.file_url = data.photo;
-      if (data.nameEnglish !== undefined || data.designationEn !== undefined || data.order !== undefined) {
-        updateData.added_by = JSON.stringify({
-          nameEnglish: data.nameEnglish,
-          designationEn: data.designationEn,
-          order: data.order
-        });
-      }
-      await supabase.from('notices').update(updateData).eq('id', id).eq('type', 'staff');
-    } catch (e) {}
+    const todayISO = new Date().toISOString().split("T")[0];
+    const { data: existingRow, error: findError } = await supabase
+      .from('notices')
+      .select('id, title, date, date_iso, file_url, added_by')
+      .eq('id', id)
+      .eq('type', 'staff')
+      .maybeSingle();
+    if (findError) throw findError;
+
+    const prev = existingRow ? parseStaffRow(existingRow) : {
+      id,
+      nameBengali: "",
+      nameEnglish: "",
+      designation: "",
+      designationEn: "",
+      phone: "",
+      photo: "",
+      order: 0
+    };
+
+    const merged: Staff = {
+      ...prev,
+      ...data,
+      id,
+    };
+
+    const updateData: any = {
+      date_iso: todayISO,
+      title: JSON.stringify({
+        nameBengali: merged.nameBengali,
+        nameEnglish: merged.nameEnglish,
+        designation: merged.designation,
+        designationEn: merged.designationEn,
+        phone: merged.phone,
+        order: merged.order,
+      }),
+      date: String(merged.designation || "").slice(0, 50),
+      added_by: String(merged.nameEnglish || merged.nameBengali || "staff").slice(0, 250),
+    };
+    if (data.photo !== undefined) updateData.file_url = data.photo;
+
+    const { error } = await supabase.from('notices').update(updateData).eq('id', id).eq('type', 'staff');
+    if (error) throw error;
 
     const local = await readLocalStaff();
     const index = local.findIndex((s: Staff) => s.id === id);
@@ -352,9 +419,8 @@ export const staffDB = {
     }
   },
   delete: async (id: number) => {
-    try {
-      await supabase.from('notices').delete().eq('id', id).eq('type', 'staff');
-    } catch (e) {}
+    const { error } = await supabase.from('notices').delete().eq('id', id).eq('type', 'staff');
+    if (error) throw error;
     const local = await readLocalStaff();
     const filtered = local.filter((s: Staff) => s.id !== id);
     await writeLocalStaff(filtered);
@@ -375,7 +441,8 @@ export interface Alumni {
 
 export const alumniDB = {
   getAll: async (): Promise<Alumni[]> => {
-    const { data } = await supabase.from('alumni').select('*').order('id', { ascending: false });
+    const { data, error } = await supabase.from('alumni').select('*').order('id', { ascending: false });
+    if (error) throw error;
     return (data || []).map(a => ({
       id: a.id, nameBengali: a.name_bengali, nameEnglish: a.name_english, institution: a.institution, degree: a.degree, photo: a.photo, year: a.passing_year
     }));
@@ -395,10 +462,12 @@ export const alumniDB = {
     if (data.degree !== undefined) updateData.degree = data.degree;
     if (data.photo !== undefined) updateData.photo = data.photo;
     if (data.year !== undefined) updateData.passing_year = data.year;
-    await supabase.from('alumni').update(updateData).eq('id', id);
+    const { error } = await supabase.from('alumni').update(updateData).eq('id', id);
+    if (error) throw error;
   },
   delete: async (id: number) => {
-    await supabase.from('alumni').delete().eq('id', id);
+    const { error } = await supabase.from('alumni').delete().eq('id', id);
+    if (error) throw error;
   },
 };
 
@@ -413,8 +482,9 @@ export interface GalleryPhoto {
 export const galleryDB = {
   getAll: async (): Promise<GalleryPhoto[]> => {
     try {
-      const { data } = await supabase.from('notices').select('*').eq('type', 'gallery').order('id', { ascending: false });
-      if (data && data.length > 0) {
+      const { data, error } = await supabase.from('notices').select('*').eq('type', 'gallery').order('id', { ascending: false });
+      if (error) throw error;
+      if (Array.isArray(data)) {
         return data.map((g: any) => ({
           id: g.id,
           src: g.file_url,
@@ -422,7 +492,9 @@ export const galleryDB = {
           category: g.added_by || "campus"
         }));
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("Supabase gallery fetch error, falling back to local JSON:", e);
+    }
     try {
       const fs = await import("fs/promises");
       const p = await import("path");
@@ -434,14 +506,15 @@ export const galleryDB = {
   },
   add: async (photo: Omit<GalleryPhoto, "id"> & { id?: number }) => {
     const photoId = photo.id || (Date.now() % 2147483647);
+    const todayISO = new Date().toISOString().split("T")[0];
     const { data, error } = await supabase.from('notices').insert({
       id: photoId,
       title: photo.caption,
       file_url: photo.src,
       type: 'gallery',
       added_by: photo.category || 'campus',
-      date: new Date().toLocaleDateString('bn-BD'),
-      date_iso: new Date().toISOString()
+      date: todayISO,
+      date_iso: todayISO
     }).select().single();
     if (error) throw error;
     return {
@@ -452,7 +525,8 @@ export const galleryDB = {
     };
   },
   delete: async (id: number) => {
-    await supabase.from('notices').delete().eq('id', id).eq('type', 'gallery');
+    const { error } = await supabase.from('notices').delete().eq('id', id).eq('type', 'gallery');
+    if (error) throw error;
   },
 };
 
@@ -471,7 +545,8 @@ export interface User {
 
 export const usersDB = {
   getAll: async (): Promise<User[]> => {
-    const { data } = await supabase.from('users').select('*').order('id', { ascending: true });
+    const { data, error } = await supabase.from('users').select('*').order('id', { ascending: true });
+    if (error) throw error;
     return (data || []).map(u => ({
       id: u.id,
       name: u.name,
@@ -584,15 +659,17 @@ export const usersDB = {
     let res = await supabase.from('users').update(updateData).eq('id', id);
     if (res.error && res.error.code === '42703') {
       delete updateData.email;
-      await supabase.from('users').update(updateData).eq('id', id);
+      res = await supabase.from('users').update(updateData).eq('id', id);
     }
+    if (res.error) throw res.error;
   },
   updateRole: async (id: number, role: "admin" | "teacher" | "student") => {
     const { error } = await supabase.from('users').update({ role }).eq('id', id);
     if (error) throw error;
   },
   delete: async (id: number) => {
-    await supabase.from('users').update({ active: false }).eq('id', id);
+    const { error } = await supabase.from('users').update({ active: false }).eq('id', id);
+    if (error) throw error;
   },
 };
 

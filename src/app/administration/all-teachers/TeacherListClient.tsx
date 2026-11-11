@@ -78,6 +78,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
           />
           {query && (
             <button
+              type="button"
               onClick={() => setQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
               aria-label="Clear search"
@@ -106,6 +107,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
               {t("কোনো শিক্ষক পাওয়া যায়নি", "No faculty member found")}
             </p>
             <button
+              type="button"
               onClick={() => setQuery("")}
               className="mt-3 text-[#06874A] text-sm hover:underline font-semibold"
             >
@@ -133,6 +135,7 @@ export default function TeacherListClient({ teachers }: { teachers: Teacher[] })
                         alt={language === "en" && teacher.nameEnglish ? teacher.nameEnglish : teacher.nameBengali}
                         fill
                         quality={85}
+                        unoptimized={teacher.photo.startsWith("data:") || teacher.photo.startsWith("http")}
                         onError={() => setImageErrors((prev) => ({ ...prev, [teacher.id]: true }))}
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"

@@ -124,6 +124,7 @@ export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
                     fill
                     preload
                     quality={85}
+                    unoptimized={teacher.photo.startsWith("data:") || teacher.photo.startsWith("http")}
                     onError={() => setImageError(true)}
                     className="object-cover object-top"
                     sizes="144px"

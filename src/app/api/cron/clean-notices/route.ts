@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       .from("notices")
       .select("id, file_url")
       .not("file_url", "is", null)
-      .not("type", "in", '("routine","slider","gallery","staff","calendar","holiday","result","committee","school_info","testimonial_counter","former_staff")')
+      .not("type", "in", '("routine","routine_weekly","slider","gallery","staff","calendar","holiday","result","committee","school_info","testimonial_counter","former_staff")')
       .lt("date_iso", dateLimit);
 
     if (fetchError) {

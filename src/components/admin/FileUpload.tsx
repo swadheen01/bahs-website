@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { FaCloudUploadAlt, FaTrash, FaSpinner, FaCheckCircle, FaFilePdf } from "react-icons/fa";
+import { prepareUploadFile } from "@/lib/clientUpload";
 
 interface FileUploadProps {
   label: string;
@@ -9,64 +10,6 @@ interface FileUploadProps {
   accept?: string;
   required?: boolean;
   helpText?: string;
-}
-
-async function compressImageIfNeeded(file: File): Promise<File> {
-  if (!file.type.startsWith("image/") || file.type.includes("svg") || file.size < 600 * 1024) {
-    return file;
-  }
-
-  return new Promise((resolve) => {
-    const img = document.createElement("img");
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-        const maxDim = 2400;
-
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(file);
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(
-          (blob) => {
-            if (blob && blob.size < file.size) {
-              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            } else {
-              resolve(file);
-            }
-          },
-          "image/jpeg",
-          0.92
-        );
-      };
-      img.onerror = () => resolve(file);
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = () => resolve(file);
-    reader.readAsDataURL(file);
-  });
 }
 
 export default function FileUpload({
@@ -85,33 +28,32 @@ export default function FileUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 25MB before compression)
-    if (file.size > 25 * 1024 * 1024) {
-      setError("ফাইল সাইজ ২৫ মেগাবাইটের বেশি হতে পারবে না");
-      return;
-    }
-
     setUploading(true);
     setError(null);
 
     try {
-      const fileToUpload = await compressImageIfNeeded(file);
+      const prepared = await prepareUploadFile(file);
+      if (prepared.error || !prepared.file) {
+        setError(prepared.error || "ফাইল প্রক্রিয়াকরণ ব্যর্থ হয়েছে");
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("file", fileToUpload);
+      formData.append("file", prepared.file);
 
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.url) {
         onChange(data.url);
       } else {
         setError(data.error || "আপলোড ব্যর্থ হয়েছে");
       }
-    } catch (err) {
+    } catch {
       setError("সার্ভার এরর! ফাইল আপলোড করা যায়নি।");
     } finally {
       setUploading(false);
@@ -124,8 +66,16 @@ export default function FileUpload({
     setError(null);
   };
 
-  const isImage = value && (value.match(/\.(jpeg|jpg|gif|png|webp)$/i) || value.startsWith("/uploads/") || value.startsWith("/images/") || value.startsWith("data:image"));
-  const isPdf = value && value.match(/\.(pdf)$/i);
+  const isImage = Boolean(
+    value &&
+      (/\.(jpeg|jpg|gif|png|webp)($|\?)/i.test(value) ||
+        value.startsWith("/uploads/") ||
+        value.startsWith("/images/") ||
+        value.startsWith("data:image"))
+  );
+  const isPdf = Boolean(
+    value && (/\.pdf($|\?)/i.test(value) || value.startsWith("data:application/pdf"))
+  );
 
   return (
     <div className="space-y-2 font-bengali">
@@ -163,7 +113,7 @@ export default function FileUpload({
               <FaCheckCircle /> ফাইল আপলোড সম্পন্ন হয়েছে
             </p>
             <p className="text-xs text-gray-500 truncate max-w-[200px] sm:max-w-xs">
-              {value.startsWith("data:") ? "সফলভাবে এনকোড করা ছবি" : value}
+              {value.startsWith("data:") ? "সফলভাবে এনকোড করা ফাইল" : value}
             </p>
           </div>
 
@@ -216,7 +166,7 @@ export default function FileUpload({
       )}
 
       {error && (
-        <p className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded-lg border border-red-200">
+        <p role="alert" className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded-lg border border-red-200">
           ⚠️ {error}
         </p>
       )}

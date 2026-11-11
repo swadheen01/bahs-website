@@ -11,6 +11,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "কোনো ফাইল পাওয়া যায়নি" }, { status: 400 });
     }
 
+    if (file.size > 6 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "ফাইলের আকার ৬ মেগাবাইটের বেশি হতে পারবে না (সর্বোচ্চ 6MB অনুমোদিত)" },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     let buffer = Buffer.from(bytes);
     let mimeType = file.type || "application/octet-stream";

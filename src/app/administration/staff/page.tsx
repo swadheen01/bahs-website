@@ -20,12 +20,16 @@ export default function StaffPage() {
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/staff")
-      .then((res) => res.json())
+    fetch("/api/staff", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (Array.isArray(data)) setStaffList(data);
+        if (Array.isArray(data)) {
+          setStaffList(data);
+          setImageErrors({});
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -104,13 +108,15 @@ export default function StaffPage() {
                 <div>
                   {/* Photo area */}
                   <div className="h-48 w-full bg-gradient-to-b from-gray-100 to-gray-200 relative overflow-hidden flex items-center justify-center">
-                    {staff.photo ? (
+                    {staff.photo && !imageErrors[staff.id] ? (
                       <Image
                         src={staff.photo}
                         alt={staff.nameBengali}
                         fill
                         quality={90}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        unoptimized={staff.photo.startsWith("data:") || staff.photo.startsWith("http")}
+                        onError={() => setImageErrors((prev) => ({ ...prev, [staff.id]: true }))}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (

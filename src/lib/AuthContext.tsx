@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshUser = async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user || null);
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. Listen to Supabase auth state changes and sync with iron-session if needed
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
-        const meRes = await fetch("/api/auth/me");
+        const meRes = await fetch("/api/auth/me", { cache: "no-store" });
         if (!meRes.ok) {
           const email = session.user.email;
           const name =

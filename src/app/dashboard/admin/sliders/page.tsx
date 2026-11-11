@@ -14,9 +14,9 @@ import {
   FaTimes,
   FaArrowUp,
   FaArrowDown,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
-import initialSliders from "@/data/sliders.json";
 
 interface Slider {
   id: number;
@@ -32,36 +32,39 @@ export default function AdminSlidersPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
 
-  // Instant render from pre-bundled sliders, verified against server
-  const [sliders, setSliders] = useState<Slider[]>((initialSliders as Slider[]) || []);
-  const [fetching, setFetching] = useState<boolean>(!initialSliders || initialSliders.length === 0);
+  const [sliders, setSliders] = useState<Slider[]>([]);
+  const [fetching, setFetching] = useState<boolean>(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [moving, setMoving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     // Purge any stale slider cache from localStorage
     try {
       localStorage.removeItem("bahs_cached_sliders");
-    } catch (e) {}
+    } catch {}
 
     if (!loading && (!user || user.role !== "admin")) router.replace("/login");
   }, [user, loading, router]);
 
   const loadSliders = async () => {
-    if (sliders.length === 0) setFetching(true);
+    setFetching(true);
     try {
-      const res = await fetch("/api/sliders");
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      const res = await fetch("/api/sliders", { cache: "no-store" });
+      const data = await res.json().catch(() => []);
+      if (!res.ok) {
+        setErrorMsg((data as any)?.error || t("স্লাইডার লোড করা যায়নি", "Failed to load sliders"));
+      } else if (Array.isArray(data)) {
         const sorted = [...data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
         setSliders(sorted);
       }
     } catch (e) {
       console.error(e);
+      setErrorMsg(t("সার্ভার থেকে স্লাইডার লোড করা যায়নি", "Failed to fetch sliders from server"));
     }
     setFetching(false);
   };
@@ -72,60 +75,68 @@ export default function AdminSlidersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     if (!form.image) {
-      alert(t("দয়া করে স্লাইডারের ছবি আপলোড করুন", "Please upload a slide image"));
+      setErrorMsg(t("দয়া করে স্লাইডারের ছবি আপলোড করুন", "Please upload a slide image"));
       return;
     }
     setSaving(true);
 
     if (editId !== null) {
-      // Optimistic update: instantly reflect changes on screen
-      const updated = sliders.map((s) =>
-        s.id === editId ? { ...s, title: form.title, image: form.image } : s
-      );
-      setSliders(updated);
-
-      setShowForm(false);
-      setEditId(null);
-      setForm(emptyForm);
-      setSaveMsg(t("স্লাইডার সফলভাবে আপডেট হয়েছে", "Slide updated successfully"));
-      setTimeout(() => setSaveMsg(""), 3000);
-
-      // Save to server in background
       try {
-        await fetch(`/api/sliders/${editId}`, {
+        const res = await fetch(`/api/sliders/${editId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setErrorMsg(data.error || t("স্লাইড আপডেট ব্যর্থ হয়েছে", "Failed to update slide"));
+          setSaving(false);
+          return;
+        }
+        setSliders((prev) =>
+          prev.map((s) =>
+            s.id === editId ? { ...s, title: form.title, image: form.image } : s
+          )
+        );
+        setShowForm(false);
+        setEditId(null);
+        setForm(emptyForm);
+        setSaveMsg(t("স্লাইডার সফলভাবে আপডেট হয়েছে", "Slide updated successfully"));
+        setTimeout(() => setSaveMsg(""), 3000);
       } catch (err) {
         console.error("Save slide error:", err);
+        setErrorMsg(t("সার্ভার ত্রুটি! আপডেট করা যায়নি", "Server error! Could not update slide"));
       }
     } else {
-      // New slide: create on server then add
       try {
         const res = await fetch("/api/sliders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...form, sort_order: sliders.length + 1 }),
         });
-        const newSlide = await res.json();
-        if (newSlide && newSlide.id) {
-          const updated = [...sliders, newSlide];
-          setSliders(updated);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.id) {
+          setErrorMsg(data.error || t("নতুন স্লাইড যোগ ব্যর্থ হয়েছে", "Failed to add new slide"));
+          setSaving(false);
+          return;
         }
+        setSliders((prev) => [...prev, data]);
+        setShowForm(false);
+        setForm(emptyForm);
+        setSaveMsg(t("নতুন স্লাইডার যুক্ত হয়েছে", "New slide added successfully"));
+        setTimeout(() => setSaveMsg(""), 3000);
       } catch (err) {
         console.error("New slide error:", err);
+        setErrorMsg(t("সার্ভার ত্রুটি! স্লাইড যোগ করা যায়নি", "Server error! Could not add slide"));
       }
-      setShowForm(false);
-      setForm(emptyForm);
-      setSaveMsg(t("নতুন স্লাইডার যুক্ত হয়েছে", "New slide added successfully"));
-      setTimeout(() => setSaveMsg(""), 3000);
     }
     setSaving(false);
   };
 
   const handleEdit = (s: Slider) => {
+    setErrorMsg("");
     setForm({ title: s.title, image: s.image, sort_order: s.sort_order });
     setEditId(s.id);
     setShowForm(true);
@@ -134,17 +145,21 @@ export default function AdminSlidersPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm(t("আপনি কি নিশ্চিতভাবে এই স্লাইডারটি মুছে ফেলতে চান?", "Are you sure you want to delete this slide?"))) return;
-
-    // Optimistic removal: instantly removes from screen
-    const updated = sliders.filter((s) => s.id !== id);
-    setSliders(updated);
-    setSaveMsg(t("স্লাইডারটি মুছে ফেলা হয়েছে", "Slide deleted successfully"));
-    setTimeout(() => setSaveMsg(""), 3000);
+    setErrorMsg("");
 
     try {
-      await fetch(`/api/sliders/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/sliders/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || t("স্লাইড মুছে ফেলা সম্ভব হয়নি", "Failed to delete slide"));
+        return;
+      }
+      setSliders((prev) => prev.filter((s) => s.id !== id));
+      setSaveMsg(t("স্লাইডারটি মুছে ফেলা হয়েছে", "Slide deleted successfully"));
+      setTimeout(() => setSaveMsg(""), 3000);
     } catch (err) {
       console.error("Delete slide error:", err);
+      setErrorMsg(t("সার্ভার ত্রুটি! মুছে ফেলা যায়নি", "Server error! Could not delete slide"));
       await loadSliders();
     }
   };
@@ -225,7 +240,8 @@ export default function AdminSlidersPage() {
             </p>
           </div>
           <button
-            onClick={() => { handleCancel(); setShowForm(!showForm); }}
+            type="button"
+            onClick={() => { setErrorMsg(""); handleCancel(); setShowForm(!showForm); }}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow"
           >
             <FaPlus /> {t("নতুন স্লাইড যোগ করুন", "Add New Slide")}
@@ -233,9 +249,16 @@ export default function AdminSlidersPage() {
         </div>
 
         {saveMsg && (
-          <div className="mb-6 bg-emerald-50 border border-emerald-300 text-[#06874A] px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-all animate-fadeIn">
+          <div role="status" className="mb-6 bg-emerald-50 border border-emerald-300 text-[#06874A] px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-all animate-fadeIn">
             <FaCheck className="shrink-0" />
             <span>{saveMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="mb-6 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -270,7 +293,7 @@ export default function AdminSlidersPage() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  disabled={saving || (!form.image && !editId)}
+                  disabled={saving}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm disabled:opacity-60 shadow"
                 >
                   {saving
@@ -352,12 +375,14 @@ export default function AdminSlidersPage() {
                 {/* Edit / Delete Actions */}
                 <div className="w-full md:w-auto flex items-center gap-2 justify-end">
                   <button
+                    type="button"
                     onClick={() => handleEdit(s)}
                     className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-xs"
                   >
                     <FaEdit size={13} /> {t("এডিট", "Edit")}
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(s.id)}
                     className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-xs"
                   >

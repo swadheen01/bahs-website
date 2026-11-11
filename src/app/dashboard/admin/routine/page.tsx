@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useRouter } from "next/navigation";
@@ -13,15 +13,17 @@ import {
   FaCheckCircle,
   FaCalendarAlt,
   FaClock,
-  FaPlus,
   FaEdit,
   FaTimes,
+  FaExclamationTriangle,
 } from "react-icons/fa";
+import { prepareUploadFile } from "@/lib/clientUpload";
 
 export default function AdminRoutinePage() {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<"files" | "weekly">("files");
 
@@ -42,6 +44,7 @@ export default function AdminRoutinePage() {
 
   const [savingWeekly, setSavingWeekly] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -51,15 +54,20 @@ export default function AdminRoutinePage() {
 
   const loadRoutines = async () => {
     try {
-      const res = await fetch("/api/routines");
-      const data = await res.json();
-      if (data.routineFiles) setRoutineFiles(data.routineFiles);
+      const res = await fetch("/api/routines", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || "রুটিন লোড করা যায়নি");
+        return;
+      }
+      if (Array.isArray(data.routineFiles)) setRoutineFiles(data.routineFiles);
       if (data.weeklyRoutines) {
         setWeeklyRoutines(data.weeklyRoutines);
         setCurrentSlots(data.weeklyRoutines[selectedClass] || []);
       }
     } catch (err) {
       console.error(err);
+      setErrorMsg("সার্ভার থেকে রুটিন লোড করা যায়নি");
     }
   };
 
@@ -68,33 +76,38 @@ export default function AdminRoutinePage() {
   }, [user]);
 
   useEffect(() => {
-    if (weeklyRoutines[selectedClass]) {
-      setCurrentSlots(weeklyRoutines[selectedClass]);
-    }
+    setCurrentSlots(weeklyRoutines[selectedClass] || []);
   }, [selectedClass, weeklyRoutines]);
 
   // Handle Routine File Upload or Edit
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     const isEditing = editFileId !== null;
-    if (!fileTitle || (!selectedFile && !existingFileUrl)) {
-      alert("শিরোনাম এবং ফাইল উভয়ই আবশ্যক");
+    if (!fileTitle.trim() || (!selectedFile && !existingFileUrl)) {
+      setErrorMsg("শিরোনাম এবং ফাইল উভয়ই আবশ্যক");
       return;
     }
     setUploading(true);
     try {
       let fileUrl = existingFileUrl;
       if (selectedFile) {
+        const prepared = await prepareUploadFile(selectedFile);
+        if (prepared.error || !prepared.file) {
+          setErrorMsg(prepared.error || "ফাইল প্রক্রিয়াকরণ ব্যর্থ হয়েছে");
+          setUploading(false);
+          return;
+        }
         // Step 1: Upload file to /api/upload
         const formData = new FormData();
-        formData.append("file", selectedFile);
+        formData.append("file", prepared.file);
         const upRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
-        const upData = await upRes.json();
+        const upData = await upRes.json().catch(() => ({}));
         if (!upRes.ok || !upData.url) {
-          alert("ফাইল সার্ভারে আপলোড হতে ব্যর্থ হয়েছে");
+          setErrorMsg(upData.error || "ফাইল সার্ভারে আপলোড হতে ব্যর্থ হয়েছে");
           setUploading(false);
           return;
         }
@@ -114,6 +127,7 @@ export default function AdminRoutinePage() {
           fileUrl,
         }),
       });
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccessMsg(isEditing ? "ক্লাস রুটিন ফাইল সফলভাবে আপডেট করা হয়েছে!" : "ক্লাস রুটিন ফাইল সফলভাবে আপলোড ও যুক্ত করা হয়েছে!");
@@ -121,24 +135,27 @@ export default function AdminRoutinePage() {
         setSelectedFile(null);
         setEditFileId(null);
         setExistingFileUrl("");
-        loadRoutines();
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        await loadRoutines();
         setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert("রুটিন সংরক্ষণ ব্যর্থ হয়েছে");
+        setErrorMsg(data.error || "রুটিন সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি দেখা দিয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setUploading(false);
   };
 
   const handleEditFile = (file: any) => {
+    setErrorMsg("");
     setEditFileId(file.id);
     setFileTitle(file.title || "");
     setFileClass(file.class || "all");
     setFileYear(file.year || "2026");
     setExistingFileUrl(file.fileUrl || "");
     setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
@@ -147,20 +164,25 @@ export default function AdminRoutinePage() {
     setFileTitle("");
     setExistingFileUrl("");
     setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   // Delete Routine File
   const handleDeleteFile = async (id: string, title: string) => {
     if (!confirm(`আপনি কি "${title}" মুছে ফেলতে চান?`)) return;
+    setErrorMsg("");
     try {
-      const res = await fetch(`/api/routines?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/routines?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setRoutineFiles((prev) => prev.filter((f) => f.id !== id));
+        setSuccessMsg("রুটিন ফাইলটি মুছে ফেলা হয়েছে!");
+        setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert("মুছে ফেলা সম্ভব হয়নি");
+        setErrorMsg(data.error || "মুছে ফেলা সম্ভব হয়নি");
       }
-    } catch (err) {
-      alert("ত্রুটি হয়েছে");
+    } catch {
+      setErrorMsg("ত্রুটি হয়েছে");
     }
   };
 
@@ -174,6 +196,7 @@ export default function AdminRoutinePage() {
   // Save Weekly Routine
   const handleSaveWeekly = async () => {
     setSavingWeekly(true);
+    setErrorMsg("");
     try {
       const res = await fetch("/api/routines", {
         method: "POST",
@@ -184,15 +207,16 @@ export default function AdminRoutinePage() {
           routine: currentSlots,
         }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccessMsg(`${selectedClass}ম শ্রেণির সাপ্তাহিক রুটিন সফলভাবে সংরক্ষিত হয়েছে!`);
         setWeeklyRoutines((prev: any) => ({ ...prev, [selectedClass]: currentSlots }));
         setTimeout(() => setSuccessMsg(""), 3500);
       } else {
-        alert("সংরক্ষণ ব্যর্থ হয়েছে");
+        setErrorMsg(data.error || "সংরক্ষণ ব্যর্থ হয়েছে");
       }
-    } catch (err) {
-      alert("ত্রুটি দেখা দিয়েছে");
+    } catch {
+      setErrorMsg("সার্ভার সংযোগে ত্রুটি দেখা দিয়েছে");
     }
     setSavingWeekly(false);
   };
@@ -226,15 +250,23 @@ export default function AdminRoutinePage() {
       <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
         {/* Success Alert */}
         {successMsg && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
+          <div role="status" className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-2 font-bold text-sm shadow-sm animate-in fade-in">
             <FaCheckCircle className="text-emerald-600" />
             <span>{successMsg}</span>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div role="alert" className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-2 font-bold text-sm shadow-sm">
+            <FaExclamationTriangle className="text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Tab Buttons */}
         <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-200 flex gap-2">
           <button
+            type="button"
             onClick={() => setActiveTab("files")}
             className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
               activeTab === "files" ? "bg-[#051939] text-white shadow" : "text-gray-600 hover:bg-gray-100"
@@ -245,6 +277,7 @@ export default function AdminRoutinePage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab("weekly")}
             className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
               activeTab === "weekly" ? "bg-[#06874A] text-white shadow" : "text-gray-600 hover:bg-gray-100"
@@ -315,6 +348,7 @@ export default function AdminRoutinePage() {
                       PDF বা ছবির ফাইল {editFileId ? "(ঐচ্ছিক, পরিবর্তন করতে চাইলে)" : "নির্বাচন করুন *"}
                     </label>
                     <input
+                      ref={fileInputRef}
                       type="file"
                       required={!editFileId}
                       accept=".pdf,image/*"
@@ -388,6 +422,7 @@ export default function AdminRoutinePage() {
                           ডাউনলোড
                         </a>
                         <button
+                          type="button"
                           onClick={() => handleEditFile(file)}
                           className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition cursor-pointer"
                           title="এডিট করুন"
@@ -395,6 +430,7 @@ export default function AdminRoutinePage() {
                           <FaEdit size={13} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteFile(file.id, file.title)}
                           className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition cursor-pointer"
                           title="মুছে ফেলুন"
@@ -426,6 +462,7 @@ export default function AdminRoutinePage() {
                 {["6", "7", "8", "9", "10"].map((num) => (
                   <button
                     key={num}
+                    type="button"
                     onClick={() => setSelectedClass(num)}
                     className={`px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer ${
                       selectedClass === num
