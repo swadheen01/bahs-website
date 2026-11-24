@@ -1,14 +1,14 @@
 import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
 import { teachersDB } from "@/lib/db";
+import { getTeacherRow } from "@/lib/publicData";
 
 export const dynamic = "force-dynamic";
 
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 async function getSession() {
   return getIronSession<IronSessionData>(await cookies(), sessionOptions);
@@ -17,10 +17,7 @@ async function getSession() {
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { data, error } = await supabase.from("teachers").select("*").eq("id", id).maybeSingle();
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    const data = await getTeacherRow(id);
     if (!data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

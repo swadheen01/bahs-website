@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { getTeacherRow, getTeachers } from "@/lib/publicData";
 import TeacherDetailsClient from "./TeacherDetailsClient";
 
-export const dynamic = "force-dynamic";
+// Every existing teacher profile is prerendered at build time and served from cache.
+// A teacher added after the last deploy is rendered on demand until the next deploy.
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const teachers = await getTeachers();
+  return teachers.filter((t) => t && t.id).map((t) => ({ id: String(t.id) }));
+}
 
 export default async function TeacherDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { data: teacher } = await supabase.from('teachers').select('*').eq('id', id).single();
+  const teacher = await getTeacherRow(id);
 
   if (!teacher) {
     return (
@@ -19,4 +26,3 @@ export default async function TeacherDetailsPage({ params }: { params: Promise<{
 
   return <TeacherDetailsClient teacher={teacher} />;
 }
-

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo } from "react";
+import { useFreshData } from "@/lib/useFreshData";
 import { useRouter } from "next/navigation";
 import { FaUserCircle, FaSearch, FaTimes, FaPhoneAlt } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -19,7 +20,8 @@ interface Teacher {
   category: string;
 }
 
-export default function TeacherListClient({ teachers }: { teachers: Teacher[] }) {
+export default function TeacherListClient({ teachers: initialTeachers }: { teachers: Teacher[] }) {
+  const teachers = useFreshData<Teacher[]>("/api/teachers", initialTeachers, Array.isArray);
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [loadingId, setLoadingId] = useState<number | null>(null);

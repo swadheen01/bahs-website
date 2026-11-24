@@ -21,7 +21,8 @@ import {
   FaTimes,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import * as XLSX from "xlsx";
+// SheetJS (~400KB) is loaded only when an admin imports/exports a spreadsheet.
+const loadXLSX = () => import("xlsx");
 
 export default function AdminResultsPage() {
   const { user, loading } = useAuth();
@@ -195,8 +196,9 @@ export default function AdminResultsPage() {
     setCsvFileName(file.name);
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
+        const XLSX = await loadXLSX();
         const buffer = event.target?.result as ArrayBuffer;
         const workbook = XLSX.read(buffer, { type: "array" });
         const firstSheetName = workbook.SheetNames[0];
@@ -312,8 +314,9 @@ export default function AdminResultsPage() {
   };
 
   // Download Sample Excel (.xlsx)
-  const handleDownloadSampleExcel = () => {
+  const handleDownloadSampleExcel = async () => {
     try {
+      const XLSX = await loadXLSX();
       const sampleData = [
         {
           roll: 1,

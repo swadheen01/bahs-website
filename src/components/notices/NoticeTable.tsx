@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useFreshData } from "@/lib/useFreshData";
 import Link from "next/link";
 import { FaFilePdf, FaDownload, FaEye, FaTimes, FaSearch, FaFileAlt, FaBell, FaExpand, FaCompress } from "react-icons/fa";
 import { safeDownloadFile } from "@/lib/downloadFile";
@@ -19,7 +20,8 @@ interface NoticeTableProps {
   notices: Notice[];
 }
 
-export default function NoticeTable({ notices }: NoticeTableProps) {
+export default function NoticeTable({ notices: initialNotices }: NoticeTableProps) {
+  const notices = useFreshData<Notice[]>("/api/notices", initialNotices, Array.isArray);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [previewNotice, setPreviewNotice] = useState<Notice | null>(null);

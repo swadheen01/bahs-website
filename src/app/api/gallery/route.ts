@@ -1,13 +1,15 @@
+import { getGalleryItems } from "@/lib/publicData";
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
 export const dynamic = "force-dynamic";
 
 const jsonPath = path.join(process.cwd(), "src", "data", "gallery.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 function generateUniqueGalleryId(existingIds: Set<number>): number {
   let candidate = (Date.now() % 2000000000) + 1000000;
@@ -70,18 +72,13 @@ async function fetchGalleryFromSupabase() {
 }
 
 export async function GET() {
-  try {
-    const items = await fetchGalleryFromSupabase();
-    return NextResponse.json(items, { headers: PUBLIC_CACHE_HEADER });
-  } catch (e) {
-    console.error("Supabase gallery fetch error, falling back to local JSON:", e);
-  }
-
-  const local = await readLocalGallery();
-  return NextResponse.json(local, { headers: PUBLIC_CACHE_HEADER });
+  const items = await getGalleryItems();
+  return NextResponse.json(items, { headers: PUBLIC_CACHE_HEADER });
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const image = String(body.image || "").trim();

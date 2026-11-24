@@ -23,7 +23,7 @@ export default function StaffPage() {
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/staff", { cache: "no-store" })
+    fetch("/api/staff")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {

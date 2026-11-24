@@ -1,30 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaFilePdf, FaBell, FaArrowRight, FaDownload } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
 import { safeDownloadFile } from "@/lib/downloadFile";
 
-export default function NoticeBoard() {
+export default function NoticeBoard({ notices }: { notices?: any[] }) {
   const { t } = useLanguage();
-  const [noticeList, setNoticeList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    try {
-      localStorage.removeItem("bahs_cached_notices");
-    } catch (e) {}
-
-    fetch("/api/notices", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setNoticeList(data);
-        }
-      })
-      .catch((e) => console.error("NoticeBoard fetch error:", e))
-      .finally(() => setLoading(false));
-  }, []);
+  // Notices are prerendered and refreshed by the parent (one /api/home request).
+  const noticeList: any[] = Array.isArray(notices) ? notices : [];
+  const loading = !Array.isArray(notices);
 
   const handleDownload = (e: React.MouseEvent, notice: any) => {
     e.preventDefault();

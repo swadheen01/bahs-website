@@ -1,6 +1,7 @@
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
@@ -41,6 +42,8 @@ async function writeLocalGallery(data: any[]) {
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { id } = await params;
     const numId = Number(id);
@@ -83,6 +86,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { id } = await params;
     const numId = Number(id);

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useFreshData } from "@/lib/useFreshData";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -80,7 +81,8 @@ function calculateExperience(joiningDateStr?: string | null, manualExp?: string 
   return null;
 }
 
-export default function TeacherDetailsClient({ teacher }: { teacher: any }) {
+export default function TeacherDetailsClient({ teacher: initialTeacher }: { teacher: any }) {
+  const teacher = useFreshData<any>(`/api/teachers/${initialTeacher.id}`, initialTeacher, (d) => Boolean(d && d.id));
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const [imageError, setImageError] = useState(false);

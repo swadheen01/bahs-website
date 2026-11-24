@@ -1,11 +1,11 @@
-import { alumniDB } from "@/lib/db";
+import { getAlumni } from "@/lib/publicData";
 import AlumniListClient from "./AlumniListClient";
 
-export const dynamic = "force-dynamic";
+// Prerendered at build; the list refreshes from /api/alumni in the browser.
+export const dynamic = "force-static";
 
 export default async function AlumniPage() {
-  const alumni = await alumniDB.getAll();
+  const alumni = await getAlumni();
 
   return <AlumniListClient alumni={alumni} />;
 }
-

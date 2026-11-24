@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const COUNTER_ID = 88888888;
 const localFilePath = path.join(process.cwd(), "src", "data", "testimonial-counter.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "private, no-store" };
 
 async function getLocalCount(): Promise<number> {
   try {

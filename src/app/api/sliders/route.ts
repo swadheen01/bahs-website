@@ -1,13 +1,15 @@
+import { getSliders } from "@/lib/publicData";
+import { requireAdmin } from "@/lib/serverAuth";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
 export const dynamic = "force-dynamic";
 
 const jsonPath = path.join(process.cwd(), "src", "data", "sliders.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 function generateUniqueSliderId(existingIds: Set<number>): number {
   let candidate = (Date.now() % 2000000000) + 1000000;
@@ -55,19 +57,13 @@ async function fetchSlidersFromSupabase() {
 }
 
 export async function GET() {
-  try {
-    const sliders = await fetchSlidersFromSupabase();
-    return NextResponse.json(sliders, { headers: PUBLIC_CACHE_HEADER });
-  } catch (e) {
-    console.error("Supabase sliders fetch error, falling back to local JSON:", e);
-  }
-
-  const local = await readLocalSliders();
-  local.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-  return NextResponse.json(local, { headers: PUBLIC_CACHE_HEADER });
+  const sliders = await getSliders();
+  return NextResponse.json(sliders, { headers: PUBLIC_CACHE_HEADER });
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const image = String(body.image || "").trim();
@@ -132,6 +128,8 @@ export async function POST(req: Request) {
 
 // Bulk update / Reorder sliders
 export async function PUT(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const items: any[] = Array.isArray(body) ? body : body.sliders;

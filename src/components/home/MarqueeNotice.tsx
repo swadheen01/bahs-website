@@ -1,21 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 
-export default function MarqueeNotice() {
+export default function MarqueeNotice({ notices = [] }: { notices?: any[] }) {
   const { t } = useLanguage();
-  const [notices, setNotices] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch("/api/notices", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setNotices(data);
-        }
-      })
-      .catch((e) => console.error("Marquee fetch error:", e));
-  }, []);
 
   const latestNotices =
     notices.length > 0

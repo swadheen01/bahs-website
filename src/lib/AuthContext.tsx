@@ -72,17 +72,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (event === "SIGNED_IN" && session?.user) {
         const meRes = await fetch("/api/auth/me", { cache: "no-store" });
         if (!meRes.ok) {
-          const email = session.user.email;
-          const name =
-            session.user.user_metadata?.full_name ||
-            session.user.user_metadata?.name ||
-            email?.split("@")[0] ||
-            "ব্যবহারকারী";
-
+          // The server verifies the Supabase access token and reads the email from it.
           const verifyRes = await fetch("/api/auth/google/verify", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, name }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
           });
 
           const data = await verifyRes.json();

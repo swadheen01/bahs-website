@@ -20,7 +20,7 @@ export default function ManagingCommitteePage() {
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/committee", { cache: "no-store" })
+    fetch("/api/committee")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.members)) {

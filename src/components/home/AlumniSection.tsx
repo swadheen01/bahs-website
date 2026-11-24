@@ -15,37 +15,22 @@ interface Alumni {
   photo?: string;
 }
 
-export default function AlumniSection() {
-  const [alumni, setAlumni] = useState<Alumni[]>((initialAlumni as Alumni[]) || []);
-  const [showSection, setShowSection] = useState<boolean>(schoolInfo.showAlumniSection ?? true);
+export default function AlumniSection({
+  alumni: propAlumni,
+  showSection: propShowSection,
+}: {
+  alumni?: Alumni[];
+  showSection?: boolean;
+}) {
+  // Data comes from the parent (prerendered + one /api/home refresh).
+  const alumni: Alumni[] = Array.isArray(propAlumni) ? propAlumni : (initialAlumni as Alumni[]) || [];
+  const showSection: boolean = propShowSection ?? schoolInfo.showAlumniSection ?? true;
   const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    try {
-      sessionStorage.removeItem("bahs_cached_alumni");
-      sessionStorage.removeItem("bahs_show_alumni");
-    } catch (e) {}
-
-    fetch("/api/school-info", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && typeof data.showAlumniSection !== "undefined") {
-          setShowSection(data.showAlumniSection);
-        }
-      })
-      .catch(() => {});
-
-    fetch("/api/alumni", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAlumni(data);
-          setImgErrors({});
-        }
-      })
-      .catch(() => {});
-  }, []);
+    setImgErrors({});
+  }, [propAlumni]);
 
   if (!showSection || !alumni || alumni.length === 0) return null;
 

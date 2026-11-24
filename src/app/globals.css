@@ -1,5 +1,13 @@
-@import url('https://fonts.maateen.me/kalpurush/font.css');
 @import "tailwindcss";
+
+/* Self-hosted Kalpurush (was a render-blocking @import from a third-party server). */
+@font-face {
+  font-family: 'Kalpurush';
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('/fonts/Kalpurush-v0.258.woff2') format('woff2');
+}
 
 :root {
   --primary: #051939;
@@ -68,6 +76,19 @@ html {
 /* Splash Screen instant hide if already viewed in session */
 html.splash-hidden #bahs-splash-screen {
   display: none !important;
+}
+
+/* CSS-only failsafe: if JavaScript is slow or fails, the splash still disappears after 6s
+   instead of covering the website forever. Normally JS removes it after ~2s. */
+#bahs-splash-screen {
+  animation: bahs-splash-failsafe 0.4s ease-out 6s forwards;
+}
+@keyframes bahs-splash-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 /* Splash Screen Progress Bar */

@@ -5,7 +5,7 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -161,13 +161,13 @@ export async function GET() {
     const { headmasters, teachers } = await fetchFromSupabase();
     return NextResponse.json(
       { headmasters, teachers },
-      { headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" } }
+      { headers: { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" } }
     );
   } catch (err) {
     console.error("Supabase former-staff fetch error, falling back to local JSON:", err);
     const fallback = await getLocalData();
     return NextResponse.json(fallback, {
-      headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" },
+      headers: { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" },
     });
   }
 }

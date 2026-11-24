@@ -4,10 +4,11 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, type IronSessionData } from "@/lib/auth";
 import { noticesDB } from "@/lib/db";
+import { getNotices } from "@/lib/publicData";
 
 export const dynamic = "force-dynamic";
 
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 async function getSession() {
   return getIronSession<IronSessionData>(await cookies(), sessionOptions);
@@ -15,7 +16,7 @@ async function getSession() {
 
 export async function GET() {
   try {
-    const notices = await noticesDB.getAll();
+    const notices = await getNotices();
     return NextResponse.json(notices, { headers: PUBLIC_CACHE_HEADER });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "নোটিশ আনতে ব্যর্থ হয়েছে" }, { status: 500 });

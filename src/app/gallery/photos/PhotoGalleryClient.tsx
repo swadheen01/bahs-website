@@ -11,7 +11,7 @@ export default function PhotoGalleryClient({ photos: initialPhotos }: { photos: 
   const [imageErrors, setImageErrors] = useState<Record<string | number, boolean>>({});
 
   useEffect(() => {
-    fetch("/api/gallery", { cache: "no-store" })
+    fetch("/api/gallery")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {

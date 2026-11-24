@@ -22,19 +22,14 @@ export default function HeroSlider({ initialSlides: propSlides }: { initialSlide
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const { language } = useLanguage();
 
+  // Slides come from the parent (prerendered + one refresh via /api/home); no separate request here.
   useEffect(() => {
-    fetch("/api/sliders", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data)) {
-          const sorted = [...data].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-          setSlides(sorted);
-          setImageErrors({});
-          setCurrentSlide((prev) => (prev < sorted.length ? prev : 0));
-        }
-      })
-      .catch((e) => console.error("Slider fetch error:", e));
-  }, []);
+    if (!Array.isArray(propSlides)) return;
+    const sorted = [...propSlides].sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+    setSlides(sorted);
+    setImageErrors({});
+    setCurrentSlide((prev) => (prev < sorted.length ? prev : 0));
+  }, [propSlides]);
 
   // Auto slide timer (paused when lightbox modal is open)
   useEffect(() => {

@@ -232,7 +232,7 @@ export default function AdminGalleryPage() {
                   <img
                     src={p.image}
                     alt={p.title}
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/gallery/hero-campus.jpg"; }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/images/gallery/gallery-1.jpg"; }}
                     className="w-full h-full object-cover"
                   />
                 </div>

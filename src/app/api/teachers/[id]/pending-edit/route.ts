@@ -21,8 +21,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!Number.isInteger(teacherId) || teacherId <= 0) {
       return NextResponse.json({ error: "Invalid teacher id" }, { status: 400 });
     }
+    // By design any teacher may *request* a change to any teacher profile; nothing is applied
+    // until an admin approves it (see /api/teachers/[id]/approve).
     const body = await req.json();
-    await pendingTeacherEditsDB.submit(teacherId, body, session.user.name);
+    // Only accept known profile fields (approve() applies only these anyway).
+    const ALLOWED = [
+      "nameEnglish", "photo", "mpoIndex", "joiningDate", "birthDate", "email", "contactNo",
+      "qualification", "experience", "mainSubject", "courses", "presentAddress", "permanentAddress",
+    ];
+    const cleanEdit: Record<string, unknown> = {};
+    for (const key of ALLOWED) {
+      if (body && body[key] !== undefined) cleanEdit[key] = body[key];
+    }
+    await pendingTeacherEditsDB.submit(teacherId, cleanEdit, session.user.name);
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "আবেদন জমা দিতে ব্যর্থ হয়েছে" }, { status: 500 });

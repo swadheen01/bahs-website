@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useFreshData } from "@/lib/useFreshData";
 import Image from "next/image";
 import { FaGraduationCap, FaAward } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -14,7 +15,8 @@ interface Alumni {
   year?: string | null;
 }
 
-export default function AlumniListClient({ alumni }: { alumni: Alumni[] }) {
+export default function AlumniListClient({ alumni: initialAlumni }: { alumni: Alumni[] }) {
+  const alumni = useFreshData<Alumni[]>("/api/alumni", initialAlumni, Array.isArray);
   const { t, language } = useLanguage();
   const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
 

@@ -54,13 +54,22 @@ export default function ResetPasswordPage() {
         throw updateError;
       }
 
-      // 2. Also update in local usersDB if email is available
-      if (userEmail) {
-        await fetch("/api/auth/reset-password", {
+      // 2. Also update the website account. The server verifies the recovery session token
+      //    and takes the email from it (never from the request body).
+      const { data: { session: recoverySession } } = await supabase.auth.getSession();
+      if (recoverySession?.access_token) {
+        const res = await fetch("/api/auth/reset-password", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userEmail, password }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${recoverySession.access_token}`,
+          },
+          body: JSON.stringify({ password }),
         });
+        if (!res.ok && res.status !== 404) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || t("পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে।", "Failed to update password."));
+        }
       }
 
       setSuccess(true);

@@ -15,10 +15,9 @@ CREATE TABLE users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
--- Insert Default Admin User (Password: bahs@admin2025)
--- Hash generated via bcrypt (cost 10)
-INSERT INTO users (name, username, password_hash, role) 
-VALUES ('Super Admin', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin');
+-- No default admin is inserted here (a published default password is a backdoor).
+-- Create the first admin by registering normally, then run in the SQL editor:
+--   UPDATE users SET role = 'admin' WHERE username = '<your-username>';
 
 -- 2. Notices Table
 CREATE TABLE notices (

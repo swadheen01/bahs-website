@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabaseAdmin as supabase } from "./supabaseServer";
 import path from "path";
 
 // ─── Notices ──────────────────────────────────────────────────────────────
@@ -98,8 +98,10 @@ export const noticesDB = {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.type !== undefined) updateData.type = data.type;
-    if (data.fileUrl !== undefined) updateData.file_url = data.fileUrl;
+    // `/api/notices/<id>/file` is only a display alias for an inline attachment: keep the stored file.
+    if (data.fileUrl !== undefined && data.fileUrl !== `/api/notices/${id}/file`) updateData.file_url = data.fileUrl;
     if (data.isNew !== undefined) updateData.is_new = data.isNew;
+    if (Object.keys(updateData).length === 0) return;
     const { error } = await supabase.from('notices').update(updateData).eq('id', id);
     if (error) throw error;
   },

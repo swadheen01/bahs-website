@@ -8,10 +8,12 @@ import NoticeBoard from "@/components/home/NoticeBoard";
 import StatsSection from "@/components/home/StatsSection";
 import TeachersSection from "@/components/home/TeachersSection";
 import AlumniSection from "@/components/home/AlumniSection";
-import schoolInfo from "@/data/school-info.json";
+import SplashScreen from "@/components/home/SplashScreen";
 import Link from "next/link";
 import { FaExternalLinkAlt, FaGraduationCap, FaBookOpen, FaAward, FaStar, FaFacebook } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useFreshData } from "@/lib/useFreshData";
+import type { HomeData } from "@/lib/publicData";
 
 const classStyles: Record<number, { gradient: string; shadow: string; accent: string }> = {
   6: {
@@ -41,24 +43,18 @@ const classStyles: Record<number, { gradient: string; shadow: string; accent: st
   },
 };
 
-export default function HomeClient({ initialSliders }: { initialSliders: any[] }) {
+export default function HomeClient({ initialData }: { initialData: HomeData }) {
   const { t, language } = useLanguage();
-  const [info, setInfo] = useState<any>(schoolInfo);
+  // ONE request for all homepage data (previously 8 separate API calls per visit).
+  const home = useFreshData<HomeData>("/api/home", initialData, (d) => Boolean(d && Array.isArray(d.sliders)));
+  const info = home.schoolInfo;
   const [hmImgErr, setHmImgErr] = useState(false);
   const [presImgErr, setPresImgErr] = useState(false);
 
   useEffect(() => {
-    fetch("/api/school-info", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && !data.error) {
-          setInfo((prev: any) => ({ ...prev, ...data }));
-          setHmImgErr(false);
-          setPresImgErr(false);
-        }
-      })
-      .catch(() => {});
-  }, []);
+    setHmImgErr(false);
+    setPresImgErr(false);
+  }, [home]);
 
   const hmRawPhoto = info?.headmasterMessage?.photo || "/images/teachers/headmaster.jpg";
   const hmPhotoSrc = hmImgErr ? "/images/teachers/headmaster.jpg" : hmRawPhoto;
@@ -70,17 +66,20 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
 
   return (
     <div className={language === "bn" ? "font-bengali" : "font-sans"}>
+      {/* Welcome splash (homepage only, once per browser session) */}
+      <SplashScreen />
+
       {/* Hero Slider */}
-      <HeroSlider initialSlides={initialSliders} />
+      <HeroSlider initialSlides={home.sliders} />
 
       {/* Scrolling Notice Bar */}
-      <MarqueeNotice />
+      <MarqueeNotice notices={home.notices} />
 
       {/* Quick Links */}
       <QuickLinks />
 
       {/* Stats */}
-      <StatsSection />
+      <StatsSection stats={info?.stats} />
 
       {/* President & Headmaster Messages + Notice Board */}
       <section className="pt-12 pb-6 bg-gradient-to-b from-gray-50 to-gray-100/60">
@@ -201,7 +200,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
             {/* Right Column (1 Col): Notice Board, Facebook & Official Links (Pulled right up snugly!) */}
             <div className="space-y-6">
               {/* Notice Board */}
-              <NoticeBoard />
+              <NoticeBoard notices={home.notices} />
 
               {/* Follow Us on Facebook (ফেসবুকে আমরা) */}
               <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-blue-100 glossy-shine transition-all duration-300 hover:shadow-xl group">
@@ -278,7 +277,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
       </section>
 
       {/* Teachers Section */}
-      <TeachersSection />
+      <TeachersSection teachers={home.teachers as any} />
 
       {/* Colorful, Dedicated Students' Corner Section (Moved cleanly down with distinct vibrant glass styling!) */}
       <section className="py-16 bg-gradient-to-r from-[#051939] via-[#09224d] to-[#051939] text-white relative overflow-hidden">
@@ -346,7 +345,7 @@ export default function HomeClient({ initialSliders }: { initialSliders: any[] }
       </section>
 
       {/* Alumni Section */}
-      <AlumniSection />
+      <AlumniSection alumni={home.alumni as any} showSection={info?.showAlumniSection ?? true} />
     </div>
   );
 }

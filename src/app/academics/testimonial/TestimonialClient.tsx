@@ -20,7 +20,9 @@ import {
   FaAward,
   FaSchool,
 } from "react-icons/fa";
-import { toJpeg } from "html-to-image";
+// Loaded only when the user clicks download (keeps ~40KB out of the initial page bundle).
+const toJpeg = async (...args: Parameters<typeof import("html-to-image").toJpeg>) =>
+  (await import("html-to-image")).toJpeg(...args);
 import { useLanguage } from "@/lib/LanguageContext";
 
 export type TestimonialType = "board" | "general";

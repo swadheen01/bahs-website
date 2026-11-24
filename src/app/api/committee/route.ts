@@ -1,13 +1,14 @@
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 const committeeFilePath = path.join(process.cwd(), "src", "data", "committee.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 const LEGACY_COMMITTEE_IDS: Record<string, number> = {
   "mc-1": 1820000001,
@@ -129,6 +130,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const todayISO = new Date().toISOString().split("T")[0];
@@ -273,6 +276,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");

@@ -1,13 +1,14 @@
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 const resultsFilePath = path.join(process.cwd(), "src", "data", "results.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "private, no-store" };
 
 const LEGACY_RESULT_IDS: Record<string, number> = {
   "res-6-1-2026": 1840000001,
@@ -95,6 +96,13 @@ export async function GET(req: Request) {
     const exam = searchParams.get("exam");
     const year = searchParams.get("year");
 
+    // Public visitors may only look up a specific student (class + roll).
+    // Listing every student's results requires an admin session.
+    if (!cls || !roll) {
+      const denied = await requireAdmin();
+      if (denied) return denied;
+    }
+
     let results: any[] = [];
     try {
       results = await fetchResultsFromSupabase();
@@ -123,6 +131,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const todayISO = new Date().toISOString().split("T")[0];
@@ -212,6 +222,8 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const id = body.id;
@@ -274,6 +286,8 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");

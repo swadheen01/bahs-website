@@ -1,14 +1,15 @@
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 const routinesFilePath = path.join(process.cwd(), "src", "data", "routines.json");
 const WEEKLY_ROUTINE_ID = 1830000001;
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 function resolveRoutineNumericId(rawId: unknown): number | null {
   const cleaned = String(rawId || "").trim().replace(/^rf-/, "");
@@ -137,6 +138,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const localData = await getRoutinesData();
@@ -328,6 +331,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");

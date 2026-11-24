@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import schoolInfoData from "@/data/school-info.json";
 import { FaSchool, FaUserGraduate, FaChalkboardTeacher, FaAward, FaLayerGroup } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -19,20 +18,10 @@ const gradients = [
   "from-[#965D03] via-[#b5730a] to-[#734500]",
 ];
 
-export default function StatsSection() {
+export default function StatsSection({ stats: propStats }: { stats?: any[] }) {
   const { language } = useLanguage();
-  const [stats, setStats] = useState(schoolInfoData.stats);
-
-  useEffect(() => {
-    fetch("/api/school-info", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && data.stats) {
-          setStats(data.stats);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // Stats come from the parent (prerendered + one /api/home refresh).
+  const stats: any[] = Array.isArray(propStats) ? propStats : schoolInfoData.stats;
 
   return (
     <section className="py-10 bg-gradient-to-r from-gray-100 via-white to-gray-100 border-b border-gray-200">

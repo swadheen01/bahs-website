@@ -1,49 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
-import { cookies } from "next/headers";
-import { sessionOptions, type IronSessionData } from "@/lib/auth";
 import { usersDB } from "@/lib/db";
+import { getSession, getVerifiedSupabaseUser } from "@/lib/serverAuth";
 
+/**
+ * Logs in a user who signed in with Google via Supabase Auth.
+ * Requires `Authorization: Bearer <supabase access token>`; the email comes from the verified token.
+ */
 export async function POST(req: NextRequest) {
   try {
-    const { email, name } = await req.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    const authUser = await getVerifiedSupabaseUser(req);
+    if (!authUser?.email) {
+      return NextResponse.json({ error: "Google সেশন যাচাই করা যায়নি" }, { status: 401 });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = authUser.email.trim().toLowerCase();
     const existingUser = await usersDB.findByUsername(normalizedEmail);
 
     if (existingUser && existingUser.role) {
-      // User exists with an established role - log them in directly
-      const session = await getIronSession<IronSessionData>(await cookies(), sessionOptions);
+      const session = await getSession();
       session.user = {
         id: existingUser.id,
         name: existingUser.name,
         username: existingUser.username,
         role: existingUser.role,
-        teacherId: existingUser.teacherId,
-        class: existingUser.class,
+        teacherId: existingUser.teacherId ?? undefined,
+        class: existingUser.class ?? undefined,
       };
       await session.save();
 
-      return NextResponse.json({
-        exists: true,
-        user: session.user,
-      });
+      return NextResponse.json({ exists: true, user: session.user });
     }
 
-    // First time user or user without a role
+    const meta: any = authUser.user_metadata || {};
     return NextResponse.json({
       exists: false,
       isFirstTime: true,
       email: normalizedEmail,
-      name: name || normalizedEmail.split("@")[0],
+      name: meta.full_name || meta.name || normalizedEmail.split("@")[0],
     });
   } catch (err: any) {
     console.error("Google verify error:", err);
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }
 }
-

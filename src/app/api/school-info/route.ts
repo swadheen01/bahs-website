@@ -1,41 +1,19 @@
+import { getSchoolInfo } from "@/lib/publicData";
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 const infoPath = path.join(process.cwd(), "src", "data", "school-info.json");
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 export async function GET() {
   try {
-    let data: any = {};
-    try {
-      const content = await readFile(infoPath, "utf-8");
-      data = JSON.parse(content);
-    } catch {}
-
-    try {
-      const { data: dbData, error } = await supabase
-        .from("notices")
-        .select("*")
-        .eq("type", "school_info")
-        .order("id", { ascending: false })
-        .limit(1);
-
-      if (error) throw error;
-
-      if (dbData && dbData.length > 0) {
-        const payload = dbData[0].file_url || dbData[0].added_by || "{}";
-        const extra = JSON.parse(payload);
-        data = { ...data, ...extra };
-      }
-    } catch (e) {
-      console.error("Supabase school-info fetch error:", e);
-    }
-
+    const data = await getSchoolInfo();
     return NextResponse.json(data, { headers: PUBLIC_CACHE_HEADER });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -43,6 +21,8 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     let data: any = {};

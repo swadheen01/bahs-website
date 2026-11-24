@@ -1,8 +1,9 @@
+import { requireAdmin } from "@/lib/serverAuth";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +135,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, ...data },
-      { headers: { "Cache-Control": "no-cache, max-age=0, must-revalidate" } }
+      { headers: { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" } }
     );
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -142,6 +143,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const body = await req.json();
     const data = await getHolidaysData();
@@ -357,6 +360,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");

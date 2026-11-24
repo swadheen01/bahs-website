@@ -7,7 +7,7 @@ import { staffDB } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-const PUBLIC_CACHE_HEADER = { "Cache-Control": "no-cache, max-age=0, must-revalidate" };
+const PUBLIC_CACHE_HEADER = { "Cache-Control": "public, max-age=60, stale-while-revalidate=300" };
 
 async function getSession() {
   return getIronSession<IronSessionData>(await cookies(), sessionOptions);

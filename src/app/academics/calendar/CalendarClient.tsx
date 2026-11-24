@@ -123,7 +123,7 @@ export default function CalendarClient() {
   );
 
   useEffect(() => {
-    fetch("/api/holidays", { cache: "no-store" })
+    fetch("/api/holidays")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.holidays) && data.holidays.length > 0) {

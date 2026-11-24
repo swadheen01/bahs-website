@@ -20,6 +20,7 @@ export default function AuthCallbackPage() {
   const [selectedClass, setSelectedClass] = useState("class-10");
   const [submitting, setSubmitting] = useState(false);
   const processedRef = useRef(false);
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
     if (processedRef.current) return;
@@ -60,7 +61,7 @@ export default function AuthCallbackPage() {
 
         // 4. If session found immediately, process it
         if (activeSession?.user) {
-          await verifyWithBackend(activeSession.user);
+          await verifyWithBackend(activeSession);
           return;
         }
 
@@ -68,7 +69,7 @@ export default function AuthCallbackPage() {
         const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           if (currentSession?.user) {
             authListener.subscription.unsubscribe();
-            await verifyWithBackend(currentSession.user);
+            await verifyWithBackend(currentSession);
           }
         });
 
@@ -76,7 +77,7 @@ export default function AuthCallbackPage() {
         setTimeout(async () => {
           const { data: { session: retrySession } } = await supabase.auth.getSession();
           if (retrySession?.user) {
-            await verifyWithBackend(retrySession.user);
+            await verifyWithBackend(retrySession);
           } else if (!isFirstTime) {
             setError("Google লগইন সেশন সনাক্ত করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।");
             setLoading(false);
@@ -89,8 +90,11 @@ export default function AuthCallbackPage() {
       }
     }
 
-    async function verifyWithBackend(user: any) {
+    async function verifyWithBackend(authSession: any) {
+      if (verifiedRef.current) return;
+      verifiedRef.current = true;
       try {
+        const user = authSession.user;
         const email = user.email;
         const name =
           user.user_metadata?.full_name ||
@@ -98,10 +102,13 @@ export default function AuthCallbackPage() {
           email?.split("@")[0] ||
           "ব্যবহারকারী";
 
+        // The server verifies this token with Supabase and takes the email from it.
         const res = await fetch("/api/auth/google/verify", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, name }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authSession.access_token}`,
+          },
         });
 
         const data = await res.json();
@@ -142,11 +149,19 @@ export default function AuthCallbackPage() {
     setError("");
 
     try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (!authSession?.access_token) {
+        setError("Google সেশনের মেয়াদ শেষ হয়েছে। আবার লগইন করুন।");
+        setSubmitting(false);
+        return;
+      }
       const res = await fetch("/api/auth/google/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authSession.access_token}`,
+        },
         body: JSON.stringify({
-          email: googleData.email,
           name: googleData.name,
           role: selectedRole,
           class: selectedRole === "student" ? selectedClass : undefined,

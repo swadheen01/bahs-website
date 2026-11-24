@@ -2,9 +2,6 @@
 -- Copy this entire file and run it in the Supabase SQL Editor
 
 -- Insert Users
-INSERT INTO users (id, name, username, password_hash, role, teacher_id, class, active) VALUES (1, 'Admin', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin', NULL, NULL, true) ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, name, username, password_hash, role, teacher_id, class, active) VALUES (2, 'পারভীন আক্তার খানম', 'headmaster', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'teacher', 1, NULL, true) ON CONFLICT (id) DO NOTHING;
-INSERT INTO users (id, name, username, password_hash, role, teacher_id, class, active) VALUES (3, 'Student Demo', 'student', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'student', NULL, '10', true) ON CONFLICT (id) DO NOTHING;
 
 -- Insert Notices
 INSERT INTO notices (id, title, date, date_iso, type, file_url, is_new, added_by) VALUES (1, 'বানিয়াচং আদর্শ উচ্চ বিদ্যালয়ের ওয়েবসাইটে আপনাকে স্বাগতম', '২৯ আগস্ট ২০২৩', '2023-08-29', 'general', NULL, false, 'System') ON CONFLICT (id) DO NOTHING;

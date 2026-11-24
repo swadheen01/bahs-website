@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { toJpeg } from "html-to-image";
+// Loaded only when the user clicks download (keeps ~40KB out of the initial page bundle).
+const toJpeg = async (...args: Parameters<typeof import("html-to-image").toJpeg>) =>
+  (await import("html-to-image")).toJpeg(...args);
 import initialRoutines from "@/data/routines.json";
 import {
   FaClock,
@@ -75,7 +77,7 @@ export default function ClassRoutinePage() {
   });
 
   useEffect(() => {
-    fetch("/api/routines", { cache: "no-store" })
+    fetch("/api/routines")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.weeklyRoutines) {

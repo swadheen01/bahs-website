@@ -21,7 +21,6 @@ interface FormerStaff {
   tenure: string;
   photo: string;
 }
-
 export default function FormerStaffPage() {
   const [headmasters, setHeadmasters] = useState<FormerStaff[]>([]);
   const [teachers, setTeachers] = useState<FormerStaff[]>([]);
@@ -32,7 +31,7 @@ export default function FormerStaffPage() {
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/former-staff", { cache: "no-store" })
+    fetch("/api/former-staff")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {

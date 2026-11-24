@@ -18,25 +18,18 @@ interface Teacher {
   mainSubject?: string;
 }
 
-export default function TeachersSection() {
-  const [teachers, setTeachers] = useState<Teacher[]>(() => {
-    return (initialTeachers.slice(0, 12) as Teacher[]) || [];
-  });
+export default function TeachersSection({ teachers: propTeachers }: { teachers?: Teacher[] }) {
+  // Teachers come from the parent (prerendered + one /api/home refresh).
+  const teachers: Teacher[] = (
+    Array.isArray(propTeachers) ? propTeachers : (initialTeachers as Teacher[])
+  ).slice(0, 12);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const { t, language } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/teachers", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setTeachers(data.slice(0, 12));
-          setImageErrors({});
-        }
-      })
-      .catch(() => {});
-  }, []);
+    setImageErrors({});
+  }, [propTeachers]);
 
   return (
     <section className="pt-8 pb-14 bg-gradient-to-b from-gray-50 via-white to-gray-50 border-t border-gray-100">
