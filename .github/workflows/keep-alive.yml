@@ -1,5 +1,9 @@
 name: Supabase Keep-Alive
 
+# Pings the database every 2 days so the free Supabase project is not paused after 7 days of inactivity.
+# The anon key can no longer read tables (supabase_security_02_lockdown.sql), so this calls the
+# public.keep_alive() function instead (created by supabase_keep_alive.sql). It returns only the time.
+
 on:
   schedule:
     # Runs at 06:00 UTC every 2 days (well within Supabase's 7-day inactivity pause limit)
@@ -13,14 +17,17 @@ jobs:
     steps:
       - name: Ping Supabase Database via REST API
         run: |
+          # The anon key is public (it ships in the website's browser code), so a fallback here is safe.
           SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://pyrccwywxhgislpweqkp.supabase.co' }}"
           SUPABASE_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5cmNjd3l3eGhnaXNscHdlcWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MjMyNTEsImV4cCI6MjEwNjA5OTI1MX0.4lX5sBYCiwEslqAXEfJPNYgNnpY1FsPiTTrfu7hBjH0' }}"
 
           echo "Pinging Supabase database to prevent auto-pause..."
-          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST \
             -H "apikey: $SUPABASE_KEY" \
             -H "Authorization: Bearer $SUPABASE_KEY" \
-            "$SUPABASE_URL/rest/v1/notices?select=id&limit=1")
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            "$SUPABASE_URL/rest/v1/rpc/keep_alive")
 
           echo "HTTP Status Code: $HTTP_STATUS"
           cat response.json
@@ -29,6 +36,7 @@ jobs:
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
             echo "✅ Supabase project successfully pinged and kept active!"
           else
-            echo "⚠️ Warning: Ping received unexpected status $HTTP_STATUS"
+            echo "⚠️ Ping failed with status $HTTP_STATUS."
+            echo "If the status is 404, run supabase_keep_alive.sql once in the Supabase SQL Editor."
             exit 1
           fi
