@@ -12,7 +12,7 @@ import SplashScreen from "@/components/home/SplashScreen";
 import Link from "next/link";
 import { FaExternalLinkAlt, FaGraduationCap, FaBookOpen, FaAward, FaStar, FaFacebook } from "react-icons/fa";
 import { useLanguage } from "@/lib/LanguageContext";
-import { useFreshData } from "@/lib/useFreshData";
+import { useFreshDataStatus } from "@/lib/useFreshData";
 import type { HomeData } from "@/lib/publicData";
 
 const classStyles: Record<number, { gradient: string; shadow: string; accent: string }> = {
@@ -46,7 +46,11 @@ const classStyles: Record<number, { gradient: string; shadow: string; accent: st
 export default function HomeClient({ initialData }: { initialData: HomeData }) {
   const { t, language } = useLanguage();
   // ONE request for all homepage data (previously 8 separate API calls per visit).
-  const home = useFreshData<HomeData>("/api/home", initialData, (d) => Boolean(d && Array.isArray(d.sliders)));
+  const { data: home, settled: homeSettled } = useFreshDataStatus<HomeData>(
+    "/api/home",
+    initialData,
+    (d) => Boolean(d && Array.isArray(d.sliders))
+  );
   const info = home.schoolInfo;
   const [hmImgErr, setHmImgErr] = useState(false);
   const [presImgErr, setPresImgErr] = useState(false);
@@ -345,7 +349,9 @@ export default function HomeClient({ initialData }: { initialData: HomeData }) {
       </section>
 
       {/* Alumni Section */}
-      <AlumniSection alumni={home.alumni as any} showSection={info?.showAlumniSection ?? true} />
+      {/* Shown only after the live setting is known, so a section turned off after the last deploy
+          never flashes from the prerendered HTML. */}
+      <AlumniSection alumni={home.alumni as any} showSection={homeSettled && info?.showAlumniSection !== false} />
     </div>
   );
 }

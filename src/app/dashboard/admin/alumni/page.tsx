@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaTrophy, FaSignOutAlt, FaPlus, FaTrash, FaEdit, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUpload from "@/components/admin/FileUpload";
+import { markDataChanged } from "@/lib/useFreshData";
 
 interface Alumni {
   id: number;
@@ -87,6 +88,7 @@ export default function AdminAlumniPage() {
       if (!res.ok) {
         throw new Error("Failed to save");
       }
+      markDataChanged();
       setSuccessMsg(newValue ? "হোমপেজে কৃতি শিক্ষার্থী সেকশন চালু করা হয়েছে।" : "হোমপেজে কৃতি শিক্ষার্থী সেকশন লুকানো হয়েছে।");
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch {
@@ -112,6 +114,7 @@ export default function AdminAlumniPage() {
         return;
       }
 
+      markDataChanged();
       setSuccessMsg(editId !== null ? "তথ্য সফলভাবে আপডেট করা হয়েছে!" : "নতুন কৃতি শিক্ষার্থী যুক্ত হয়েছে!");
       setEditId(null);
       setForm({ nameBengali: "", nameEnglish: "", institution: "", degree: "", year: "", photo: "" });
@@ -134,6 +137,7 @@ export default function AdminAlumniPage() {
         setErrorMsg(resData.error || "মুছে ফেলা সম্ভব হয়নি");
         return;
       }
+      markDataChanged();
       setSuccessMsg("তালিকা থেকে সরানো হয়েছে!");
       await loadAlumni();
       setTimeout(() => setSuccessMsg(""), 3000);

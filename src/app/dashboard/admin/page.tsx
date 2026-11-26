@@ -54,6 +54,14 @@ export default function AdminDashboardPage() {
 
   const adminModules = [
     {
+      title: "টুলস",
+      desc: "পরীক্ষার আসন বিন্যাস টোকেন (PDF) তৈরি সহ এডমিন ও শিক্ষকদের সহায়ক টুল",
+      icon: <FaTools size={28} className="text-slate-600" />,
+      href: "/dashboard/tools",
+      badge: "টুলস",
+      color: "border-slate-500 hover:border-slate-600"
+    },
+    {
       title: "নোটিশ বোর্ড ব্যবস্থাপনা",
       desc: "জরুরী বা সাধারণ নোটিশ আপলোড ও ম্যানেজ করুন",
       icon: <FaBullhorn size={28} className="text-amber-600" />,
@@ -173,14 +181,6 @@ export default function AdminDashboardPage() {
       href: "/dashboard/admin/alumni",
       badge: "অ্যালামনাই",
       color: "border-yellow-500 hover:border-yellow-600"
-    },
-    {
-      title: "টুলস",
-      desc: "পরীক্ষার আসন বিন্যাস টোকেন (PDF) তৈরি সহ এডমিন ও শিক্ষকদের সহায়ক টুল",
-      icon: <FaTools size={28} className="text-slate-600" />,
-      href: "/dashboard/tools",
-      badge: "টুলস",
-      color: "border-slate-500 hover:border-slate-600"
     }
   ];
 

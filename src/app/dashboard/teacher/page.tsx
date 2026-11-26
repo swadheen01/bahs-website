@@ -143,7 +143,12 @@ export default function TeacherDashboardPage() {
         )}
 
         {!showManagement ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link href="/dashboard/tools" className="block bg-white p-6 rounded-xl shadow border-l-4 border-slate-500 hover:shadow-md transition">
+              <FaTools size={28} className="text-slate-500 mb-3" />
+              <h3 className="font-bold text-gray-800 text-lg">টুলস</h3>
+              <p className="text-sm text-gray-500 mt-1">পরীক্ষার আসন বিন্যাস টোকেন (PDF) তৈরি করুন</p>
+            </Link>
             <button type="button" onClick={() => setShowManagement(true)} className="block bg-white p-6 rounded-xl shadow border-l-4 border-green-500 hover:shadow-md transition text-left">
               <FaUserEdit size={28} className="text-green-500 mb-3" />
               <h3 className="font-bold text-gray-800 text-lg">শিক্ষক ব্যবস্থাপনা</h3>
@@ -158,11 +163,6 @@ export default function TeacherDashboardPage() {
               <FaBook size={28} className="text-blue-500 mb-3" />
               <h3 className="font-bold text-gray-800 text-lg">ক্লাস রুটিন</h3>
               <p className="text-sm text-gray-500 mt-1">সাপ্তাহিক ক্লাসের সময়সূচী ও বিষয়ভিত্তিক তথ্য</p>
-            </Link>
-            <Link href="/dashboard/tools" className="block bg-white p-6 rounded-xl shadow border-l-4 border-slate-500 hover:shadow-md transition">
-              <FaTools size={28} className="text-slate-500 mb-3" />
-              <h3 className="font-bold text-gray-800 text-lg">টুলস</h3>
-              <p className="text-sm text-gray-500 mt-1">পরীক্ষার আসন বিন্যাস টোকেন (PDF) তৈরি করুন</p>
             </Link>
           </div>
         ) : (
